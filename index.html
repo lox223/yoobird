@@ -42,10 +42,11 @@
     </div>
 
     <!-- Ядерка: за просмотр рекламы, одна на попытку -->
-    <button id="nuke-btn" class="hidden" data-action="nuke" aria-label="Ядерный удар">
-      <svg viewBox="0 0 24 24" class="tre"><circle cx="12" cy="12" r="2.4"/><path d="M12 12L7.2 3.7A9.6 9.6 0 0 0 2.4 12zM12 12h9.6a9.6 9.6 0 0 0-4.8-8.3zM12 12l-4.8 8.3a9.6 9.6 0 0 0 9.6 0z"/></svg>
+    <button id="nuke-btn" class="hidden" data-action="nuke" aria-label="Царь-Бомба">
+      <svg viewBox="0 0 24 24" class="tre"><circle cx="11" cy="14.5" r="7.5"/><path d="M5.6 8.2 5 3.6l2.6 2L10 2.6l2.4 3 2.6-2-.6 4.6z" fill="#FFF1A8"/><path d="M16.4 9.4c1.6-1.4 2.6-2.8 2.4-4.4" fill="none" stroke-width="1.8" stroke-linecap="round"/><circle cx="19" cy="4.2" r="1.6" fill="#FF6B1F"/><ellipse cx="8.4" cy="12.4" rx="2" ry="1.1" fill="rgba(255,255,255,.35)" transform="rotate(-35 8.4 12.4)"/></svg>
       <b class="ad-badge"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></b>
-      <span data-i18n="bNuke">Ядерка</span>
+      <b class="stock-badge" id="nuke-stock"></b>
+      <span data-i18n="bNuke">Царь-Бомба</span>
     </button>
 
     <div id="toast" class="hidden"></div>
@@ -58,6 +59,27 @@
       <div class="loader"><span></span></div>
       <p class="muted" data-i18n="loading">Загрузка…</p>
       <p class="tip" id="load-tip"></p>
+      <div class="age-mark" aria-label="Возрастное ограничение 6+">6+</div>
+    </section>
+
+    <!-- Переход между уровнями: явная загрузка (межстраничная реклама показывается только здесь) -->
+    <section id="screen-transit" class="screen hidden">
+      <div class="loader"><span></span></div>
+      <p class="muted" data-i18n="loadingLevel">Загружаем уровень…</p>
+    </section>
+
+    <!-- Ядерка за рекламу: перед показом прямо говорим, что получит игрок -->
+    <section id="screen-nuke" class="screen modal hidden">
+      <div class="panel">
+        <h2 class="title" data-i18n="nukeTitle">Царь-Бомба</h2>
+        <p class="muted" data-i18n="nukeDesc">Посмотри рекламу — и сбрось Царь-Бомбу: она сносит половину уровня. Одна на попытку.</p>
+        <p class="tip" id="nuke-offer-how"></p>
+        <button class="btn btn-ad btn-big" data-action="nuke-ad">
+          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9v6l5-3z" fill="#FFC72C"/></svg>
+          <span data-i18n="nukeWatch">Смотреть рекламу</span>
+        </button>
+        <button class="btn btn-small" data-action="nuke-cancel"><span data-i18n="nukeCancel">Не сейчас</span></button>
+      </div>
     </section>
 
     <!-- Главное меню -->
@@ -75,7 +97,7 @@
         <button class="icon-btn big" data-action="wardrobe" aria-label="Наряды"><svg viewBox="0 0 24 24"><path d="M7 4h10v10h4v4H3v-4h4z"/></svg></button>
         <button class="icon-btn big vk-only hidden" data-action="share" aria-label="Поделиться"><svg viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.5a3 3 0 0 0 0-1.4l6.7-3.5A3 3 0 1 0 15 7c0 .2 0 .5.1.7L8.4 11.2a3 3 0 1 0 0 3.6l6.7 3.5A3 3 0 1 0 18 16z"/></svg></button>
         <button class="icon-btn big vk-only hidden" data-action="favorite" aria-label="В избранное"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.1.8-5.3 4.8 1.5 7-6.3-3.6-6.3 3.6 1.5-7L1.9 9.4 9 8.6z"/></svg></button>
-        <div class="total-stars"><i></i><b class="ts-val">0 / 45</b></div>
+        <div class="total-stars"><i></i><b class="ts-val">0 / 75</b></div>
       </div>
       <div class="version">v1.0</div>
     </section>
@@ -83,6 +105,11 @@
     <!-- Выбор уровня -->
     <section id="screen-levels" class="screen hidden">
       <div class="levels-head"><h2 class="title" data-i18n="levels">Уровни</h2><div class="total-stars"><i></i><b class="ts-val">0 / 45</b></div></div>
+      <div class="world-bar">
+        <button class="icon-btn world-arrow" id="world-prev" data-action="world-prev" aria-label="Предыдущий мир"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7z"/></svg></button>
+        <div class="world-title"><b id="world-name"></b><span class="world-dots"><i></i><i></i></span></div>
+        <button class="icon-btn world-arrow" id="world-next" data-action="world-next" aria-label="Следующий мир"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7z"/></svg></button>
+      </div>
       <div id="level-grid" class="level-grid"></div>
       <button class="btn btn-small" data-action="back"><span data-i18n="back">Назад</span></button>
     </section>
@@ -145,6 +172,7 @@
         <div class="muted"><span data-i18n="best">Рекорд</span>: <span id="win-best">0</span> <span id="win-record" class="badge hidden" data-i18n="newRecord">Новый рекорд!</span></div>
         <div class="win-stats" id="win-stats"></div>
         <div class="muted" id="win-next"></div>
+        <div class="badge win-nuke hidden" id="win-nuke" data-i18n="nukeEarned">+1 Царь-Бомба в запас за три звезды!</div>
         <p id="win-alldone" class="muted hidden" data-i18n="allDone"></p>
         <div class="row-btns">
           <button class="icon-btn big" data-action="menu" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/></svg></button>
@@ -212,10 +240,6 @@
       </div>
     </div>
 
-    <div id="rotate">
-      <svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M20 12a8 8 0 0 1-4 6.9M4 12a8 8 0 0 1 4-6.9" fill="none"/></svg>
-      <p data-i18n="rotate">Поверни устройство горизонтально</p>
-    </div>
   </div>
 
   <script src="js/lib/vk-bridge.min.js"></script>

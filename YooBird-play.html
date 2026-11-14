@@ -58,7 +58,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 }
 .muted { color: var(--dark-2); font-weight: 700; font-size: clamp(13px, 2.6vmin, 18px); text-align: center; }
 
-.menu-col { display: flex; flex-direction: column; gap: clamp(10px, 2vmin, 16px); align-items: stretch; min-width: min(320px, 70vw); }
+.menu-col { display: flex; flex-direction: column; gap: clamp(10px, 2vmin, 16px); align-items: stretch; min-width: min(320px, calc(var(--vw, 1vw) * 70)); }
 
 /* ---------- Кнопки ---------- */
 .btn {
@@ -101,7 +101,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   box-shadow: 0 10px 0 var(--dark), inset 0 0 0 6px #FFE27A;
   padding: clamp(16px, 3.5vmin, 30px) clamp(20px, 5vmin, 44px);
   display: flex; flex-direction: column; align-items: stretch; gap: clamp(10px, 2vmin, 16px);
-  min-width: min(380px, 88vw); max-width: 92vw; max-height: 94vh; overflow: auto;
+  min-width: min(380px, calc(var(--vw, 1vw) * 88)); max-width: calc(var(--vw, 1vw) * 92); max-height: calc(var(--vh, 1vh) * 94); overflow: auto;
   animation: pop-in 0.25s cubic-bezier(.2, 1.6, .5, 1);
 }
 @keyframes pop-in { from { transform: scale(0.7); opacity: 0; } }
@@ -121,7 +121,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 /* ---------- Уровни ---------- */
 .level-grid { display: grid; grid-template-columns: repeat(8, auto); gap: clamp(8px, 1.8vmin, 18px); justify-content: center; }
 .level-card {
-  width: clamp(64px, min(10.4vw, 22vh), 138px); aspect-ratio: 1 / 1.05; border-width: 4px; border-radius: 20px;
+  width: clamp(64px, min(calc(var(--vw, 1vw) * 10.4), calc(var(--vh, 1vh) * 22)), 138px); aspect-ratio: 1 / 1.05; border-width: 4px; border-radius: 20px;
   background: linear-gradient(#FFF1A8, var(--yellow)); border: 5px solid var(--dark); border-radius: 24px;
   box-shadow: 0 8px 0 var(--dark); cursor: pointer; font-family: var(--font); color: var(--dark);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative;
@@ -151,7 +151,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 #hud {
   position: absolute; left: 0; right: 0; top: 0; z-index: 5;
   display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
-  padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
+  padding: max(10px, var(--sa-top, env(safe-area-inset-top))) max(12px, var(--sa-right, env(safe-area-inset-right))) 0 max(12px, var(--sa-left, env(safe-area-inset-left)));
   pointer-events: none;
 }
 #hud > * { pointer-events: auto; }
@@ -168,12 +168,12 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 #toast {
   position: absolute; left: 50%; top: clamp(64px, 14vmin, 100px); transform: translateX(-50%); z-index: 6;
   background: var(--dark); color: var(--yellow-hi); font-weight: 900; font-size: clamp(14px, 3vmin, 22px);
-  padding: 10px 20px; border-radius: 14px; border: 3px solid var(--yellow); max-width: 90vw; text-align: center;
+  padding: 10px 20px; border-radius: 14px; border: 3px solid var(--yellow); max-width: calc(var(--vw, 1vw) * 90); text-align: center;
   animation: toast-in 0.3s ease-out; pointer-events: none;
 }
 @keyframes toast-in { from { transform: translate(-50%, -20px); opacity: 0; } }
 
-.loader { width: min(320px, 70vw); height: 22px; border: 4px solid var(--dark); border-radius: 12px; background: var(--yellow-pale); overflow: hidden; }
+.loader { width: min(320px, calc(var(--vw, 1vw) * 70)); height: 22px; border: 4px solid var(--dark); border-radius: 12px; background: var(--yellow-pale); overflow: hidden; }
 .loader span { display: block; height: 100%; width: 0; background: var(--orange); transition: width 0.3s; }
 
 #dev-ad { position: absolute; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; }
@@ -184,12 +184,12 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 #rotate { position: absolute; inset: 0; z-index: 100; background: var(--yellow); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; font-weight: 900; font-size: 22px; text-align: center; padding: 30px; }
 #rotate svg { width: 90px; height: 90px; fill: none; stroke: var(--dark); stroke-width: 1.8; animation: rot 2s ease-in-out infinite; }
 @keyframes rot { 50% { transform: rotate(-90deg); } }
-@media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
+/* Вертикальный телефон: игра поворачивается сама (Game.layout), заглушка «поверни устройство» не нужна */
 
 /* ---------- Бустеры ---------- */
 #boosters {
   position: absolute; z-index: 5; display: flex; flex-direction: column; gap: clamp(6px, 1.4vmin, 12px);
-  left: max(12px, env(safe-area-inset-left)); top: calc(max(10px, env(safe-area-inset-top)) + clamp(52px, 10vmin, 70px));
+  left: max(12px, var(--sa-left, env(safe-area-inset-left))); top: calc(max(10px, var(--sa-top, env(safe-area-inset-top))) + clamp(52px, 10vmin, 70px));
 }
 .boost {
   position: relative; width: clamp(44px, 8.5vmin, 62px); height: clamp(44px, 8.5vmin, 62px);
@@ -212,15 +212,16 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 /* ---------- Ядерка ---------- */
 #nuke-btn {
   position: absolute; z-index: 5;
-  right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom));
+  right: max(14px, var(--sa-right, env(safe-area-inset-right))); bottom: max(14px, var(--sa-bottom, env(safe-area-inset-bottom)));
   width: clamp(62px, 12vmin, 86px); height: clamp(62px, 12vmin, 86px); border-radius: 50%;
   border: 4px solid var(--dark); background: radial-gradient(circle at 40% 35%, #FFF07A, #FFC400 55%, #F08A00);
   box-shadow: 0 5px 0 var(--dark); cursor: pointer; font-family: var(--font); color: var(--dark);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   animation: nuke-lure 4s ease-in-out infinite;
 }
-#nuke-btn .tre { width: 52%; height: 52%; fill: var(--dark); animation: nuke-spin 12s linear infinite; }
-#nuke-btn span { font-size: clamp(8px, 1.6vmin, 11px); font-weight: 900; margin-top: -2px; }
+#nuke-btn .tre { width: 54%; height: 54%; fill: var(--dark); stroke: var(--dark); animation: bomb-wobble 2.6s ease-in-out infinite; }
+@keyframes bomb-wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+#nuke-btn span { font-size: clamp(7px, 1.4vmin, 10px); font-weight: 900; margin-top: -2px; white-space: nowrap; letter-spacing: -0.2px; }
 #nuke-btn .ad-badge {
   position: absolute; top: -8px; left: -8px; width: 26px; height: 26px; border-radius: 50%; background: var(--ad); border: 2px solid var(--dark);
   display: flex; align-items: center; justify-content: center;
@@ -259,7 +260,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
 /* ================= Версия 1.0: заставка, достижения, наряды, карточки ================= */
 .panel { touch-action: pan-y; }
-.panel.wide { min-width: min(640px, 92vw); }
+.panel.wide { min-width: min(640px, calc(var(--vw, 1vw) * 92)); }
 .tip { font-size: clamp(12px, 2.3vmin, 16px); font-weight: 700; color: var(--dark-2); text-align: center; max-width: 520px; align-self: center; }
 .tip:not(:empty)::before { content: "💡 "; }
 #screen-loading .tip { margin-top: 6px; }
@@ -277,6 +278,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 .level-card.w-sunset:not(.locked) { background: linear-gradient(#FFE0A8, #FF9A3C); }
 .level-card.w-dusk:not(.locked) { background: linear-gradient(#F3D3F7, #C07AD6); }
 .level-card.w-night:not(.locked) { background: linear-gradient(#C9D4FF, #6C80E0); }
+.level-card.w-winter:not(.locked) { background: linear-gradient(#FFFFFF, #A9CFF2); }
+.level-card.w-volcano:not(.locked) { background: linear-gradient(#FFC48A, #E2552E); }
 .level-card.gold:not(.locked) { box-shadow: 0 8px 0 var(--dark), 0 0 0 4px #FFF3A0 inset; }
 .level-card.current { animation: card-pulse 1.5s ease-in-out infinite; }
 @keyframes card-pulse { 50% { transform: translateY(-4px) scale(1.04); box-shadow: 0 12px 0 var(--dark); } }
@@ -310,9 +313,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
 /* Всплывающее достижение */
 #ach-toast {
-  position: absolute; right: max(12px, env(safe-area-inset-right)); top: clamp(70px, 16vmin, 110px); z-index: 60; pointer-events: none;
+  position: absolute; right: max(12px, var(--sa-right, env(safe-area-inset-right))); top: clamp(70px, 16vmin, 110px); z-index: 60; pointer-events: none;
   display: flex; align-items: center; gap: 10px; background: var(--dark); color: #fff; border: 3px solid var(--yellow); border-radius: 16px;
-  padding: 8px 16px 8px 10px; animation: ach-in 2.6s ease-in-out both; max-width: 80vw;
+  padding: 8px 16px 8px 10px; animation: ach-in 2.6s ease-in-out both; max-width: calc(var(--vw, 1vw) * 80);
 }
 #ach-toast svg { width: 34px; height: 34px; fill: var(--yellow-hi); flex: none; }
 #ach-toast small { display: block; color: var(--yellow-hi); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
@@ -320,7 +323,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 @keyframes ach-in { 0% { transform: translateX(120%); } 10%, 88% { transform: translateX(0); } 100% { transform: translateX(120%); } }
 
 /* Список достижений */
-.ach-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; max-height: 56vh; overflow-y: auto; padding: 2px 4px 6px; }
+.ach-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; max-height: calc(var(--vh, 1vh) * 56); overflow-y: auto; padding: 2px 4px 6px; }
 .ach { display: flex; align-items: center; gap: 10px; background: #F1E3B0; border: 3px solid rgba(43,29,14,0.35); border-radius: 14px; padding: 7px 10px; opacity: 0.6; }
 .ach i { flex: none; width: 30px; height: 30px; background: #9C8F6E; clip-path: var(--star); }
 .ach b { display: block; font-size: 14px; line-height: 1.15; }
@@ -341,8 +344,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 .skin:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--dark); }
 
 /* Карточка знакомства */
-.intro-card { align-items: center; max-width: min(460px, 92vw); position: relative; }
-.intro-card canvas { width: 240px; height: 180px; max-height: 34vh; object-fit: contain; }
+.intro-card { align-items: center; max-width: min(460px, calc(var(--vw, 1vw) * 92)); position: relative; }
+.intro-card canvas { width: 240px; height: 180px; max-height: calc(var(--vh, 1vh) * 34); object-fit: contain; }
 .intro-new { position: absolute; top: -14px; left: 50%; transform: translateX(-50%) rotate(-3deg); background: var(--orange); color: #fff; font-weight: 900;
   padding: 3px 14px; border-radius: 10px; border: 3px solid var(--dark); font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
 
@@ -354,8 +357,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
 .intro-card { overflow: visible; margin-top: 14px; }
 .star-bar { margin-right: 10px; }
-.panel.wide { min-width: min(800px, 94vw); }
-.ach-list { grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); max-height: 62vh; }
+.panel.wide { min-width: min(800px, calc(var(--vw, 1vw) * 94)); }
+.ach-list { grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); max-height: calc(var(--vh, 1vh) * 62); }
 
 /* ===== «Объём» кнопок и панелей без шва =====
    box-shadow рисуется только снаружи элемента, и при масштабе экрана 125–150% между обводкой и тенью
@@ -390,7 +393,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
    браузер выравнивает градиент по целым пикселям, и между ним и обводкой остаётся щель в долю пикселя.
    Раньше сквозь неё был виден фон страницы (и щель повторялась в тени); теперь в ней тёмный цвет обводки. */
 .btn, .btn-big, .btn-ad, .btn-next, .btn-danger, .icon-btn, .icon-btn.off,
-.level-card, .level-card.locked, .level-card.w-sunset:not(.locked), .level-card.w-dusk:not(.locked), .level-card.w-night:not(.locked),
+.level-card, .level-card.locked, .level-card.w-sunset:not(.locked), .level-card.w-dusk:not(.locked), .level-card.w-night:not(.locked), .level-card.w-winter:not(.locked), .level-card.w-volcano:not(.locked),
 .boost, .boost.active, #nuke-btn, .skin, .skin.locked, .skin.current, .hud-title, .hud-enemies, .panel {
   /* градиент не повторяется и занимает только область внутри обводки; всё остальное, включая возможную щель
      на его краю, закрашено сплошным тёмным цветом фона (он идёт под обводку) */
@@ -406,6 +409,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 .level-card.w-sunset:not(.locked) { --face: linear-gradient(#FFE0A8, #FF9A3C); }
 .level-card.w-dusk:not(.locked) { --face: linear-gradient(#F3D3F7, #C07AD6); }
 .level-card.w-night:not(.locked) { --face: linear-gradient(#C9D4FF, #6C80E0); }
+.level-card.w-winter:not(.locked) { --face: linear-gradient(#FFFFFF, #A9CFF2); }
+.level-card.w-volcano:not(.locked) { --face: linear-gradient(#FFC48A, #E2552E); }
 .level-card.locked { --face: linear-gradient(#E5DAC0, #C3B48E); }
 .boost { --face: linear-gradient(#FFF3B8, #FFD54A); }
 .boost.active { --face: linear-gradient(#FFB36B, #FF7A00); }
@@ -414,6 +419,39 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 .skin.locked { --face: linear-gradient(#EFE6CE, #CFC2A0); }
 .skin.current { --face: linear-gradient(#D6F5B0, #8FD14F); }
 .hud-title, .hud-enemies, .panel { --face: linear-gradient(var(--panel), var(--panel)); }
+
+/* Ядерка в запасе: вместо значка рекламы — число */
+#nuke-btn .stock-badge {
+  position: absolute; top: -8px; left: -8px; min-width: 26px; height: 26px; padding: 0 5px; border-radius: 13px;
+  background: #fff; border: 2px solid var(--dark); color: var(--dark); font-size: 14px; font-weight: 900;
+  display: none; align-items: center; justify-content: center; box-sizing: border-box;
+}
+#nuke-btn.stock .stock-badge { display: flex; }
+#nuke-btn.stock .ad-badge { display: none; }
+.win-nuke { margin-top: 6px; align-self: center; padding: 3px 12px; }
+/* Возрастная маркировка на экране запуска */
+.age-mark {
+  position: absolute; right: max(14px, var(--sa-right, env(safe-area-inset-right))); bottom: max(14px, var(--sa-bottom, env(safe-area-inset-bottom)));
+  border: 3px solid var(--dark); border-radius: 10px; padding: 2px 8px; font-weight: 900; font-size: 18px; color: var(--dark); background: rgba(255,255,255,0.6);
+}
+/* Экран загрузки уровня между уровнями */
+#screen-transit { z-index: 70; background: radial-gradient(circle at 50% 35%, #FFF1A8, #FFC72C 70%); }
+#screen-transit.hidden { display: none; }
+
+/* Миры на экране уровней */
+.world-bar { display: flex; align-items: center; gap: 14px; }
+.world-title { display: flex; flex-direction: column; align-items: center; min-width: clamp(180px, calc(var(--vw, 1vw) * 30), 340px); }
+.world-title b { font-size: clamp(16px, 3vmin, 26px); font-weight: 900; color: var(--dark); white-space: nowrap; }
+.world-dots { display: flex; gap: 6px; margin-top: 4px; }
+.world-dots i { width: 9px; height: 9px; border-radius: 50%; background: rgba(43,29,14,0.25); }
+.world-dots i.on { background: var(--dark); }
+.world-arrow.hidden { display: flex !important; visibility: hidden; }
+.skin-list { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 620px) { .skin-list { grid-template-columns: repeat(4, 1fr); } }
+
+/* Повёрнутая игра: #app занимает экран «боком», вырез и полоску «домой» обходим в Game.layout,
+   поэтому внутри безопасные отступы не нужны */
+#app.rotated { inset: auto; left: 0; top: 0; transform-origin: 0 0; --sa-top: 0px; --sa-bottom: 0px; --sa-left: 0px; --sa-right: 0px; }
 
 </style>
 </head>
@@ -452,10 +490,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     </div>
 
     <!-- Ядерка: за просмотр рекламы, одна на попытку -->
-    <button id="nuke-btn" class="hidden" data-action="nuke" aria-label="Ядерный удар">
-      <svg viewBox="0 0 24 24" class="tre"><circle cx="12" cy="12" r="2.4"/><path d="M12 12L7.2 3.7A9.6 9.6 0 0 0 2.4 12zM12 12h9.6a9.6 9.6 0 0 0-4.8-8.3zM12 12l-4.8 8.3a9.6 9.6 0 0 0 9.6 0z"/></svg>
+    <button id="nuke-btn" class="hidden" data-action="nuke" aria-label="Царь-Бомба">
+      <svg viewBox="0 0 24 24" class="tre"><circle cx="11" cy="14.5" r="7.5"/><path d="M5.6 8.2 5 3.6l2.6 2L10 2.6l2.4 3 2.6-2-.6 4.6z" fill="#FFF1A8"/><path d="M16.4 9.4c1.6-1.4 2.6-2.8 2.4-4.4" fill="none" stroke-width="1.8" stroke-linecap="round"/><circle cx="19" cy="4.2" r="1.6" fill="#FF6B1F"/><ellipse cx="8.4" cy="12.4" rx="2" ry="1.1" fill="rgba(255,255,255,.35)" transform="rotate(-35 8.4 12.4)"/></svg>
       <b class="ad-badge"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></b>
-      <span data-i18n="bNuke">Ядерка</span>
+      <b class="stock-badge" id="nuke-stock"></b>
+      <span data-i18n="bNuke">Царь-Бомба</span>
     </button>
 
     <div id="toast" class="hidden"></div>
@@ -468,6 +507,27 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       <div class="loader"><span></span></div>
       <p class="muted" data-i18n="loading">Загрузка…</p>
       <p class="tip" id="load-tip"></p>
+      <div class="age-mark" aria-label="Возрастное ограничение 6+">6+</div>
+    </section>
+
+    <!-- Переход между уровнями: явная загрузка (межстраничная реклама показывается только здесь) -->
+    <section id="screen-transit" class="screen hidden">
+      <div class="loader"><span></span></div>
+      <p class="muted" data-i18n="loadingLevel">Загружаем уровень…</p>
+    </section>
+
+    <!-- Ядерка за рекламу: перед показом прямо говорим, что получит игрок -->
+    <section id="screen-nuke" class="screen modal hidden">
+      <div class="panel">
+        <h2 class="title" data-i18n="nukeTitle">Царь-Бомба</h2>
+        <p class="muted" data-i18n="nukeDesc">Посмотри рекламу — и сбрось Царь-Бомбу: она сносит половину уровня. Одна на попытку.</p>
+        <p class="tip" id="nuke-offer-how"></p>
+        <button class="btn btn-ad btn-big" data-action="nuke-ad">
+          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9v6l5-3z" fill="#FFC72C"/></svg>
+          <span data-i18n="nukeWatch">Смотреть рекламу</span>
+        </button>
+        <button class="btn btn-small" data-action="nuke-cancel"><span data-i18n="nukeCancel">Не сейчас</span></button>
+      </div>
     </section>
 
     <!-- Главное меню -->
@@ -485,7 +545,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         <button class="icon-btn big" data-action="wardrobe" aria-label="Наряды"><svg viewBox="0 0 24 24"><path d="M7 4h10v10h4v4H3v-4h4z"/></svg></button>
         <button class="icon-btn big vk-only hidden" data-action="share" aria-label="Поделиться"><svg viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.5a3 3 0 0 0 0-1.4l6.7-3.5A3 3 0 1 0 15 7c0 .2 0 .5.1.7L8.4 11.2a3 3 0 1 0 0 3.6l6.7 3.5A3 3 0 1 0 18 16z"/></svg></button>
         <button class="icon-btn big vk-only hidden" data-action="favorite" aria-label="В избранное"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.1.8-5.3 4.8 1.5 7-6.3-3.6-6.3 3.6 1.5-7L1.9 9.4 9 8.6z"/></svg></button>
-        <div class="total-stars"><i></i><b class="ts-val">0 / 45</b></div>
+        <div class="total-stars"><i></i><b class="ts-val">0 / 75</b></div>
       </div>
       <div class="version">v1.0</div>
     </section>
@@ -493,6 +553,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     <!-- Выбор уровня -->
     <section id="screen-levels" class="screen hidden">
       <div class="levels-head"><h2 class="title" data-i18n="levels">Уровни</h2><div class="total-stars"><i></i><b class="ts-val">0 / 45</b></div></div>
+      <div class="world-bar">
+        <button class="icon-btn world-arrow" id="world-prev" data-action="world-prev" aria-label="Предыдущий мир"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7z"/></svg></button>
+        <div class="world-title"><b id="world-name"></b><span class="world-dots"><i></i><i></i></span></div>
+        <button class="icon-btn world-arrow" id="world-next" data-action="world-next" aria-label="Следующий мир"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7z"/></svg></button>
+      </div>
       <div id="level-grid" class="level-grid"></div>
       <button class="btn btn-small" data-action="back"><span data-i18n="back">Назад</span></button>
     </section>
@@ -555,6 +620,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         <div class="muted"><span data-i18n="best">Рекорд</span>: <span id="win-best">0</span> <span id="win-record" class="badge hidden" data-i18n="newRecord">Новый рекорд!</span></div>
         <div class="win-stats" id="win-stats"></div>
         <div class="muted" id="win-next"></div>
+        <div class="badge win-nuke hidden" id="win-nuke" data-i18n="nukeEarned">+1 Царь-Бомба в запас за три звезды!</div>
         <p id="win-alldone" class="muted hidden" data-i18n="allDone"></p>
         <div class="row-btns">
           <button class="icon-btn big" data-action="menu" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/></svg></button>
@@ -622,10 +688,6 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       </div>
     </div>
 
-    <div id="rotate">
-      <svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M20 12a8 8 0 0 1-4 6.9M4 12a8 8 0 0 1 4-6.9" fill="none"/></svg>
-      <p data-i18n="rotate">Поверни устройство горизонтально</p>
-    </div>
   </div>
 
   <script>/* js/lib/vk-bridge.min.js */
@@ -685,7 +747,12 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     speed:  { r: 23, density: 0.0040 },
     bomb:   { r: 30, density: 0.0050 },
     split:  { r: 25, density: 0.0045 },   // Тройняшка: в полёте делится на троих
+    heavy:  { r: 31, density: 0.0062 },   // Пузан: по тапу пикирует вниз и бьёт ударной волной
+    boomer: { r: 24, density: 0.0042 },   // Бумеранг: по тапу разворачивается и летит назад
+    puff:   { r: 27, density: 0.0040 },   // Пушок: по тапу (или сам после удара) надувается и расталкивает всё вокруг
   };
+  const SLAM = { R: 150, dmg: 120, push: 10 };     // удар Пузана о поверхность
+  const PUFF = { R: 240, dmg: 50, push: 17, k: 1.7 }; // Пушок: много толчка, мало урона
 
   class Sim {
     constructor(cb) { this.cb = cb || {}; }
@@ -697,7 +764,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.engine = Engine.create({ enableSleeping: true, positionIterations: 10, velocityIterations: 8 });
       this.world = this.engine.world;
       this.blocks = []; this.enemies = []; this.statics = [];
-      this.bird = null; this.minis = []; this.trail = []; this.toRemove = []; this.pendingBlasts = [];
+      this.bird = null; this.minis = []; this.trail = []; this.toRemove = []; this.pendingBlasts = []; this.pendingSlam = null;
       this.score = 0; this.steps = 0; this.damageOn = false; this.quietSteps = 0; this.asleep = false;
       this.seed = 0x9E3779B9 ^ (def.id || 1);
 
@@ -796,6 +863,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       if (!g || g.dead) return;
       if (g.kind === 'bird') {
         if (!g.hit) { g.hit = true; g.hitT = g.t; }
+        // Пузан в пике: первое касание — ударная волна
+        if (g.dive && !g.slammed) { g.slammed = true; this.pendingSlam = { x: body.position.x, y: body.position.y + g.r * 0.6 }; }
         this.emit('birdHit', { x, y, v: Math.min(1, imp / 14), type: g.type });
         return;
       }
@@ -911,7 +980,38 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         if (g.hit) return false;
         this.split(b); return true;
       }
+      if (g.type === 'heavy') {
+        if (g.hit) return false;
+        g.used = true; g.dive = true;
+        const v = Body.getVelocity(b);
+        Body.setVelocity(b, { x: v.x * 0.18, y: Math.max(v.y, 0) + 26 });
+        Body.setDensity(b, b.density * 2.6);
+        this.emit('dive', { x: b.position.x, y: b.position.y });
+        return true;
+      }
+      if (g.type === 'boomer') {
+        if (g.hit) return false;
+        g.used = true;
+        const v = Body.getVelocity(b);
+        // возвращается быстро и почти горизонтально, как настоящий бумеранг
+        const sp = Math.max(Math.hypot(v.x, v.y) * 1.05, 17);
+        Body.setVelocity(b, { x: (v.x > 0 ? -1 : 1) * sp, y: -2.5 });
+        this.emit('boomerang', { x: b.position.x, y: b.position.y, dir: v.x > 0 ? -1 : 1 });
+        return true;
+      }
+      if (g.type === 'puff') { this.inflate(b); return true; }
       return false;
+    }
+
+    // Пушок надувается: сильный толчок во все стороны почти без урона, сам становится большим мячом
+    inflate(b) {
+      const g = b.game; if (g.used) return; g.used = true; g.puffed = true; g.puffT = 0;
+      const x = b.position.x, y = b.position.y;
+      this.emit('inflate', { x, y, R: PUFF.R });
+      this.blast(x, y, PUFF.R, PUFF.dmg, PUFF.push, 1);
+      Body.scale(b, PUFF.k, PUFF.k); g.r = Math.round(g.r * PUFF.k);
+      Body.setDensity(b, b.density * 0.35);
+      b.frictionAir = 0.03; b.restitution = 0.6;
     }
 
     // Тройняшка: основной птенец уменьшается, рядом появляются ещё два, разлёт веером ±12°
@@ -1018,6 +1118,13 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       Engine.update(this.engine, C.STEP_MS);
       this.flushRemovals();
       if (this.pendingBlasts.length) { this.flushBlasts(); this.flushRemovals(); }
+      if (this.pendingSlam) {
+        const s = this.pendingSlam; this.pendingSlam = null;
+        this.emit('slam', { x: s.x, y: s.y, R: SLAM.R });
+        this.blast(s.x, s.y, SLAM.R, SLAM.dmg, SLAM.push, 1.4);
+        if (this.bird && this.bird.game.dive) { const v = Body.getVelocity(this.bird); Body.setVelocity(this.bird, { x: v.x * 0.5, y: Math.min(v.y, 0) * 0.3 }); }
+        this.flushRemovals();
+      }
 
       const b = this.bird;
       if (b) {
@@ -1027,6 +1134,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         if (g.type === 'bomb' && !g.used && g.hit) {
           g.fuse++;
           if (g.fuse > 75) this.explode(b);
+        }
+        // Пушок без тапа надувается сам вскоре после удара; надутый — лопается через ~1.2 с
+        if (g.type === 'puff') {
+          if (!g.used && g.hit && ++g.fuse > 10) this.inflate(b);
+          if (g.puffed && ++g.puffT > 72) { this.emit('pop', { x: b.position.x, y: b.position.y, r: g.r }); this.retireBird(true); }
         }
         if (this.bird) {
           g.still = Body.getSpeed(b) < 0.35 ? g.still + 1 : 0;
@@ -1057,7 +1169,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       // Вылетевшие за пределы мира объекты
       for (const e of this.enemies) {
         const p = e.position;
-        if (!e.game.dead && (p.x < -200 || p.x > C.W + 300 || p.y > C.H + 200)) this.killEnemy(e);
+        // вылетел за край арены (справа его уже не видно) — выбыл
+        if (!e.game.dead && (p.x < -200 || p.x > C.W + 70 || p.y > C.H + 200)) this.killEnemy(e);
       }
       for (const bl of this.blocks) {
         const p = bl.position;
@@ -1100,7 +1213,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     }
   }
 
-  const api = { Sim, C, MATERIALS, ENEMIES, BIRDS, _setEnemyFriction: (v) => { ENEMY_FRICTION = v; } };
+  const api = { Sim, C, MATERIALS, ENEMIES, BIRDS, SLAM, PUFF, _setEnemyFriction: (v) => { ENEMY_FRICTION = v; } };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.YB = Object.assign(root.YB || {}, api);
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -1505,6 +1618,238 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         tnt(1840, 700, 36),
       ],
     },
+
+    // ===== Уровни 16–20: снежные горы. Новые птенцы: Пузан и Бумеранг =====
+
+    // ---------- 16. Каменные крыши (знакомство с Пузаном) ----------
+    {
+      id: 16, nameKey: 'lvl16',
+      birds: ['heavy', 'normal', 'heavy', 'normal'],
+      stars: [0, 34000, 46000],
+      theme: 'winter',
+      statics: [],
+      items: [
+        // Землянка: толстая каменная плита сверху — сбоку не пробить, а Пузан проломит сверху
+        post(1000, G, 80, 'stone', 30), post(1120, G, 80, 'stone', 30), beam(1060, G - 80, 190, 'stone', 30),
+        enemy(1060, G, 'blue'),
+        // Две избушки с каменными крышами
+        post(1310, G, 110, 'wood', 26), post(1450, G, 110, 'wood', 26), beam(1380, G - 110, 200, 'stone', 28),
+        enemy(1380, G, 'red'),
+        post(1330, G - 138, 70, 'glass'), post(1430, G - 138, 70, 'glass'), beam(1380, G - 208, 140, 'stone', 24),
+        enemy(1380, G - 138, 'blue'),
+        post(1620, G, 110, 'wood', 26), post(1760, G, 110, 'wood', 26), beam(1690, G - 110, 200, 'stone', 28),
+        enemy(1690, G, 'blue'),
+        tri(1690, G - 138, 180, 50, 'wood'),
+        tnt(1535, G, 40),
+      ],
+    },
+
+    // ---------- 17. Колодец ----------
+    {
+      id: 17, nameKey: 'lvl17',
+      birds: ['heavy', 'speed', 'heavy', 'bomb', 'normal'],
+      stars: [0, 40000, 52000],
+      startHint: 'hintWell', theme: 'winter',
+      statics: [{ x: 1500, y: 860, w: 420, h: 200 }], // плато: верх на y = 760
+      items: [
+        // Пост у подножия
+        post(980, G, 120, 'glass'), post(1080, G, 120, 'glass'), beam(1030, G - 120, 150),
+        enemy(1030, G, 'blue'), enemy(1030, G - 142, 'blue'),
+        // Колодец на плато: высокие каменные стенки, сверху — деревянный настил
+        post(1360, 760, 200, 'stone', 34), post(1640, 760, 200, 'stone', 34),
+        enemy(1440, 760, 'red'), enemy(1560, 760, 'red'),
+        boulder(1500, 760, 24),
+        beam(1500, 560, 316, 'wood', 22),
+        enemy(1500, 538, 'blue'),
+        // Сторожка справа
+        post(1760, G, 90, 'stone', 26), post(1860, G, 90, 'stone', 26), beam(1810, G - 90, 140, 'wood', 24),
+        enemy(1810, G, 'blue'),
+      ],
+    },
+
+    // ---------- 18. За стеной (знакомство с Бумерангом) ----------
+    {
+      id: 18, nameKey: 'lvl18',
+      birds: ['boomer', 'normal', 'boomer', 'speed', 'normal'],
+      stars: [0, 36000, 48000],
+      startHint: 'hintWall', theme: 'winter',
+      statics: [],
+      items: [
+        // Высокая каменная стена: спереди не пробить
+        post(1250, G, 270, 'stone', 46),
+        enemy(1250, G - 270, 'blue'),
+        // Укрытия сразу за стеной: сверху толстые каменные плиты, справа открыты — только тонкие стеклянные стойки
+        post(1300, G, 120, 'stone', 24), post(1530, G, 120, 'glass', 18), beam(1415, G - 120, 260, 'stone', 30),
+        enemy(1370, G, 'blue'), enemy(1455, G, 'blue'),
+        enemy(1415, G - 150, 'red'),
+        // Сторожка справа
+        post(1780, G, 90, 'wood', 24), post(1880, G, 90, 'wood', 24), beam(1830, G - 90, 140, 'wood', 24),
+        enemy(1830, G, 'blue'),
+      ],
+    },
+
+    // ---------- 19. Снежная крепость ----------
+    {
+      id: 19, nameKey: 'lvl19',
+      birds: ['heavy', 'boomer', 'split', 'bomb', 'normal'],
+      stars: [0, 38000, 50000],
+      theme: 'winter',
+      statics: [{ x: 1600, y: 870, w: 520, h: 180 }, { tri: [[1240, 960], [1340, 960], [1340, 780]] }], // холм (верх y = 780) и скат
+      items: [
+        // Ледяная вышка у подножия
+        post(980, G, 160, 'glass'), post(1060, G, 160, 'glass'), beam(1020, G - 160, 120, 'glass'),
+        enemy(1020, G - 182, 'blue'),
+        enemy(1020, G, 'blue'),
+        // Крепость на холме: передняя каменная стена
+        post(1390, 780, 150, 'stone', 36),
+        post(1460, 780, 110), post(1600, 780, 110), beam(1530, 670, 200, 'stone', 26),
+        enemy(1530, 780, 'red'),
+        post(1480, 644, 80, 'glass'), post(1580, 644, 80, 'glass'), beam(1530, 564, 140, 'wood'),
+        enemy(1530, 644, 'blue'),
+        // Задний двор: открыт справа
+        post(1680, 780, 110, 'stone', 26), post(1840, 780, 110, 'glass', 20), beam(1760, 670, 190, 'stone', 26),
+        tnt(1720, 780, 38), enemy(1785, 780, 'red'),
+      ],
+    },
+
+    // ---------- 20. Ледяной Король ----------
+    {
+      id: 20, nameKey: 'lvl20',
+      birds: ['heavy', 'speed', 'boomer', 'bomb', 'heavy'],
+      stars: [0, 46000, 58000],
+      startHint: 'hintBoss4', theme: 'winter', mood: 'boss',
+      statics: [{ x: 1640, y: 850, w: 440, h: 220 }], // холм: верх y = 740
+      items: [
+        // Застава
+        post(980, G, 100, 'stone', 28), post(1100, G, 100, 'stone', 28), beam(1040, G - 100, 180, 'stone', 26),
+        enemy(1040, G, 'red'), enemy(1040, G - 126, 'blue'),
+        tnt(1230, G, 40),
+        // Ледяной дворец на холме
+        post(1450, 740, 140, 'glass'), post(1830, 740, 140, 'glass'),
+        post(1520, 740, 140, 'stone', 28), post(1760, 740, 140, 'stone', 28), beam(1640, 600, 360, 'stone', 28),
+        enemy(1640, 740, 'boss'),
+        enemy(1485, 740, 'blue'),
+        post(1560, 572, 100), post(1720, 572, 100), beam(1640, 472, 220, 'wood'),
+        enemy(1640, 572, 'red'),
+        tri(1640, 450, 200, 56, 'glass'),
+      ],
+    },
+
+    // ===== Уровни 21–25: вулкан. Новый птенец: Пушок =====
+
+    // ---------- 21. Уступы (знакомство с Пушком) ----------
+    {
+      id: 21, nameKey: 'lvl21',
+      birds: ['puff', 'normal', 'puff', 'speed', 'normal'],
+      stars: [0, 36000, 48000],
+      startHint: 'hintLedges', theme: 'volcano',
+      // три базальтовых столба: верх y = 700, 620, 700
+      statics: [{ x: 1200, y: 830, w: 110, h: 260 }, { x: 1480, y: 790, w: 150, h: 340 }, { x: 1760, y: 830, w: 110, h: 260 }],
+      items: [
+        enemy(1200, 700, 'blue'),
+        enemy(1445, 620, 'red'), enemy(1518, 620, 'blue'),
+        enemy(1760, 700, 'red'),
+        // Между столбами — лачуги
+        post(1300, G, 80, 'glass'), post(1380, G, 80, 'glass'), beam(1340, G - 80, 120),
+        enemy(1340, G, 'blue'),
+        tnt(1620, G, 40),
+      ],
+    },
+
+    // ---------- 22. Лавовый мост ----------
+    {
+      id: 22, nameKey: 'lvl22',
+      birds: ['puff', 'heavy', 'boomer', 'normal', 'speed', 'normal'],
+      stars: [0, 37000, 49000],
+      theme: 'volcano',
+      statics: [{ x: 1110, y: 850, w: 220, h: 220 }, { x: 1750, y: 850, w: 260, h: 220 }], // два утёса, верх y = 740
+      items: [
+        // Мост между утёсами
+        beam(1420, 740, 470, 'wood', 24),
+        enemy(1330, 718, 'blue'), enemy(1430, 718, 'red'), enemy(1530, 718, 'blue'),
+        // Под мостом
+        post(1380, G, 90, 'wood', 24), post(1480, G, 90, 'wood', 24), beam(1430, G - 90, 150, 'wood', 24),
+        enemy(1430, G, 'red'),
+        // Будка на правом утёсе
+        post(1680, 740, 100, 'glass', 24), post(1800, 740, 100, 'wood', 24), beam(1740, 640, 180, 'wood', 24),
+        enemy(1740, 740, 'blue'),
+        tnt(1080, 740, 38),
+      ],
+    },
+
+    // ---------- 23. Обсерватория ----------
+    {
+      id: 23, nameKey: 'lvl23',
+      birds: ['split', 'puff', 'boomer', 'heavy', 'normal'],
+      stars: [0, 42000, 54000],
+      theme: 'volcano',
+      statics: [],
+      items: [
+        // Тонкие стеклянные башни с дозорными наверху
+        post(1000, G, 240, 'glass', 24), post(1080, G, 240, 'glass', 24), beam(1040, G - 240, 130, 'wood'),
+        enemy(1040, G - 262, 'blue'),
+        post(1240, G, 320, 'glass', 24), post(1320, G, 320, 'glass', 24), beam(1280, G - 320, 130, 'wood'),
+        enemy(1280, G - 342, 'red'),
+        // Купол обсерватории
+        post(1500, G, 130, 'stone', 30), post(1700, G, 130, 'stone', 30), beam(1600, G - 130, 260, 'stone', 26),
+        enemy(1560, G, 'blue'), enemy(1640, G, 'red'),
+        post(1530, G - 156, 90, 'wood'), post(1670, G - 156, 90, 'wood'), beam(1600, G - 246, 180, 'wood'),
+        enemy(1600, G - 156, 'blue'),
+        tri(1600, G - 268, 200, 70, 'glass'),
+        // Задний пост: стена спереди
+        post(1800, G, 140, 'stone', 34), enemy(1860, G, 'blue'),
+      ],
+    },
+
+    // ---------- 24. Пороховая шахта ----------
+    {
+      id: 24, nameKey: 'lvl24',
+      birds: ['boomer', 'heavy', 'puff', 'bomb', 'normal'],
+      stars: [0, 44000, 56000],
+      theme: 'volcano',
+      statics: [{ x: 1500, y: 860, w: 360, h: 200 }, { x: 1880, y: 840, w: 120, h: 240 }], // плато (верх y = 760) и скала справа
+      items: [
+        // Каменная стена у подножия
+        post(1080, G, 230, 'stone', 42),
+        // За стеной склад: TNT и охрана, сверху каменная плита
+        post(1120, G, 120, 'wood', 24), post(1280, G, 120, 'wood', 24), beam(1200, G - 120, 190, 'stone', 26),
+        tnt(1160, G, 36), enemy(1225, G, 'red'),
+        // Шахта на плато
+        post(1360, 760, 170, 'stone', 32), post(1640, 760, 170, 'stone', 32),
+        enemy(1440, 760, 'blue'), tnt(1500, 760, 40), enemy(1560, 760, 'red'),
+        beam(1500, 590, 316, 'wood', 22),
+        enemy(1450, 568, 'blue'), enemy(1550, 568, 'blue'),
+        // У скалы
+        enemy(1770, G, 'red'), tnt(1712, G, 40),
+      ],
+    },
+
+    // ---------- 25. Сердце вулкана ----------
+    {
+      id: 25, nameKey: 'lvl25',
+      birds: ['heavy', 'puff', 'boomer', 'bomb', 'split'],
+      stars: [0, 52000, 66000],
+      startHint: 'hintBoss5', theme: 'volcano', mood: 'boss',
+      // нижний уступ (верх y = 840), верхний (верх y = 700), скат с земли
+      statics: [{ x: 1330, y: 900, w: 240, h: 120 }, { x: 1680, y: 830, w: 460, h: 260 }, { tri: [[1110, 960], [1210, 960], [1210, 840]] }],
+      items: [
+        // Передовой пост
+        post(940, G, 110, 'glass'), post(1040, G, 110, 'glass'), beam(990, G - 110, 150, 'stone', 24),
+        enemy(990, G, 'blue'), enemy(990, G - 134, 'red'),
+        // Бункер на нижнем уступе
+        post(1270, 840, 90, 'stone', 28), post(1390, 840, 90, 'stone', 28), beam(1330, 750, 170, 'stone', 26),
+        enemy(1330, 840, 'red'),
+        tnt(1330, 724, 36),
+        // Тронный зал: каменная стена спереди, открыт справа
+        post(1500, 700, 180, 'stone', 40),
+        post(1580, 700, 140, 'wood', 26), post(1800, 700, 140, 'wood', 26), beam(1690, 560, 300, 'stone', 28),
+        enemy(1690, 700, 'boss'),
+        enemy(1860, 700, 'blue'),
+        post(1610, 532, 90, 'glass'), post(1770, 532, 90, 'glass'), beam(1690, 442, 220, 'wood'),
+        enemy(1690, 532, 'red'),
+        tri(1690, 420, 200, 56, 'stone'),
+      ],
+    },
   ];
 
   if (typeof module !== 'undefined' && module.exports) module.exports = LEVELS;
@@ -1526,47 +1871,67 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       lvl4: 'Очень сложно', lvl5: 'Хардкор', lvl6: 'Король чувачков',
       hintBoss: 'Король чувачков! Он большой и крепкий — бей бомбами!',
       lvl13: 'Домино', lvl14: 'Пороховой склад', lvl15: 'Цитадель',
+      lvl16: 'Каменные крыши', lvl17: 'Колодец', lvl18: 'За стеной', lvl19: 'Снежная крепость', lvl20: 'Ледяной Король',
+      lvl21: 'Уступы', lvl22: 'Лавовый мост', lvl23: 'Обсерватория', lvl24: 'Пороховая шахта', lvl25: 'Сердце вулкана',
+      world1: 'Солнечная долина', world2: 'Снежные горы и вулкан',
+      hintWell: 'Чувачки в колодце! Пузан пробьёт настил сверху.', hintWall: 'За стеной не достать в лоб — пусть Бумеранг зайдёт с тыла!',
+      hintLedges: 'Чувачки на столбах: Пушок сдует их вниз!', hintBoss4: 'Ледяной Король во дворце на холме — круши сверху!',
+      hintBoss5: 'Последний бой! Король прячется за каменной стеной.',
       hintDomino: 'Толкни первую доску — пойдёт цепная реакция!',
       hintBoss3: 'Цитадель Короля: последняя битва!',
       lvl7: 'Два лагеря', lvl8: 'Стеклянный дворец', lvl9: 'Мост', lvl10: 'Бункеры', lvl11: 'Небоскрёб', lvl12: 'Возвращение Короля',
       hintBoosters: 'Слева бустеры: каждый можно взять один раз за попытку!',
       hintBoss2: 'Король вернулся и засел на холме!',
-      bSight: 'Прицел', bPower: 'Мощь', bQuake: 'Тряска', bNuke: 'Ядерка',
+      bSight: 'Прицел', bPower: 'Мощь', bQuake: 'Тряска', bNuke: 'Царь-Бомба',
       achNew: 'Достижение!', achTitle: 'Достижения',
       ach_first: 'Первая победа', ach_first_d: 'Пройди любой уровень',
       ach_oneshot: 'Один выстрел', ach_oneshot_d: 'Пройди уровень одним птенцом (со 2-го уровня)',
       ach_combo3: 'Комбо x3', ach_combo3_d: 'Сбей трёх чувачков одним птенцом',
       ach_combo5: 'Страйк!', ach_combo5_d: 'Сбей пятерых одним птенцом',
-      ach_clean: 'Чистая победа', ach_clean_d: 'Пройди уровень 7 или выше без бустеров, ядерки и рекламы',
+      ach_clean: 'Чистая победа', ach_clean_d: 'Пройди уровень 7 или выше без бустеров, Царь-Бомбы и рекламы',
       ach_king: 'Король повержен', ach_king_d: 'Победи Короля чувачков',
-      ach_final: 'Гроза королей', ach_final_d: 'Возьми Цитадель',
-      ach_nuke: 'Красная кнопка', ach_nuke_d: 'Сбрось ядерку',
+      ach_citadel: 'Гроза королей', ach_citadel_d: 'Возьми Цитадель',
+      ach_iceking: 'Оттепель', ach_iceking_d: 'Победи Ледяного Короля',
+      ach_final: 'Покоритель вулкана', ach_final_d: 'Пройди «Сердце вулкана»',
+      ach_slam2: 'Тяжёлый случай', ach_slam2_d: 'Сбей двоих чувачков одним пике Пузана',
+      ach_boomer: 'Привет с тыла', ach_boomer_d: 'Сбей чувачка Бумерангом после разворота',
+      ach_puff3: 'Ураган', ach_puff3_d: 'Сбей троих чувачков одним Пушком',
+      ach_stars60: 'Звёздный дождь', ach_stars60_d: 'Собери 60 звёзд',
+      ach_nuke: 'Царский размах', ach_nuke_d: 'Сбрось Царь-Бомбу',
       ach_tnt10: 'Подрывник', ach_tnt10_d: 'Взорви 10 ящиков TNT',
       ach_kills100: 'Сотня', ach_kills100_d: 'Сбей 100 чувачков',
       ach_stars15: 'Звездочёт', ach_stars15_d: 'Собери 15 звёзд',
       ach_stars30: 'Звёздный путь', ach_stars30_d: 'Собери 30 звёзд',
       ach_stars45: 'Перфекционист', ach_stars45_d: 'Собери все звёзды',
       wardTitle: 'Наряды', wardSub: 'Открываются за звёзды', skinOn: 'Надето', skinLocked: 'Собери больше звёзд',
-      skin_none: 'Без наряда', skin_cap: 'Кепка', skin_glasses: 'Очки', skin_bandana: 'Бандана', skin_tophat: 'Цилиндр', skin_crown: 'Корона',
+      skin_none: 'Без наряда', skin_cap: 'Кепка', skin_glasses: 'Очки', skin_bandana: 'Бандана', skin_tophat: 'Цилиндр', skin_crown: 'Корона', skin_scarf: 'Шарф', skin_pilot: 'Шлем пилота',
       introNew: 'Новинка!', gotIt: 'Понятно!',
       intro_speed: 'Шустрик', intro_speed_d: 'Нажми на экран, пока он летит, и он рванёт вперёд. Отлично пробивает дерево.',
       intro_bomb: 'Бомбик', intro_bomb_d: 'Нажми в полёте — взорвётся. Если не нажать, взорвётся сам после удара.',
       intro_tnt: 'Ящик TNT', intro_tnt_d: 'Взрывается от удара или если его опрокинуть. Соседние ящики взрываются по цепочке.',
       intro_split: 'Тройняшка', intro_split_d: 'Нажми в полёте — разделится на троих птенцов. Отлично против стекла и врагов, стоящих врассыпную.',
       hintSplit: 'Розовая Тройняшка: нажми в полёте — их станет трое!',
+      intro_heavy: 'Пузан', intro_heavy_d: 'Тяжёлый и крепкий. Нажми в полёте — камнем рухнет вниз и ударит волной. Проламывает крыши и камень.',
+      intro_boomer: 'Бумеранг', intro_boomer_d: 'Нажми в полёте — развернётся и полетит обратно. Достаёт тех, кто спрятался за стеной.',
+      intro_puff: 'Пушок', intro_puff_d: 'Нажми в полёте — надуется и раскидает всё вокруг. Сам почти не бьёт, зато сталкивает с уступов и валит башни.',
+      hintHeavy: 'Фиолетовый Пузан: нажми над целью — рухнет вниз!', hintBoomer: 'Зелёный Бумеранг: нажми, когда пролетит стену, — вернётся!', hintPuff: 'Пушок: нажми рядом с целью — надуется!',
+      comicSlam: 'БУХ!|ТЫДЫЩ!|ГРОХ!', comicPuff: 'ПУФ!|ФУХ!|ВЖУХ!',
       intro_boulder: 'Валун', intro_boulder_d: 'Тяжёлый камень. Столкни его — покатится и раздавит всё на пути.',
       intro_boss: 'Король чувачков', intro_boss_d: 'Большой и очень крепкий. Одного птенца на него не хватит — бей бомбами и роняй на него камни.',
       adBoost: 'Реклама: бустеры ×2 на следующем уровне', boostersReady: 'Готово! На следующем уровне бустеров вдвое больше', boostersX2: 'Бустеры ×2 — по два каждого!',
+      nukeTitle: 'Царь-Бомба', nukeDesc: 'Посмотри рекламу — и сбрось Царь-Бомбу: она сносит половину уровня. Одна на попытку.',
+      nukeHow: 'Царь-Бомбу можно заработать и без рекламы: пройди любой уровень на три звезды впервые — она ляжет в запас.',
+      nukeWatch: 'Смотреть рекламу', nukeCancel: 'Не сейчас', nukeEarned: '+1 Царь-Бомба в запас за три звезды!', loadingLevel: 'Загружаем уровень…',
       vibration: 'Вибрация', reset: 'Сбросить прогресс', resetSure: 'Точно сбросить?', resetDone: 'Прогресс сброшен',
       statShots: 'Выстрелов', statLeft: 'Птенцов в запасе', statCombo: 'Лучшее комбо', needMore: 'До следующей звезды', enemiesLeft: 'Осталось чувачков',
-      tips: 'Стекло ломается легче всего, камень — тяжелее всего.|Каждый птенец в запасе — это +10 000 очков.|Сломанный блок птенец пробивает насквозь и летит дальше.|Опрокинутый ящик TNT тоже взрывается.|Сбей несколько чувачков одним птенцом — получишь комбо-бонус.|Бустер «Прицел» показывает весь путь птенца до земли.|Бей по опорам: рухнувшая крыша сделает работу за тебя.|«Тряска» сильнее всего бьёт по стеклу.',
+      tips: 'Стекло ломается легче всего, камень — тяжелее всего.|Пузан проламывает каменные крыши: нажми, когда он над целью.|Бумеранг достаёт тех, кто спрятался за стеной.|Пушок почти не бьёт, зато сдувает чувачков с уступов.|Каждый птенец в запасе — это +10 000 очков.|Сломанный блок птенец пробивает насквозь и летит дальше.|Опрокинутый ящик TNT тоже взрывается.|Сбей несколько чувачков одним птенцом — получишь комбо-бонус.|Бустер «Прицел» показывает весь путь птенца до земли.|Бей по опорам: рухнувшая крыша сделает работу за тебя.|«Тряска» сильнее всего бьёт по стеклу.',
       comicHit: 'БАМ!|БУХ!|БАЦ!|ШМЯК!', comicBoom: 'БУМ!|БАБАХ!|БАХ!',
       taunt1: 'Ха-ха!', taunt2: 'Мимо!', taunt3: 'Промазал!', taunt4: 'Не попал!',
       hintTnt: 'Ящики TNT взрываются от удара — и цепляют соседей!',
       hintBoulder: 'Толкни валун — пусть покатится!',
       boosterNA: 'Сейчас этот бустер не сработает',
-      nukeAim: 'Нажми, куда сбросить ядерку!',
-      nukeLater: 'Ядерку можно сбросить, когда никто не летит',
+      nukeAim: 'Нажми, куда сбросить Царь-Бомбу!',
+      nukeLater: 'Царь-Бомбу можно сбросить, когда никто не летит',
       pause: 'Пауза', resume: 'Продолжить', restart: 'Заново', menu: 'Меню',
       winTitle: 'Уровень пройден!', next: 'Дальше', allDone: 'Все уровни пройдены! Скоро новые.',
       loseTitle: 'Чувачки уцелели!', loseSub: 'Не сдавайся — у тебя получится!',
@@ -1589,47 +1954,67 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       lvl4: 'Very hard', lvl5: 'Hardcore', lvl6: 'Dude King',
       hintBoss: 'The Dude King! He is big and tough — use bombs!',
       lvl13: 'Dominoes', lvl14: 'Powder Store', lvl15: 'The Citadel',
+      lvl16: 'Stone Roofs', lvl17: 'The Well', lvl18: 'Behind the Wall', lvl19: 'Snow Fort', lvl20: 'The Ice King',
+      lvl21: 'Ledges', lvl22: 'Lava Bridge', lvl23: 'Observatory', lvl24: 'Powder Mine', lvl25: 'Heart of the Volcano',
+      world1: 'Sunny Valley', world2: 'Snowy Peaks & Volcano',
+      hintWell: 'Dudes down the well! Tubby can smash the planks from above.', hintWall: 'No way through the wall: let Boomerang come from behind!',
+      hintLedges: 'Dudes on pillars: Fluffy will blow them off!', hintBoss4: 'The Ice King sits in a palace on the hill. Smash from above!',
+      hintBoss5: 'The final battle! The King hides behind a stone wall.',
       hintDomino: 'Push the first plank and start a chain reaction!',
       hintBoss3: 'The King\'s Citadel: the final battle!',
       lvl7: 'Two Camps', lvl8: 'Glass Palace', lvl9: 'The Bridge', lvl10: 'Bunkers', lvl11: 'Skyscraper', lvl12: 'King\'s Return',
       hintBoosters: 'Boosters on the left: each one is free once per try!',
       hintBoss2: 'The King is back and hiding on the hill!',
-      bSight: 'Aim', bPower: 'Power', bQuake: 'Quake', bNuke: 'Nuke',
+      bSight: 'Aim', bPower: 'Power', bQuake: 'Quake', bNuke: 'Tsar Bomb',
       achNew: 'Achievement!', achTitle: 'Achievements',
       ach_first: 'First Win', ach_first_d: 'Complete any level',
       ach_oneshot: 'One Shot', ach_oneshot_d: 'Complete a level with a single chick (level 2 or later)',
       ach_combo3: 'Combo x3', ach_combo3_d: 'Knock out three dudes with one chick',
       ach_combo5: 'Strike!', ach_combo5_d: 'Knock out five with one chick',
-      ach_clean: 'Clean Win', ach_clean_d: 'Complete level 7 or later without boosters, nuke or ads',
+      ach_clean: 'Clean Win', ach_clean_d: 'Complete level 7 or later without boosters, Tsar Bomb or ads',
       ach_king: 'Down With the King', ach_king_d: 'Defeat the Dude King',
-      ach_final: 'Terror of Kings', ach_final_d: 'Take the Citadel',
-      ach_nuke: 'Red Button', ach_nuke_d: 'Drop the nuke',
+      ach_citadel: 'Terror of Kings', ach_citadel_d: 'Take the Citadel',
+      ach_iceking: 'The Thaw', ach_iceking_d: 'Defeat the Ice King',
+      ach_final: 'Volcano Tamer', ach_final_d: 'Beat the Heart of the Volcano',
+      ach_slam2: 'Heavy Duty', ach_slam2_d: 'Knock out two dudes with one Tubby dive',
+      ach_boomer: 'Surprise From Behind', ach_boomer_d: 'Knock out a dude with Boomerang after it turns',
+      ach_puff3: 'Hurricane', ach_puff3_d: 'Knock out three dudes with one Fluffy',
+      ach_stars60: 'Star Shower', ach_stars60_d: 'Collect 60 stars',
+      ach_nuke: 'Royal Blast', ach_nuke_d: 'Drop the Tsar Bomb',
       ach_tnt10: 'Demolition Man', ach_tnt10_d: 'Blow up 10 TNT crates',
       ach_kills100: 'The Hundred', ach_kills100_d: 'Knock out 100 dudes',
       ach_stars15: 'Stargazer', ach_stars15_d: 'Collect 15 stars',
       ach_stars30: 'Star Road', ach_stars30_d: 'Collect 30 stars',
       ach_stars45: 'Perfectionist', ach_stars45_d: 'Collect every star',
       wardTitle: 'Outfits', wardSub: 'Unlocked with stars', skinOn: 'Wearing', skinLocked: 'Collect more stars',
-      skin_none: 'No outfit', skin_cap: 'Cap', skin_glasses: 'Shades', skin_bandana: 'Bandana', skin_tophat: 'Top hat', skin_crown: 'Crown',
+      skin_none: 'No outfit', skin_cap: 'Cap', skin_glasses: 'Shades', skin_bandana: 'Bandana', skin_tophat: 'Top hat', skin_crown: 'Crown', skin_scarf: 'Scarf', skin_pilot: 'Pilot cap',
       introNew: 'New!', gotIt: 'Got it!',
       intro_speed: 'Zippy', intro_speed_d: 'Tap the screen while it flies and it dashes forward. Great against wood.',
       intro_bomb: 'Boomer', intro_bomb_d: 'Tap in flight to explode. If you don\'t, it blows up by itself after impact.',
       intro_tnt: 'TNT crate', intro_tnt_d: 'Explodes when hit or tipped over. Nearby crates go off in a chain.',
       intro_split: 'Triplet', intro_split_d: 'Tap in flight to split into three chicks. Great against glass and scattered dudes.',
       hintSplit: 'Pink Triplet: tap in flight and there will be three!',
+      intro_heavy: 'Tubby', intro_heavy_d: 'Heavy and tough. Tap in flight and he drops like a rock with a shockwave. Smashes roofs and stone.',
+      intro_boomer: 'Boomerang', intro_boomer_d: 'Tap in flight and it turns around and flies back. Gets the dudes hiding behind walls.',
+      intro_puff: 'Fluffy', intro_puff_d: 'Tap in flight to puff up and blow everything away. Barely hits, but knocks dudes off ledges and topples towers.',
+      hintHeavy: 'Purple Tubby: tap above the target to drop!', hintBoomer: 'Green Boomerang: tap after passing the wall and it comes back!', hintPuff: 'Fluffy: tap near the target to puff up!',
+      comicSlam: 'THUD!|WHAM!|CRUNCH!', comicPuff: 'POOF!|FWOOSH!|WHOOSH!',
       intro_boulder: 'Boulder', intro_boulder_d: 'A heavy rock. Push it and it rolls over everything in its way.',
       intro_boss: 'The Dude King', intro_boss_d: 'Big and very tough. One chick is not enough: use bombs and drop rocks on him.',
       adBoost: 'Watch ad: boosters ×2 on the next level', boostersReady: 'Done! Double boosters on the next level', boostersX2: 'Boosters ×2 — two of each!',
+      nukeTitle: 'Tsar Bomb', nukeDesc: 'Watch an ad and drop the Tsar Bomb: it wipes out half the level. One per attempt.',
+      nukeHow: 'You can also earn Tsar Bombs without ads: beat any level with three stars for the first time and one goes into your stock.',
+      nukeWatch: 'Watch ad', nukeCancel: 'Not now', nukeEarned: '+1 Tsar Bomb in stock for three stars!', loadingLevel: 'Loading level…',
       vibration: 'Vibration', reset: 'Reset progress', resetSure: 'Really reset?', resetDone: 'Progress reset',
       statShots: 'Shots', statLeft: 'Chicks left', statCombo: 'Best combo', needMore: 'To the next star', enemiesLeft: 'Dudes left',
-      tips: 'Glass breaks easiest, stone is the toughest.|Every spare chick is worth +10,000 points.|A chick smashes through a broken block and keeps flying.|A tipped-over TNT crate explodes too.|Knock out several dudes with one chick for a combo bonus.|The Aim booster shows the full flight path.|Hit the supports: a falling roof does the job for you.|Quake hits glass the hardest.',
+      tips: 'Glass breaks easiest, stone is the toughest.|Tubby smashes stone roofs: tap when he is above the target.|Boomerang gets the dudes hiding behind walls.|Fluffy barely hits, but blows dudes off ledges.|Every spare chick is worth +10,000 points.|A chick smashes through a broken block and keeps flying.|A tipped-over TNT crate explodes too.|Knock out several dudes with one chick for a combo bonus.|The Aim booster shows the full flight path.|Hit the supports: a falling roof does the job for you.|Quake hits glass the hardest.',
       comicHit: 'POW!|BAM!|BONK!|BOING!', comicBoom: 'BOOM!|KABOOM!|BANG!',
       taunt1: 'Ha-ha!', taunt2: 'Missed!', taunt3: 'Nope!', taunt4: 'Too bad!',
       hintTnt: 'TNT crates blow up on impact — and set off their neighbours!',
       hintBoulder: 'Push the boulder and let it roll!',
       boosterNA: 'This booster can\'t be used right now',
-      nukeAim: 'Tap where to drop the nuke!',
-      nukeLater: 'You can drop the nuke when nothing is flying',
+      nukeAim: 'Tap where to drop the Tsar Bomb!',
+      nukeLater: 'You can drop the Tsar Bomb when nothing is flying',
       pause: 'Paused', resume: 'Resume', restart: 'Restart', menu: 'Menu',
       winTitle: 'Level complete!', next: 'Next', allDone: 'All levels complete! More coming soon.',
       loseTitle: 'The dudes survived!', loseSub: 'Don\'t give up — you can do it!',
@@ -1737,6 +2122,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     day:    { tune: 'major', bpm: 116, lead: 'square',   leadVol: 0.060, cutoff: 2600, drums: 1,    four: false, arp: true },
     sunset: { tune: 'major', bpm: 104, lead: 'triangle', leadVol: 0.085, cutoff: 2000, drums: 0.7,  four: false, arp: false },
     night:  { tune: 'minor', bpm: 100, lead: 'triangle', leadVol: 0.085, cutoff: 1800, drums: 0.55, four: false, arp: true },
+    winter: { tune: 'major', bpm: 96,  lead: 'sine',     leadVol: 0.095, cutoff: 3200, drums: 0.45, four: false, arp: true },
+    volcano:{ tune: 'minor', bpm: 122, lead: 'square',   leadVol: 0.050, cutoff: 1500, drums: 1.0,  four: true,  arp: false },
     boss:   { tune: 'minor', bpm: 134, lead: 'sawtooth', leadVol: 0.050, cutoff: 2400, drums: 1.15, four: true,  arp: true },
   };
   const MUSIC_VOL = 0.34;
@@ -2037,6 +2424,36 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this._tone({ type: 'sine', f: 700, f2: 1400, t, d: 0.07, vol: 0.18 });
       [2100, 2600, 3100].forEach((f, i) => this._tone({ type: 'sine', f, f2: f * 1.25, t: t + 0.03 + i * 0.05, d: 0.06, vol: 0.12 }));
     },
+    // Пузан пикирует: падающий свист
+    dive(t) {
+      this._tone({ type: 'sine', f: 1800, f2: 380, t, a: 0.01, d: 0.45, vol: 0.13 });
+      this._noise({ t, a: 0.02, d: 0.35, vol: 0.18, filter: 'bandpass', freq: 2500, freq2: 600, q: 2 });
+    },
+    // удар Пузана о землю: тяжёлое «бух» и дребезг
+    slam(t) {
+      this._tone({ type: 'sine', f: 110, f2: 32, t, d: 0.55, vol: 0.7 });
+      this._noise({ t, a: 0.002, d: 0.4, vol: 0.55, filter: 'lowpass', freq: 1400, freq2: 120, q: 0.8 });
+      this._tone({ type: 'square', f: 70, f2: 45, t, d: 0.18, vol: 0.08, lp: 600 });
+    },
+    // Бумеранг разворачивается: «вжух» туда-обратно
+    boomerang(t) {
+      this._noise({ t, a: 0.01, d: 0.18, vol: 0.22, filter: 'bandpass', freq: 900, freq2: 3500, q: 3 });
+      this._noise({ t: t + 0.16, a: 0.01, d: 0.2, vol: 0.2, filter: 'bandpass', freq: 3500, freq2: 900, q: 3 });
+      this._tone({ type: 'triangle', f: 600, f2: 1300, t, d: 0.12, vol: 0.1 });
+      this._tone({ type: 'triangle', f: 1300, f2: 700, t: t + 0.14, d: 0.14, vol: 0.09 });
+    },
+    // Пушок надувается: быстрое «ф-ф-фух» вверх
+    inflate(t) {
+      this._noise({ t, a: 0.03, d: 0.3, vol: 0.3, filter: 'lowpass', freq: 600, freq2: 3000, q: 1 });
+      this._tone({ type: 'sine', f: 220, f2: 900, t, a: 0.02, d: 0.28, vol: 0.2 });
+      this._tone({ type: 'sine', f: 120, f2: 60, t: t + 0.05, d: 0.3, vol: 0.35 });
+    },
+    // Пушок лопается
+    pop(t) {
+      this._noise({ t, a: 0.001, d: 0.06, vol: 0.45, filter: 'highpass', freq: 1200 });
+      this._tone({ type: 'sine', f: 900, f2: 300, t, d: 0.08, vol: 0.18 });
+      [1800, 2400].forEach((f, i) => this._tone({ type: 'sine', f, f2: f * 1.3, t: t + 0.04 + i * 0.05, d: 0.05, vol: 0.08 }));
+    },
     explode(t) {
       this._noise({ t, a: 0.003, d: 0.12, vol: 0.7, filter: 'highpass', freq: 1500 });
       this._noise({ t, a: 0.005, d: 1.0, vol: 0.8, filter: 'lowpass', freq: 2400, freq2: 90, q: 0.7 });
@@ -2230,7 +2647,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.isVK = !!(b && LAUNCH.has('vk_app_id') && (b.isEmbedded ? b.isEmbedded() : true));
       if (!this.isVK) return;
       this.name = 'vk';
-      try { await send('VKWebAppInit'); } catch (e) { console.warn('[VK] init', e); }
+      try { await send('VKWebAppInit'); } catch (e) { /* без ВК игра работает в браузере */ }
       b.subscribe((e) => {
         const type = e && e.detail && e.detail.type;
         if (type === 'VKWebAppViewHide') this._pause('view');
@@ -2361,6 +2778,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     out.stats = {};
     for (const k of new Set([...Object.keys(a.stats || {}), ...Object.keys(b.stats || {})])) out.stats[k] = Math.max((a.stats || {})[k] || 0, (b.stats || {})[k] || 0);
     out.skin = b.skin || a.skin || 'none';
+    out.nukes = Math.min(a.nukes || 0, b.nukes || 0);
     return out;
   }
 
@@ -2417,6 +2835,22 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       grass: ['#7C9C3C', '#566F24', '#9CBB50'], haze: 'rgba(120,135,230,0.16)', stars: true,
       light: [0.4, -0.92], ambient: 'fireflies',
     },
+    // Снежные горы: холодный ясный день, сугробы вместо цветов, снегопад
+    winter: {
+      sky: ['#9CC8F0', '#CFE6FA', '#F2F8FF'], sun: { x: 1520, y: 190, r: 64, core: '#FFFFFF', glow: '#EAF6FF', rays: 'rgba(255,255,255,0.22)' },
+      cloud: 'rgba(255,255,255,0.95)', cloudShade: 'rgba(140,180,230,0.30)',
+      hills: ['#E6F1FC', '#C9DDF2', '#A9C3E3'], trees: '#2F5E5A', ground: ['#6A5A50', '#3E322C'], pebble: 'rgba(30,26,40,0.45)',
+      grass: ['#8E9A6A', '#5E6A44', '#A8B07C'], haze: 'rgba(235,245,255,0.40)', stars: false,
+      light: [0.5, -0.87], ambient: 'snow', flock: false, snow: true, noFlowers: true,
+    },
+    // Вулкан: тёмный базальт, лава в трещинах, искры в воздухе
+    volcano: {
+      sky: ['#2A1424', '#7A2A2A', '#E0662E'], sun: { x: 430, y: 240, r: 70, core: '#FFD9A8', glow: 'rgba(255,120,60,0.7)', rays: null },
+      cloud: 'rgba(120,80,80,0.75)', cloudShade: 'rgba(40,10,20,0.45)',
+      hills: ['#5A2E2A', '#3E1F1E', '#2A1414'], trees: '#1E1010', ground: ['#3E2E2C', '#1A1212'], pebble: 'rgba(255,110,30,0.45)',
+      grass: ['#6E5A3A', '#46381F', '#8A7246'], haze: 'rgba(255,110,60,0.18)', stars: true,
+      light: [-0.55, -0.83], ambient: 'embers', flock: false, noFlowers: true, lava: true,
+    },
   };
   let theme = THEMES.noon;
   function setTheme(name) { theme = THEMES[name] || THEMES.noon; themeName = THEMES[name] ? name : 'noon'; }
@@ -2461,6 +2895,18 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       tree: ['#10163A', '#4E62A8', '#0A0E2A'], trunk: '#0E1230',
       cloud: ['#AAB4E6', '#6E78B8', '#3A4382'], haze: 'rgba(110,130,220,0.16)', rays: null,
     },
+    winter: {
+      sky: ['#7FB2E6', '#A9D0F2', '#D6EAFB', '#F4F9FF'],
+      hills: [['#EEF5FD', '#D8E6F6'], ['#DCE9F7', '#BFD3EC'], ['#C6D9EF', '#A2BCDD']],
+      tree: ['#2E5E58', '#4E8A7E', '#1C3E3C'], trunk: '#4A3426', pines: true,
+      cloud: ['#FFFFFF', '#E6F0FB', '#B9CDE6'], haze: 'rgba(240,247,255,0.45)', rays: 'rgba(255,255,255,0.08)',
+    },
+    volcano: {
+      sky: ['#1C0E1A', '#4E1E2A', '#A8382A', '#F07A36'],
+      hills: [['#6A2E2C', '#521F20'], ['#46201F', '#341616'], ['#2A1414', '#1C0C0C']],
+      tree: ['#2A1A16', '#7A3A22', '#140A08'], trunk: '#1A0E0A', dead: true,
+      cloud: ['#8A6260', '#5A3A3E', '#2E1A22'], haze: 'rgba(255,100,50,0.20)', rays: null, volcano: true,
+    },
   };
   let themeName = 'noon';
   // Свет сцены: цвет контрового света, цвет «воздуха» у солнца и цветокоррекция (soft-light)
@@ -2469,6 +2915,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     sunset: { rim: 'rgba(255,190,110,0.95)', air: 'rgba(255,150,80,0.11)', grade: 'rgba(255,120,60,0.26)', beams: 'rgba(255,200,140,0.08)' },
     dusk:   { rim: 'rgba(255,170,170,0.85)', air: 'rgba(255,140,120,0.09)', grade: 'rgba(190,90,160,0.24)', beams: null },
     night:  { rim: 'rgba(190,210,255,0.8)', air: 'rgba(150,170,255,0.07)', grade: 'rgba(60,80,180,0.28)', beams: null },
+    winter: { rim: 'rgba(235,246,255,0.9)', air: 'rgba(225,240,255,0.08)', grade: 'rgba(140,180,240,0.16)', beams: 'rgba(245,250,255,0.06)' },
+    volcano:{ rim: 'rgba(255,140,60,0.95)', air: 'rgba(255,90,30,0.12)', grade: 'rgba(210,60,30,0.26)', beams: null },
   };
   const lightCfg = () => LIGHT[themeName] || LIGHT.noon;
 
@@ -2501,6 +2949,55 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     c.globalAlpha = 1; c.lineCap = 'butt';
   }
 
+  // Ель в снегу: ярусы-треугольники, снежные шапки с солнечной стороны
+  function paintPine(c, x, y, s, P, sunX, r) {
+    const H = s * (1.5 + r() * 0.5), W = s * 0.62, dir = sunX > x ? 1 : -1;
+    c.fillStyle = P.trunk; c.fillRect(x - s * 0.06, y - s * 0.25, s * 0.12, s * 0.3);
+    for (let k = 0; k < 4; k++) {
+      const top = y - H + k * H * 0.2, bot = y - H * 0.08 - (3 - k) * H * 0.12, w = W * (0.45 + k * 0.2);
+      c.fillStyle = P.tree[0]; c.beginPath(); c.moveTo(x, top); c.lineTo(x + w, bot); c.lineTo(x - w, bot); c.closePath(); c.fill();
+      c.fillStyle = P.tree[2]; c.globalAlpha = 0.55; c.beginPath(); c.moveTo(x, top); c.lineTo(x - dir * w, bot); c.lineTo(x - dir * w * 0.2, bot); c.closePath(); c.fill(); c.globalAlpha = 1;
+      // снег на лапах
+      c.fillStyle = '#F6FBFF'; c.beginPath(); c.moveTo(x, top + 1); c.lineTo(x + w * 0.55, top + (bot - top) * 0.55); c.quadraticCurveTo(x, top + (bot - top) * 0.42, x - w * 0.55, top + (bot - top) * 0.55); c.closePath(); c.fill();
+      c.beginPath(); c.ellipse(x + dir * w * 0.35, bot - 2, w * 0.45, 3 + s * 0.04, 0, 0, TAU); c.fill();
+    }
+  }
+  // Обгоревшее дерево: голый ствол с ветками
+  function paintDead(c, x, y, s, P, sunX, r) {
+    c.strokeStyle = P.tree[0]; c.lineCap = 'round';
+    const H = s * (1.1 + r() * 0.5);
+    c.lineWidth = s * 0.13; c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + (r() - 0.5) * s * 0.3, y - H * 0.5, x + (r() - 0.5) * s * 0.25, y - H); c.stroke();
+    c.lineWidth = s * 0.06;
+    for (let i = 0; i < 4; i++) {
+      const hy = y - H * (0.4 + i * 0.15), d = i % 2 ? 1 : -1, L = s * (0.35 - i * 0.05);
+      c.beginPath(); c.moveTo(x, hy); c.quadraticCurveTo(x + d * L * 0.5, hy - L * 0.2, x + d * L, hy - L * 0.6); c.stroke();
+    }
+    c.lineCap = 'butt';
+  }
+  // Вулкан на дальнем плане: конус, светящийся кратер и потёки лавы
+  function paintVolcano(c, P) {
+    const cx = 1180, base = 760, top = 300, bw = 760, tw = 120;
+    const g = c.createLinearGradient(0, top, 0, base);
+    g.addColorStop(0, '#4A2422'); g.addColorStop(1, '#2A1416');
+    c.fillStyle = g; c.beginPath();
+    c.moveTo(cx - bw, base); c.quadraticCurveTo(cx - bw * 0.35, base - 120, cx - tw, top); c.lineTo(cx + tw, top); c.quadraticCurveTo(cx + bw * 0.35, base - 120, cx + bw, base); c.closePath(); c.fill();
+    // освещённый склон
+    c.fillStyle = 'rgba(255,120,70,0.10)'; c.beginPath(); c.moveTo(cx - tw, top); c.quadraticCurveTo(cx - bw * 0.35, base - 120, cx - bw, base); c.lineTo(cx - bw * 0.4, base); c.quadraticCurveTo(cx - tw * 0.9, base - 200, cx - tw * 0.4, top); c.closePath(); c.fill();
+    // потёки лавы
+    c.lineCap = 'round';
+    for (const [dx, len, w] of [[-60, 260, 10], [30, 340, 13], [85, 200, 8]]) {
+      c.strokeStyle = 'rgba(255,90,20,0.85)'; c.lineWidth = w;
+      c.beginPath(); c.moveTo(cx + dx * 0.6, top + 4); c.quadraticCurveTo(cx + dx * 1.4, top + len * 0.5, cx + dx * 2.2, top + len); c.stroke();
+      c.strokeStyle = 'rgba(255,220,120,0.8)'; c.lineWidth = w * 0.35; c.stroke();
+    }
+    c.lineCap = 'butt';
+    // свечение кратера
+    const cg = c.createRadialGradient(cx, top, 10, cx, top, 260);
+    cg.addColorStop(0, 'rgba(255,200,100,0.9)'); cg.addColorStop(0.25, 'rgba(255,110,40,0.45)'); cg.addColorStop(1, 'rgba(255,80,30,0)');
+    c.fillStyle = cg; c.beginPath(); c.arc(cx, top, 260, 0, TAU); c.fill();
+    c.fillStyle = '#FFB347'; c.beginPath(); c.ellipse(cx, top + 2, tw * 0.95, 12, 0, 0, TAU); c.fill();
+  }
+
   function buildBackdrop(name, sc) {
     const key = name + '|' + sc;
     if (bgCache.has(key)) return bgCache.get(key);
@@ -2530,6 +3027,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       [[-22, -16, 15], [24, 8, 11], [-6, 30, 8], [14, -34, 6]].forEach(([dx, dy, rr2]) => { c.beginPath(); c.arc(S.x + dx, S.y + dy, rr2, 0, TAU); c.fill(); });
     }
 
+    if (P.volcano) paintVolcano(c, P);
+
     // холмы: три слоя с дымкой между ними, на каждом — деревья
     const layers = [
       { base: 640, amp: 46, f: 0.0032, ph: 0.6, a2: 22, f2: 0.009, trees: 20, ts: [20, 30], group: 3 },
@@ -2554,7 +3053,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         const grove = [];
         for (let k = 0; k < n; k++) grove.push({ x: cx + (k - (n - 1) / 2) * L.ts[0] * (0.9 + r() * 0.5), s: L.ts[0] + r() * (L.ts[1] - L.ts[0]) });
         grove.sort((a, b) => a.s - b.s);
-        for (const tr of grove) paintTree(c, tr.x, hillY(tr.x, L.base, L.amp, L.f, L.ph, L.a2, L.f2) + 8, tr.s, P, S.x, r);
+        const painter = P.pines ? paintPine : P.dead ? paintDead : paintTree;
+        for (const tr of grove) painter(c, tr.x, hillY(tr.x, L.base, L.amp, L.f, L.ph, L.a2, L.f2) + 8, tr.s, P, S.x, r);
       }
       // дымка: чем дальше слой, тем больше он «тонет» в воздухе
       if (li < 2) {
@@ -2631,6 +3131,15 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       }
       ctx.restore(); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
     }
+    // дым над кратером вулкана
+    if (P.volcano) {
+      for (let i = 0; i < 9; i++) {
+        const k = ((t * 0.06 + i / 9) % 1), x = 1180 + Math.sin(k * 5 + i) * 30 + k * 260, y = 290 - k * 520, rad = 40 + k * 120;
+        ctx.globalAlpha = (1 - k) * 0.45 * Math.min(1, k * 6);
+        ctx.fillStyle = i % 2 ? '#4A3036' : '#5E3E40'; circle(ctx, x, y, rad); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
     // облака плывут
     const set = cloudSet(themeName);
     if (set) {
@@ -2662,7 +3171,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   const TILE_W = 512, TILE_H = 320;
   const soilCache = new Map();
   function soilPattern(ctx) {
-    const T = theme, key = T.ground.join() + T.pebble;
+    const T = theme, key = T.ground.join() + T.pebble + (T.lava ? '|lava' : '');
     if (soilCache.has(key)) return soilCache.get(key);
     if (typeof document === 'undefined') return null;
     const cv = document.createElement('canvas'); cv.width = TILE_W; cv.height = TILE_H;
@@ -2697,6 +3206,19 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         if (r() < 0.6) { c.moveTo(x + 1, 18 + len * 0.3); c.lineTo(x + (r() < 0.5 ? -8 : 8), 22 + len * 0.55); }
         c.stroke();
       });
+    }
+    // вулкан: раскалённые трещины в базальте
+    if (T.lava) {
+      c.lineCap = 'round'; c.lineJoin = 'round';
+      for (let i = 0; i < 9; i++) {
+        const x = r() * TILE_W, y = 30 + r() * (TILE_H - 60), pts = [[x, y]];
+        for (let k = 0; k < 5; k++) { const [px, py] = pts[pts.length - 1]; pts.push([px + 10 + r() * 22, py + (r() - 0.5) * 26]); }
+        wrap(() => {
+          for (const [col, lw] of [['rgba(255,80,20,0.25)', 9], ['rgba(255,110,30,0.85)', 3.2], ['rgba(255,220,120,0.9)', 1.2]]) {
+            c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); pts.forEach(([px, py], k) => (k ? c.lineTo(px, py) : c.moveTo(px, py))); c.stroke();
+          }
+        });
+      }
     }
     // камешки: тёмные с бликом, разного размера и формы
     for (let i = 0; i < 46; i++) {
@@ -2790,6 +3312,20 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       }
       c.fill();
     }
+    // зима: сугроб поверх сухой травы — торчат только кончики
+    if (theme.snow) {
+      c.fillStyle = '#EEF5FD'; c.beginPath(); c.moveTo(x0, y + 13);
+      for (let x = Math.floor(x0 / 22) * 22; x <= x1 + 22; x += 22) { const h = hash(hx(x) * 0.53); c.quadraticCurveTo(x + 11, y - 9 - h * 10, x + 22, y - 3 - hash(hx(x + 22) * 0.53) * 4); }
+      c.lineTo(x1 + 22, y + 13); c.closePath(); c.fill();
+      c.fillStyle = 'rgba(160,190,230,0.45)'; c.fillRect(x0, y + 7, x1 - x0, 6);
+      c.fillStyle = '#FFFFFF'; c.beginPath();
+      for (let x = Math.floor(x0 / 22) * 22; x <= x1 + 22; x += 22) { const h = hash(hx(x) * 0.53); c.moveTo(x + 4, y - 2 - h * 5); c.quadraticCurveTo(x + 11, y - 9 - h * 10, x + 18, y - 3 - h * 5); }
+      c.lineWidth = 3; c.strokeStyle = '#FFFFFF'; c.stroke();
+      // искорки инея
+      c.fillStyle = 'rgba(255,255,255,0.95)';
+      for (let x = Math.floor(x0 / 31) * 31; x < x1; x += 31) { const h = hash(hx(x) * 2.7); if (h > 0.55) c.fillRect(x + h * 10, y - 1 + h * 8, 2, 2); }
+      return;
+    }
     // светлые кончики
     c.strokeStyle = 'rgba(255,255,210,0.35)'; c.lineWidth = 1.2; c.beginPath();
     for (let x = Math.floor(x0 / 37) * 37; x < x1; x += 37) {
@@ -2800,7 +3336,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     c.stroke();
   }
   function grassFrames() {
-    const key = theme.grass.join();
+    const key = theme.grass.join() + (theme.snow ? '|snow' : '');
     if (grassCache.has(key)) return grassCache.get(key);
     if (typeof document === 'undefined') return null;
     const frames = [];
@@ -2827,7 +3363,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       ctx.drawImage(fr, sx * GSC, 0, w * GSC, GH * GSC, cx, y - GUP, w, GH);
       if (w < step) ctx.drawImage(frames[0] === fr ? fr : fr, 0, 0, (step - w) * GSC, GH * GSC, cx + w, y - GUP, step - w, GH);
     }
-    if (!flowers) return;
+    if (!flowers || theme.noFlowers) return;
     // цветы рисуются вживую — их мало, и они качаются вместе с травой
     const cols = ['#FFFFFF', '#FFFFFF', '#FFE14D', '#FF8FB1', '#FF9A3C', '#B9A6FF'];
     ctx.lineCap = 'round';
@@ -2905,6 +3441,26 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         ctx.strokeStyle = 'rgba(90,30,0,0.5)'; ctx.lineWidth = 1; line(ctx, -9, 0, 9, 0);
         ctx.restore();
       }
+    } else if (kind === 'snow') {
+      // снегопад: два слоя хлопьев, дальние мельче и медленнее
+      ctx.fillStyle = '#FFFFFF';
+      for (let i = 0; i < 46; i++) {
+        const near = i % 3 === 0, sp = near ? 60 + r() * 30 : 28 + r() * 20, ph = r() * 6.28, sz = near ? 3 + r() * 2.5 : 1.4 + r() * 1.6;
+        const y = v.y0 - 20 + ((r() * 1100 + t * sp) % 1100), x = v.x0 + ((r() * W + Math.sin(t * 0.8 + ph) * 40 - t * 10) % W + W) % W;
+        ctx.globalAlpha = near ? 0.9 : 0.55; circle(ctx, x, y, sz); ctx.fill();
+      }
+    } else if (kind === 'embers') {
+      // искры от лавы поднимаются вверх и мерцают
+      ctx.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 30; i++) {
+        const sp = 30 + r() * 50, ph = r() * 6.28, life = 900;
+        const y = C.GROUND_Y + 20 - ((r() * life + t * sp) % life), x = v.x0 + ((r() * W + Math.sin(t * 1.3 + ph) * 30) % W + W) % W;
+        const a = (0.4 + 0.6 * Math.max(0, Math.sin(t * 4 + ph * 5))) * Math.min(1, (y - 100) / 300);
+        if (a <= 0) continue;
+        ctx.fillStyle = `rgba(255,${150 + Math.floor(r() * 80)},60,${a.toFixed(2)})`;
+        circle(ctx, x, y, 1.5 + r() * 2.2); ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-over';
     } else if (kind === 'pollen') {
       ctx.fillStyle = '#FFFFFF';
       for (let i = 0; i < 20; i++) {
@@ -3301,11 +3857,15 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     speed:  { a: '#FFC067', b: '#FF8A00', belly: '#FFE3B8', wing: '#E06F00' },
     bomb:   { a: '#7A6650', b: '#46372A', belly: '#9C8A73', wing: '#33271D' },
     split:  { a: '#FFC4DC', b: '#FF6FA8', belly: '#FFE6F0', wing: '#E85590' },
+    heavy:  { a: '#C2B2FF', b: '#7454D8', belly: '#E4DCFF', wing: '#563AB0' },
+    boomer: { a: '#C8F58A', b: '#58B52A', belly: '#ECFFD6', wing: '#3E8F18' },
+    puff:   { a: '#FFFFFF', b: '#9ED8FF', belly: '#FFFFFF', wing: '#74C0F2' },
   };
 
   function chick(ctx, x, y, r, ang, type, o = {}) {
     const c = CHICK[type] || CHICK.normal;
     ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+    if (o.mirror) ctx.scale(1, -1);   // летит влево — не переворачиваем вверх ногами
     if (o.squash) ctx.scale(1 + o.squash, 1 - o.squash);
     ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(2.5, r * 0.12); ctx.strokeStyle = OUT;
 
@@ -3320,6 +3880,22 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     } else if (type === 'speed') {
       ctx.fillStyle = c.b;
       ctx.beginPath(); ctx.moveTo(r * 0.2, -r * 0.85); ctx.lineTo(-r * 0.9, -r * 1.25); ctx.lineTo(-r * 0.35, -r * 0.8); ctx.lineTo(-r * 1.0, -r * 0.95); ctx.lineTo(-r * 0.3, -r * 0.6); ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (type === 'heavy') {
+      // шип на каске
+      ctx.fillStyle = '#C9CED8';
+      ctx.beginPath(); ctx.moveTo(-r * 0.12, -r * 0.9); ctx.lineTo(0, -r * 1.32); ctx.lineTo(r * 0.12, -r * 0.9); ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (type === 'boomer') {
+      // деревянный бумеранг на макушке
+      ctx.save(); ctx.translate(-r * 0.15, -r * 1.02); ctx.rotate(-0.3); ctx.scale(1.3, 1.3);
+      ctx.fillStyle = '#C98A3E'; ctx.beginPath();
+      ctx.moveTo(-r * 0.62, r * 0.05); ctx.quadraticCurveTo(-r * 0.2, -r * 0.08, 0, -r * 0.42); ctx.quadraticCurveTo(r * 0.2, -r * 0.08, r * 0.62, r * 0.05);
+      ctx.lineTo(r * 0.56, r * 0.22); ctx.quadraticCurveTo(r * 0.1, r * 0.1, 0, -r * 0.14); ctx.quadraticCurveTo(-r * 0.1, r * 0.1, -r * 0.56, r * 0.22); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#E8343A'; ctx.fillRect(-r * 0.46, r * 0.06, r * 0.1, r * 0.1); ctx.fillRect(r * 0.36, r * 0.06, r * 0.1, r * 0.1);
+      ctx.restore();
+    } else if (type === 'puff') {
+      // три кудряшки
+      ctx.fillStyle = c.b;
+      for (let i = 0; i < 3; i++) { circle(ctx, -r * 0.24 + i * r * 0.24, -r * 1.02 - (i === 1 ? r * 0.08 : 0), r * 0.17); ctx.fill(); ctx.stroke(); }
     } else if (type === 'bomb') {
       ctx.strokeStyle = OUT; ctx.lineWidth = r * 0.14;
       ctx.beginPath(); ctx.moveTo(0, -r * 0.95); ctx.quadraticCurveTo(r * 0.2, -r * 1.35, r * 0.45, -r * 1.3); ctx.stroke();
@@ -3332,12 +3908,28 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     // тело
     const g = ctx.createRadialGradient(-r * 0.35, -r * 0.4, r * 0.1, 0, 0, r * 1.05);
     g.addColorStop(0, c.a); g.addColorStop(1, c.b);
-    ctx.fillStyle = g; circle(ctx, 0, 0, r); ctx.fill(); ctx.stroke();
+    if (type === 'puff') {
+      // пушистый край: кольцо пёрышек, внутренний контур закрывается телом
+      const n = 14, fr = r * (o.puffed ? 0.2 : 0.24);
+      ctx.fillStyle = c.b;
+      for (let i = 0; i < n; i++) { const a = (i / n) * TAU + (o.time || 0) * (o.puffed ? 1.5 : 0); circle(ctx, Math.cos(a) * r * 0.9, Math.sin(a) * r * 0.9, fr); ctx.fill(); ctx.stroke(); }
+      ctx.fillStyle = g; circle(ctx, 0, 0, r * 0.92); ctx.fill();
+    } else { ctx.fillStyle = g; circle(ctx, 0, 0, r); ctx.fill(); ctx.stroke(); }
     // брюшко
     ctx.save(); circle(ctx, 0, 0, r - ctx.lineWidth / 2); ctx.clip();
     ctx.fillStyle = c.belly; ctx.beginPath(); ctx.ellipse(r * 0.15, r * 0.55, r * 0.7, r * 0.5, 0, 0, TAU); ctx.fill();
     ctx.restore();
-    sphereShade(ctx, r, lightAngle() - ang);
+    sphereShade(ctx, r, o.mirror ? ang - lightAngle() : lightAngle() - ang);
+    if (type === 'heavy') {
+      // железная каска с заклёпками
+      ctx.save(); circle(ctx, 0, 0, r + ctx.lineWidth); ctx.clip();
+      const hg = ctx.createLinearGradient(0, -r, 0, -r * 0.3);
+      hg.addColorStop(0, '#E6EAF0'); hg.addColorStop(1, '#8D95A5');
+      ctx.fillStyle = hg; ctx.beginPath(); ctx.ellipse(0, -r * 0.42, r * 1.08, r * 0.72, 0, Math.PI, TAU); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#7A8292'; rr(ctx, -r * 1.05, -r * 0.5, r * 2.1, r * 0.17, r * 0.06); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#E6EAF0'; for (const rx of [-0.7, -0.25, 0.25, 0.7]) { circle(ctx, rx * r, -r * 0.415, r * 0.045); ctx.fill(); }
+      ctx.restore();
+    }
     // крыло
     const flap = o.flap ? Math.sin((o.time || 0) * 34) : 0;
     ctx.fillStyle = c.wing; ctx.beginPath();
@@ -3359,6 +3951,17 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       ctx.lineWidth = r * 0.12; ctx.beginPath();
       ctx.moveTo(ex1 - er, ey - er * 1.3); ctx.lineTo(ex1 + er, ey - er * 0.9);
       ctx.moveTo(ex2 - er * 0.8, ey - er * 0.9); ctx.lineTo(ex2 + er, ey - er * 1.3); ctx.stroke();
+    } else if (type === 'heavy') {
+      // тяжёлые сдвинутые брови
+      ctx.fillStyle = OUT; ctx.beginPath();
+      ctx.moveTo(ex1 - er * 1.1, ey - er * 1.5); ctx.lineTo(ex1 + er * 1.05, ey - er * 0.85); ctx.lineTo(ex1 + er * 0.9, ey - er * 0.55); ctx.lineTo(ex1 - er * 1.1, ey - er * 1.05); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(ex2 - er * 0.9, ey - er * 0.85); ctx.lineTo(ex2 + er * 1.1, ey - er * 1.5); ctx.lineTo(ex2 + er * 1.1, ey - er * 1.05); ctx.lineTo(ex2 - er * 0.75, ey - er * 0.55); ctx.closePath(); ctx.fill();
+    } else if (type === 'boomer') {
+      // хитрый прищур: одна бровь поднята
+      ctx.lineWidth = r * 0.1; ctx.lineCap = 'round'; ctx.beginPath();
+      ctx.moveTo(ex1 - er, ey - er * 1.55); ctx.quadraticCurveTo(ex1, ey - er * 2.0, ex1 + er, ey - er * 1.6);
+      ctx.moveTo(ex2 - er * 0.8, ey - er * 1.1); ctx.lineTo(ex2 + er, ey - er * 1.2); ctx.stroke(); ctx.lineCap = 'butt';
     }
     // клюв
     ctx.lineWidth = Math.max(2, r * 0.09); ctx.fillStyle = '#FF8A1F';
@@ -3405,6 +4008,24 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       rr(ctx, -r * 0.42, -r * 1.78, r * 0.84, r * 0.98, r * 0.06); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#FFC72C'; ctx.fillRect(-r * 0.4, -r * 1.14, r * 0.8, r * 0.17);
       ctx.fillStyle = '#2B2B33'; ctx.beginPath(); ctx.ellipse(0, -r * 0.84, r * 0.74, r * 0.14, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    } else if (sk === 'scarf') {
+      // вязаный полосатый шарф: петля вокруг шеи и развевающийся конец
+      ctx.save(); circle(ctx, 0, 0, r + 2); ctx.clip();
+      ctx.fillStyle = '#E8343A'; ctx.beginPath(); ctx.ellipse(-r * 0.05, r * 0.62, r * 1.05, r * 0.24, 0.08, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#FFFFFF'; for (let i = -3; i <= 3; i++) { ctx.fillRect(i * r * 0.3 - r * 0.06, r * 0.45, r * 0.12, r * 0.34); }
+      ctx.restore();
+      ctx.fillStyle = '#E8343A'; ctx.beginPath(); ctx.moveTo(-r * 0.55, r * 0.6); ctx.quadraticCurveTo(-r * 1.1, r * 0.75, -r * 1.45, r * 0.5); ctx.lineTo(-r * 1.38, r * 0.85); ctx.quadraticCurveTo(-r * 1.0, r * 1.0, -r * 0.5, r * 0.82); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-r * 1.1, r * 0.66, r * 0.1, r * 0.24);
+    } else if (sk === 'pilot') {
+      // кожаный шлем лётчика и очки на лбу
+      ctx.fillStyle = '#8A5A2B';
+      ctx.beginPath(); ctx.arc(0, -r * 0.1, r * 0.98, Math.PI * 1.05, Math.PI * 1.95); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(-r * 0.62, r * 0.05, r * 0.2, r * 0.34, 0.2, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,230,180,0.5)'; ctx.lineWidth = Math.max(1, r * 0.05);
+      ctx.beginPath(); ctx.arc(0, -r * 0.1, r * 0.75, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+      ctx.strokeStyle = OUT; ctx.lineWidth = Math.max(2, r * 0.09);
+      ctx.fillStyle = '#5A3A1A'; rr(ctx, -r * 0.55, -r * 0.82, r * 1.2, r * 0.16, r * 0.06); ctx.fill(); ctx.stroke();
+      for (const gx of [-r * 0.12, r * 0.42]) { ctx.fillStyle = '#BFE6FF'; circle(ctx, gx, -r * 0.74, r * 0.2); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,0.8)'; circle(ctx, gx - r * 0.06, -r * 0.8, r * 0.06); ctx.fill(); }
     } else if (sk === 'crown') {
       ctx.save(); ctx.translate(0, -r * 0.95);
       ctx.fillStyle = '#FFD21F'; ctx.beginPath();
@@ -3694,7 +4315,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     ctx.restore();
   }
 
-  // ---------- Бустеры и ядерка ----------
+  // ---------- Бустеры и Царь-Бомба ----------
   function aura(ctx, x, y, r, t) {
     const k = 1 + Math.sin(t * 8) * 0.08;
     const g = ctx.createRadialGradient(x, y, r * 0.8, x, y, r * 1.7 * k);
@@ -3702,15 +4323,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     ctx.fillStyle = g; circle(ctx, x, y, r * 1.7 * k); ctx.fill();
   }
 
-  function trefoil(ctx, x, y, r, rot) {
-    ctx.save(); ctx.translate(x, y); ctx.rotate(rot || 0);
-    for (let i = 0; i < 3; i++) {
-      const a = -Math.PI / 2 + (i * TAU) / 3;
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r, a - 0.52, a + 0.52); ctx.closePath(); ctx.fill();
-    }
-    ctx.restore();
-    ctx.save(); ctx.fillStyle = ctx.strokeStyle; circle(ctx, x, y, r * 0.22); ctx.fill(); ctx.restore();
-  }
+
 
   function nukeTarget(ctx, x, y, R, t, alpha = 1) {
     ctx.save(); ctx.globalAlpha = alpha;
@@ -3724,33 +4337,46 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     ctx.restore();
   }
 
+  // Царь-Бомба: круглая мультяшная бомба с короной и искрящим фитилём
   function nukeBomb(ctx, x, y, t) {
-    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(t * 9) * 0.05);
-    ctx.lineJoin = 'round'; ctx.strokeStyle = OUT; ctx.lineWidth = 5;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(t * 9) * 0.06);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     // полосы скорости
     ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 4;
-    for (const dx of [-26, 0, 26]) line(ctx, dx, -110, dx, -200 - Math.abs(dx) * 2);
-    ctx.strokeStyle = OUT; ctx.lineWidth = 5;
-    // стабилизаторы
-    ctx.fillStyle = '#4C5A34';
-    ctx.beginPath(); ctx.moveTo(-34, -70); ctx.lineTo(-48, -112); ctx.lineTo(48, -112); ctx.lineTo(34, -70); ctx.closePath(); ctx.fill(); ctx.stroke();
+    for (const dx of [-30, 0, 30]) line(ctx, dx, -120, dx, -210 - Math.abs(dx) * 2);
+    // фитиль
+    ctx.strokeStyle = '#8A5A2B'; ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(30, -48); ctx.quadraticCurveTo(52, -78, 44, -96); ctx.stroke();
+    const fl = 1 + Math.sin(t * 40) * 0.25;
+    ctx.fillStyle = '#FFF3A0'; circle(ctx, 44, -98, 9 * fl); ctx.fill();
+    ctx.fillStyle = '#FF9A1F'; circle(ctx, 44, -98, 5 * fl); ctx.fill();
     // корпус
-    const g = ctx.createLinearGradient(-36, 0, 36, 0);
-    g.addColorStop(0, '#3E4A2A'); g.addColorStop(0.45, '#7A8A55'); g.addColorStop(1, '#2F3820');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, -10, 38, 78, 0, 0, TAU); ctx.fill(); ctx.stroke();
-    // жёлто-чёрная полоса
-    ctx.save(); ctx.beginPath(); ctx.ellipse(0, -10, 36, 76, 0, 0, TAU); ctx.clip();
-    ctx.fillStyle = '#FFD21F'; ctx.fillRect(-40, -46, 80, 22);
-    ctx.fillStyle = OUT; for (let i = -40; i < 40; i += 16) { ctx.beginPath(); ctx.moveTo(i, -24); ctx.lineTo(i + 8, -46); ctx.lineTo(i + 16, -46); ctx.lineTo(i + 8, -24); ctx.closePath(); ctx.fill(); }
-    ctx.restore();
-    // знак радиации
-    ctx.fillStyle = '#FFD21F'; circle(ctx, 0, 18, 22); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = OUT; ctx.strokeStyle = OUT; trefoil(ctx, 0, 18, 17);
+    const g = ctx.createRadialGradient(-20, -22, 6, 0, 0, 70);
+    g.addColorStop(0, '#6B5BA8'); g.addColorStop(0.5, '#3A2F66'); g.addColorStop(1, '#1E1838');
+    ctx.fillStyle = g; ctx.strokeStyle = OUT; ctx.lineWidth = 5;
+    circle(ctx, 0, 0, 60); ctx.fill(); ctx.stroke();
+    // горловина под фитиль
+    ctx.fillStyle = '#C9A13A'; ctx.save(); ctx.translate(26, -48); ctx.rotate(0.5);
+    ctx.fillRect(-12, -9, 24, 16); ctx.strokeRect(-12, -9, 24, 16); ctx.restore();
+    // блик
+    ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.beginPath(); ctx.ellipse(-24, -26, 16, 9, -0.6, 0, TAU); ctx.fill();
+    // золотой пояс со звездой
+    ctx.save(); circle(ctx, 0, 0, 58); ctx.clip();
+    ctx.fillStyle = '#FFC72C'; ctx.fillRect(-62, 8, 124, 16); ctx.restore();
+    ctx.fillStyle = '#FFF1A8'; star(ctx, 0, 16, 12); ctx.fill(); ctx.stroke();
+    // корона
+    ctx.fillStyle = '#FFD21F'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(-30, -50); ctx.lineTo(-34, -84); ctx.lineTo(-16, -66); ctx.lineTo(0, -92); ctx.lineTo(16, -66); ctx.lineTo(30, -84); ctx.lineTo(26, -50); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#FF4D6D'; circle(ctx, 0, -62, 5); ctx.fill();
+    ctx.fillStyle = '#4DC3FF'; circle(ctx, -18, -58, 4); ctx.fill(); circle(ctx, 16, -58, 4); ctx.fill();
     ctx.restore();
   }
 
+
+
+
   root.YB = Object.assign(root.YB || {}, {
-    Render: { sunPos, lighting, grade, foreground, setBgScale, setDetail, groundFx, setSkin, ambient, decals, bubble, blockSides, background, statics, block, setTheme, surfaceY, chick, dude, slingBack, slingFront, dots, particles, star, rr, aura, nukeTarget, nukeBomb, trefoil, MAT_COLORS, CHICK, OUT },
+    Render: { sunPos, lighting, grade, foreground, setBgScale, setDetail, groundFx, setSkin, ambient, decals, bubble, blockSides, background, statics, block, setTheme, surfaceY, chick, dude, slingBack, slingFront, dots, particles, star, rr, aura, nukeTarget, nukeBomb, MAT_COLORS, CHICK, OUT },
   });
 })(window);
 
@@ -3763,7 +4389,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   const DT = 1 / 60;
   const SX = C.SLING_X, SY = C.SLING_Y;
   const rand = (a, b) => a + Math.random() * (b - a);
-  const MOOD_BY_THEME = { noon: 'day', sunset: 'sunset', dusk: 'night', night: 'night' };
+  const MOOD_BY_THEME = { noon: 'day', sunset: 'sunset', dusk: 'night', night: 'night', winter: 'winter', volcano: 'volcano' };
 
   const Game = {
     canvas: null, ctx: null, dpr: 1, view: null,
@@ -3795,9 +4421,43 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       requestAnimationFrame((t) => this.frame(t));
     },
 
+    // Игра всегда горизонтальная. Если телефон держат вертикально (в приложении ВКонтакте
+    // или в браузере, в том числе с выключенным автоповоротом), вся игра поворачивается на 90°
+    // по часовой стрелке: игрок просто поворачивает телефон, и картинка встаёт правильно.
+    // Вырез экрана и полоска «домой» в вертикальном положении сверху и снизу — их обходим.
+    layout() {
+      const W = root.innerWidth, H = root.innerHeight, app = document.getElementById('app');
+      const coarse = root.matchMedia && root.matchMedia('(pointer: coarse)').matches;
+      const rot = coarse && H > W * 1.05;
+      const de = document.documentElement.style;
+      if (rot) {
+        const ins = this.safeInsets();
+        const w = H - ins.top - ins.bottom, h = W;
+        app.classList.add('rotated');
+        app.style.width = w + 'px'; app.style.height = h + 'px';
+        app.style.transform = `translate(${W}px, ${ins.top}px) rotate(90deg)`;
+        this.rot = { W, top: ins.top };
+        de.setProperty('--vw', w / 100 + 'px'); de.setProperty('--vh', h / 100 + 'px');
+        return { w, h };
+      }
+      app.classList.remove('rotated'); app.style.width = ''; app.style.height = ''; app.style.transform = '';
+      this.rot = null;
+      de.removeProperty('--vw'); de.removeProperty('--vh');
+      return { w: W, h: H };
+    },
+    safeInsets() {
+      if (!this._probe) {
+        const d = this._probe = document.createElement('div');
+        d.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+        document.body.appendChild(d);
+      }
+      const cs = getComputedStyle(this._probe);
+      return { top: parseFloat(cs.paddingTop) || 0, bottom: parseFloat(cs.paddingBottom) || 0 };
+    },
+
     resize() {
       const dpr = Math.min(2, root.devicePixelRatio || 1);
-      const w = root.innerWidth, h = root.innerHeight;
+      const { w, h } = this.layout();
       this.dpr = dpr;
       this.canvas.width = Math.round(w * dpr); this.canvas.height = Math.round(h * dpr);
       this.canvas.style.width = w + 'px'; this.canvas.style.height = h + 'px';
@@ -3808,13 +4468,13 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       const ox = (cw - C.W * s) / 2, oy = (ch - FH * s) * 0.85 - FY0 * s; // лишнее место по высоте — в основном небу
       this.view = { s, ox, oy, x0: -ox / s, x1: (cw - ox) / s, y0: -oy / s, y1: (ch - oy) / s };
       R.setBgScale(s);
-      const portrait = h > w * 1.05 && root.matchMedia && root.matchMedia('(pointer: coarse)').matches;
-      if (portrait) this.extPause.add('rotate'); else this.extPause.delete('rotate');
     },
 
     toWorld(e) {
       const v = this.view;
-      return { x: (e.clientX * this.dpr - v.ox) / v.s, y: (e.clientY * this.dpr - v.oy) / v.s };
+      // при повёрнутой игре экранные координаты переводим в координаты игры
+      const cx = this.rot ? e.clientY - this.rot.top : e.clientX, cy = this.rot ? this.rot.W - e.clientX : e.clientY;
+      return { x: (cx * this.dpr - v.ox) / v.s, y: (cy * this.dpr - v.oy) / v.s };
     },
 
     running() { return this.state === 'play' && !this.paused && this.extPause.size === 0; },
@@ -3865,6 +4525,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       if (this.ready === 'speed') this.showHint('hintSpeed');
       if (this.ready === 'bomb') this.showHint('hintBomb');
       if (this.ready === 'split') this.showHint('hintSplit');
+      if (this.ready === 'heavy') this.showHint('hintHeavy');
+      if (this.ready === 'boomer') this.showHint('hintBoomer');
+      if (this.ready === 'puff') this.showHint('hintPuff');
     },
 
     addExtraBird() {
@@ -3892,7 +4555,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
     // ---------- Ядерка (за рекламу, одна на попытку) ----------
     canNuke() { return this.running() && !this.ending && !this.nuke.used && !this.nuke.mode && this.sim.enemiesAlive() > 0; },
-    // Награда за рекламу: ядерка выдаётся в любом случае и ждёт, пока игра снова пойдёт.
+    // Награда за рекламу: Царь-Бомба выдаётся в любом случае и ждёт, пока игра снова пойдёт.
     grantNuke() {
       this.nuke.used = true; this.nuke.pending = true;
       this.ui.refreshBoosters();
@@ -3942,6 +4605,18 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     },
 
     // ---------- Ввод ----------
+    // Браузер на Android (вне ВКонтакте): по первому касанию разворачиваем игру на весь экран
+    // и закрепляем горизонтальную ориентацию системно. Где так нельзя (iPhone, приложение ВК),
+    // работает поворот из layout().
+    lockLandscape() {
+      if (this._lockTried) return; this._lockTried = true;
+      try {
+        const P = root.YB.Platform, el = document.documentElement, so = root.screen && root.screen.orientation;
+        if (P.isVK || !this.rot || !so || !so.lock || !el.requestFullscreen || !document.fullscreenEnabled) return;
+        el.requestFullscreen({ navigationUI: 'hide' }).then(() => so.lock('landscape')).catch(() => {});
+      } catch (er) {}
+    },
+
     onDown(e) {
       A.unlock();
       if (!this.running()) return;
@@ -3980,7 +4655,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     launch(dx, dy) {
       const v = this.launchVel(dx, dy);
       this.sim.launch(this.ready, SX + dx, SY + dy, v.x, v.y, { power: this.active.power });
-      this.ready = null; this.phase = 'flying'; this.shots++;
+      this.ready = null; this.phase = 'flying'; this.shots++; this.shotAbility = null;
       this.active = { sight: false, power: false };
       this.kills = 0; this.flyTrail = []; this.taunt = null; this.wob = 1;
       this.haptic('light');
@@ -4054,13 +4729,16 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       const s = this.save, i = this.levelIdx;
       const newRecord = score > (s.best[i] || 0);
       s.best[i] = Math.max(s.best[i] || 0, score);
+      // Первые три звезды на уровне — Царь-Бомба в запас (до 3 штук). Получить её можно и без рекламы.
+      const nukeEarned = stars === 3 && (s.stars[i] || 0) < 3 && (s.nukes || 0) < 3;
+      if (nukeEarned) s.nukes = (s.nukes || 0) + 1;
       s.stars[i] = Math.max(s.stars[i] || 0, stars);
       s.unlocked = Math.max(s.unlocked, Math.min(LEVELS.length, i + 2));
       this.ui.persist();
       A.play('win');
       this.confetti();
       this.ui.showWin({ score, stars, best: s.best[i], newRecord, hasNext: i + 1 < LEVELS.length, level: i,
-        shots: this.shots, combo: this.bestCombo, left: this.leftCount, used: this.used, need: stars < 3 ? st[stars] - score : 0 });
+        shots: this.shots, combo: this.bestCombo, left: this.leftCount, used: this.used, nukeEarned, need: stars < 3 ? st[stars] - score : 0 });
     },
 
     finishLose() {
@@ -4109,6 +4787,10 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           if (G.kills >= 3) G.ui.unlock('combo3');
           if (G.kills >= 5) G.ui.unlock('combo5');
           if (d.t === 'boss') G.ui.unlock('king');
+          // достижения новых птенцов: считаем выбывших за выстрел после способности
+          if (G.shotAbility === 'heavy' && G.kills >= 2) G.ui.unlock('slam2');
+          if (G.shotAbility === 'boomer') G.ui.unlock('boomer');
+          if (G.shotAbility === 'puff' && G.kills >= 3) G.ui.unlock('puff3');
           if (!G.nuke.mode) G.hitStop = Math.max(G.hitStop, 0.06);
           G.haptic('medium');
           if (G.taunt) G.taunt = null;
@@ -4123,6 +4805,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           // Каска или корона слетает
           if (d.t !== 'blue') G.part({ kind: 'hat', t: d.t, x: d.x, y: d.y - d.r * 0.7, vx: rand(-160, 160), vy: rand(-620, -460), g: 1100, s: d.r * (d.t === 'boss' ? 0.9 : 0.75), life: 1.8, vr: rand(-9, 9) });
           G.part({ kind: 'glow', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.r * 3.2, color: 'rgba(255,255,220,0.8)', life: 0.3, vr: 0 });
+          // «Пуф!» — чувачок исчезает в облачке со звёздочками (мультяшно, без натурализма)
+          for (let i = 0; i < 8; i++) { const a = (i / 8) * 6.28; G.part({ kind: 'puff', x: d.x + Math.cos(a) * d.r * 0.6, y: d.y + Math.sin(a) * d.r * 0.5, vx: Math.cos(a) * 70, vy: Math.sin(a) * 50 - 30, g: 0, s: d.r * 0.55, color: 'rgba(255,255,255,0.85)', life: 0.55 }); }
+          for (let i = 0; i < 4; i++) G.part({ kind: 'spark', x: d.x, y: d.y - d.r * 0.4, vx: rand(-220, 220), vy: rand(-420, -220), g: 900, s: rand(9, 14), color: '#FFE14D', life: 0.8 });
           // Последний враг: замедление и приближение
           if (!G.sim.enemies.some((e) => !e.game.dead) && !G.nuke.mode) { G.finale = 1.0; G.zoom.x = d.x; G.zoom.y = d.y; G.zoom.amt = 0.22; }
           const col = d.t === 'blue' ? 'rgba(70,150,250,0.75)' : 'rgba(240,80,60,0.75)';
@@ -4141,6 +4826,41 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           G.part({ kind: 'glow', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: 70, color: 'rgba(255,200,230,0.9)', life: 0.25, vr: 0 });
           for (let i = 0; i < 10; i++) G.part({ kind: 'feather', x: d.x, y: d.y, vx: rand(-140, 140), vy: rand(-140, 60), g: 120, s: rand(6, 10), color: R.CHICK.split.b, life: 1.1, vr: rand(-4, 4) });
           for (let i = 0; i < 6; i++) G.part({ kind: 'spark', x: d.x, y: d.y, vx: rand(-200, 200), vy: rand(-200, 200), g: 300, s: rand(6, 10), color: '#FFE14D', life: 0.5 });
+        },
+        dive(d) {
+          G.shotAbility = 'heavy';
+          A.play('dive', { x: d.x });
+          G.part({ kind: 'glow', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: 60, color: 'rgba(200,180,255,0.8)', life: 0.25, vr: 0 });
+          for (let i = 0; i < 8; i++) G.part({ kind: 'puff', x: d.x + rand(-20, 20), y: d.y - rand(0, 30), vx: rand(-30, 30), vy: rand(-90, -30), g: 0, s: rand(8, 14), color: 'rgba(220,210,255,0.7)', life: 0.5 });
+        },
+        slam(d) {
+          A.play('slam', { x: d.x });
+          G.shake = Math.max(G.shake, 14); G.haptic('heavy');
+          if (!G.nuke.mode) G.hitStop = Math.max(G.hitStop, 0.06);
+          G.comic(d.x, d.y - 80, 'comicSlam');
+          G.part({ kind: 'ring', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.R, color: 'rgba(200,180,255,0.9)', life: 0.45, vr: 0 });
+          G.dust(d.x, d.y, 14);
+          for (let i = 0; i < 6; i++) G.part({ kind: 'spark', x: d.x, y: d.y, vx: rand(-320, 320), vy: rand(-420, -120), g: 800, s: rand(8, 12), color: '#FFE14D', life: 0.7 });
+        },
+        boomerang(d) {
+          G.shotAbility = 'boomer';
+          A.play('boomerang', { x: d.x });
+          G.part({ kind: 'ring', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: 70, color: 'rgba(160,240,110,0.9)', life: 0.3, vr: 0 });
+          for (let i = 0; i < 8; i++) { const a = (i / 8) * 6.28; G.part({ kind: 'feather', x: d.x, y: d.y, vx: Math.cos(a) * 120, vy: Math.sin(a) * 120, g: 100, s: rand(6, 9), color: R.CHICK.boomer.b, life: 0.9, vr: rand(-4, 4) }); }
+        },
+        inflate(d) {
+          G.shotAbility = 'puff';
+          A.play('inflate', { x: d.x });
+          G.shake = Math.max(G.shake, 8); G.haptic('medium');
+          G.comic(d.x, d.y - 90, 'comicPuff');
+          G.part({ kind: 'ring', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.R, color: 'rgba(190,230,255,0.95)', life: 0.5, vr: 0 });
+          G.part({ kind: 'ring', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.R * 0.6, color: 'rgba(255,255,255,0.9)', life: 0.35, vr: 0 });
+          for (let i = 0; i < 14; i++) { const a = (i / 14) * 6.28; G.part({ kind: 'puff', x: d.x + Math.cos(a) * 30, y: d.y + Math.sin(a) * 30, vx: Math.cos(a) * 420, vy: Math.sin(a) * 300, g: 0, s: rand(14, 22), color: 'rgba(235,248,255,0.8)', life: 0.45 }); }
+        },
+        pop(d) {
+          A.play('pop', { x: d.x });
+          for (let i = 0; i < 16; i++) G.part({ kind: 'feather', x: d.x + rand(-d.r, d.r) * 0.6, y: d.y + rand(-d.r, d.r) * 0.6, vx: rand(-220, 220), vy: rand(-260, 60), g: 90, s: rand(7, 11), color: i % 2 ? R.CHICK.puff.b : '#FFFFFF', life: 1.4, vr: rand(-5, 5) });
+          G.part({ kind: 'glow', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.r * 2, color: 'rgba(230,245,255,0.8)', life: 0.25, vr: 0 });
         },
         boost(d) {
           A.play('boost', { x: d.x });
@@ -4173,13 +4893,17 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
             const a = rand(0, 6.28), sp = rand(60, 700);
             G.part({ kind: 'puff', x: d.x, y: d.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6, g: -80, s: rand(24, 50), color: ['rgba(255,240,170,0.95)', 'rgba(255,170,40,0.9)', 'rgba(240,90,20,0.85)'][i % 3], life: rand(0.6, 1.4) });
           }
-          // ножка гриба
-          for (let i = 0; i < 26; i++) G.part({ kind: 'puff', x: d.x + rand(-30, 30), y: d.y - i * 14, vx: rand(-15, 15), vy: rand(-170, -110), g: 30, s: rand(26, 40) - i * 0.4, color: i % 2 ? 'rgba(150,110,80,0.75)' : 'rgba(255,150,50,0.7)', life: rand(2.2, 2.8) });
-          // шляпка гриба
-          for (let i = 0; i < 34; i++) {
-            const a = rand(Math.PI, Math.PI * 2), r = rand(40, 170);
-            G.part({ kind: 'puff', x: d.x + Math.cos(a) * r, y: d.y - 380 + Math.sin(a) * r * 0.5, vx: Math.cos(a) * rand(20, 70), vy: rand(-140, -80), g: 25, s: rand(40, 70), color: ['rgba(255,190,90,0.85)', 'rgba(170,120,90,0.8)', 'rgba(110,80,60,0.75)'][i % 3], life: rand(2.4, 3.2) });
+          // большое мультяшное облако (кольцо пушистых клубов) и россыпь звёзд с конфетти
+          for (let i = 0; i < 30; i++) {
+            const a = rand(0, 6.28), r = rand(60, 200);
+            G.part({ kind: 'puff', x: d.x + Math.cos(a) * r, y: d.y - 40 + Math.sin(a) * r * 0.6, vx: Math.cos(a) * rand(30, 90), vy: rand(-90, -30), g: 15, s: rand(40, 70), color: ['rgba(255,252,235,0.9)', 'rgba(255,230,160,0.85)', 'rgba(255,210,120,0.8)'][i % 3], life: rand(1.8, 2.6) });
           }
+          for (let i = 0; i < 26; i++) {
+            const a = rand(0, 6.28), sp = rand(250, 750);
+            G.part({ kind: 'spark', x: d.x, y: d.y - 30, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 250, g: 700, s: rand(12, 22), color: ['#FFE14D', '#FFFFFF', '#FFB13B'][i % 3], life: rand(1, 1.6) });
+          }
+          const cc = ['#FFC72C', '#FF6B6B', '#4DC3FF', '#7BC043', '#FFFFFF'];
+          for (let i = 0; i < 50; i++) G.part({ kind: 'confetti', x: d.x + rand(-80, 80), y: d.y - 60, vx: rand(-500, 500), vy: rand(-900, -400), g: 600, s: rand(10, 16), color: cc[i % cc.length], life: rand(2, 3), vr: rand(-8, 8) });
           for (let i = 0; i < 30; i++) G.chunk(['wood', 'stone', 'glass'][i % 3], d.x + rand(-60, 60), d.y + rand(-30, 30), 2.2);
         },
         quake() {
@@ -4363,7 +5087,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         }
         const ang = g.hit ? fb.angle + g.launchAng : Math.atan2(fb.velocity.y, fb.velocity.x);
         if (g.power) R.aura(ctx, fb.position.x, fb.position.y, g.r, t);
-        R.chick(ctx, fb.position.x, fb.position.y, g.r, ang, g.type, { time: t, squash: this.birdSquash, flap: !g.hit });
+        R.chick(ctx, fb.position.x, fb.position.y, g.r, ang, g.type, { time: t, squash: this.birdSquash, flap: !g.hit && !g.dive, puffed: g.puffed, mirror: !g.hit && Math.cos(ang) < 0 });
       }
       for (const m of sim.minis) {
         const g = m.game, ang = g.hit ? m.angle + g.launchAng : Math.atan2(m.velocity.y, m.velocity.x);
@@ -4472,7 +5196,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => document.querySelectorAll(s);
   const MAIN = ['loading', 'menu', 'levels'];
-  const MODALS = ['pause', 'win', 'lose', 'settings', 'ach', 'wardrobe', 'intro'];
+  const MODALS = ['pause', 'win', 'lose', 'settings', 'ach', 'wardrobe', 'intro', 'nuke'];
   const LOCK_SVG = '<svg class="lock" viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 1 1 12 0v2h1v12H5V10zm2 0h8V8a4 4 0 1 0-8 0z"/></svg>';
   const fmt = (v) => v.toLocaleString('ru-RU');
 
@@ -4502,20 +5226,23 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   };
 
   // Достижения: названия и описания — в i18n (ach_<id>, ach_<id>_d)
-  const ACH = ['first', 'oneshot', 'combo3', 'combo5', 'clean', 'king', 'final', 'nuke', 'tnt10', 'kills100', 'stars15', 'stars30', 'stars45'];
+  const ACH = ['first', 'oneshot', 'combo3', 'combo5', 'clean', 'king', 'citadel', 'iceking', 'final', 'nuke', 'slam2', 'boomer', 'puff3', 'tnt10', 'kills100', 'stars15', 'stars30', 'stars60', 'stars45'];
   // Наряды птенцов: сколько звёзд нужно, чтобы открыть
-  const SKINS = [{ id: 'none', need: 0 }, { id: 'cap', need: 5 }, { id: 'glasses', need: 10 }, { id: 'bandana', need: 18 }, { id: 'tophat', need: 28 }, { id: 'crown', need: 40 }];
+  const SKINS = [{ id: 'none', need: 0 }, { id: 'cap', need: 5 }, { id: 'glasses', need: 10 }, { id: 'bandana', need: 18 }, { id: 'tophat', need: 28 }, { id: 'crown', need: 40 }, { id: 'scarf', need: 52 }, { id: 'pilot', need: 66 }];
   // Карточки знакомства: показываются один раз, когда элемент впервые встречается на уровне
   const fakeBlock = (m, shape, w) => ({ position: { x: 0, y: 0 }, angle: 0, game: { m, shape, w, h: w, seed: 3, hp: 1, maxHp: 1 } });
   const INTROS = [
     { key: 'speed', has: (d) => d.birds.includes('speed'), draw: (c) => R.chick(c, 0, 4, 52, -0.2, 'speed', { time: 0 }) },
     { key: 'bomb', has: (d) => d.birds.includes('bomb'), draw: (c) => R.chick(c, 0, 10, 56, 0, 'bomb', { time: 0.02 }) },
     { key: 'split', has: (d) => d.birds.includes('split'), draw: (c) => { R.chick(c, -46, 18, 32, -0.25, 'split', { time: 0 }); R.chick(c, 46, 18, 32, 0.25, 'split', { time: 0.4 }); R.chick(c, 0, -8, 36, 0, 'split', { time: 0.8 }); } },
+    { key: 'heavy', has: (d) => d.birds.includes('heavy'), draw: (c) => R.chick(c, 0, 8, 56, 0, 'heavy', { time: 0 }) },
+    { key: 'boomer', has: (d) => d.birds.includes('boomer'), draw: (c) => R.chick(c, 0, 10, 50, -0.15, 'boomer', { time: 0 }) },
+    { key: 'puff', has: (d) => d.birds.includes('puff'), draw: (c) => R.chick(c, 0, 10, 50, 0, 'puff', { time: 0 }) },
     { key: 'tnt', has: (d) => d.items.some((i) => i.m === 'tnt'), draw: (c) => R.block(c, fakeBlock('tnt', 'rect', 96)) },
     { key: 'boulder', has: (d) => d.items.some((i) => i.shape === 'circle'), draw: (c) => R.block(c, fakeBlock('stone', 'circle', 104)) },
     { key: 'boss', has: (d) => d.items.some((i) => i.t === 'boss'), draw: (c) => R.dude(c, 0, 12, 60, 0, 'boss', { look: Math.PI * 0.9, time: 0 }) },
   ];
-  const THEME_CLASS = { noon: 'w-noon', sunset: 'w-sunset', dusk: 'w-dusk', night: 'w-night' };
+  const THEME_CLASS = { noon: 'w-noon', sunset: 'w-sunset', dusk: 'w-dusk', night: 'w-night', winter: 'w-winter', volcano: 'w-volcano' };
 
   const UI = {
     save: null, busy: false, noIntro: root.location.hash === '#test',
@@ -4590,6 +5317,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       const t = this.totalStars(), st = this.save.stats;
       if (t >= 15) this.unlock('stars15');
       if (t >= 30) this.unlock('stars30');
+      if (t >= 60) this.unlock('stars60');
       if (t >= LEVELS.length * 3) this.unlock('stars45');
       if ((st.kills || 0) >= 100) this.unlock('kills100');
       if ((st.tnt || 0) >= 10) this.unlock('tnt10');
@@ -4658,6 +5386,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.unlock('first');
       if (r.shots === 1 && r.level >= 1) this.unlock('oneshot');
       if (r.level >= 6 && !r.used.booster && !r.used.nuke && !r.used.ad) this.unlock('clean');
+      if (r.level === 14) this.unlock('citadel');
+      if (r.level === 19) this.unlock('iceking');
       if (r.level === LEVELS.length - 1) this.unlock('final');
       this.checkProgressAch();
 
@@ -4669,6 +5399,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       $('#win-stats').innerHTML = `<span>${I18n.t('statShots')}: <b>${r.shots}</b></span><span>${I18n.t('statLeft')}: <b>${r.left}</b></span>`
         + (r.combo >= 2 ? `<span>${I18n.t('statCombo')}: <b>x${r.combo}</b></span>` : '');
       $('#win-next').textContent = r.need > 0 ? `${I18n.t('needMore')}: ${fmt(r.need)}` : '';
+      $('#win-nuke').classList.toggle('hidden', !r.nukeEarned);
       const stars = $$('#screen-win .stars i');
       stars.forEach((s) => s.classList.remove('on'));
       setTimeout(() => {
@@ -4694,7 +5425,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       setTimeout(() => this.modal('lose', true), 600);
     },
 
-    // Состояние кнопок бустеров и ядерки
+    // Состояние кнопок бустеров и Царь-Бомбы
     refreshBoosters() {
       const G = Game;
       ['sight', 'power', 'quake'].forEach((b) => {
@@ -4706,16 +5437,40 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       });
       const nb = $('#nuke-btn');
       nb.classList.toggle('used', G.nuke.used);
+      this.refreshNukeBtn();
       // Мягко «подмигнуть» один раз за попытку, когда остался последний птенец, а врагов ещё много
       if (!G.nuke.used && !this._tempted && G.sim && G.queue.length === 0 && G.sim.enemiesAlive() >= 2 && G.shots > 0) {
         this._tempted = true; nb.classList.add('tempt'); A.play('nukeOffer');
       }
     },
 
+    // Значок на кнопке Царь-Бомбы: число в запасе или пометка «реклама»
+    refreshNukeBtn() {
+      const n = this.save.nukes || 0, nb = $('#nuke-btn');
+      if (nb._n === n) return; nb._n = n;
+      nb.classList.toggle('stock', n > 0);
+      $('#nuke-stock').textContent = n > 0 ? String(n) : '';
+    },
+
     // ---------- Экран уровней ----------
-    buildLevels() {
+    // Миры: страницы на экране уровней
+    WORLDS: [{ key: 'world1', from: 0, to: 15, cols: 8 }, { key: 'world2', from: 15, to: 25, cols: 5 }],
+    buildLevels(page) {
+      const W = this.WORLDS;
+      if (page == null) {   // открываем мир, где сейчас продолжается игра
+        const cur = Math.min(LEVELS.length, this.save.unlocked) - 1;
+        page = Math.max(0, W.findIndex((w) => cur >= w.from && cur < w.to));
+      }
+      page = Math.max(0, Math.min(W.length - 1, page)); this.levelPage = page;
+      const w = W[page];
+      $('#world-name').textContent = I18n.t(w.key);
+      $('#world-prev').classList.toggle('hidden', page === 0);
+      $('#world-next').classList.toggle('hidden', page === W.length - 1);
+      $$('.world-dots i').forEach((d, k) => d.classList.toggle('on', k === page));
       const grid = $('#level-grid'); grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${w.cols}, auto)`;
       LEVELS.forEach((lv, i) => {
+        if (i < w.from || i >= w.to) return;
         const locked = i + 1 > this.save.unlocked;
         const st = this.save.stars[i] || 0;
         const b = document.createElement('button');
@@ -4742,6 +5497,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
     startLevel(i) {
       this.closeModals();
+      this.introQueue = []; Game.extPause.delete('intro'); Game.extPause.delete('nuke');
       this.hideToast();
       this.show('game');
       this._tempted = false; $('#nuke-btn').classList.remove('tempt');
@@ -4753,25 +5509,38 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       }
       if (this.noIntro) { Game.nextT = 0.35; Game.introT = 0; Game.zoom.k = 0; Game.hintT = Game.hintT ? 0.05 : 0; }   // режим автотестов: без заставки
       this.hudTitle();
-      this.checkIntro(i);
+      if (this._inTransit) this._afterTransit = () => this.checkIntro(i); else this.checkIntro(i);
     },
 
     toMenu() {
       this.closeModals();
-      Game.extPause.delete('intro');
+      Game.extPause.delete('intro'); Game.extPause.delete('nuke'); this._afterTransit = null;
       Game.state = 'menu'; Game.sim = null; Game.parts = []; R.setTheme('noon'); A.setMood('day');
       P.gameplayStop();
       this.show('menu');
     },
 
-    // Межстраничная реклама в паузе между уровнями, затем действие.
-    async withInterstitial(fn) {
+    // Межстраничная реклама — только во время настоящей загрузки (п. 5.1.5.1 «а» правил VK).
+    // Экран «Загружаем уровень…» не бутафорский: под ним собирается следующий уровень
+    // (физика, постройки, отрисовка фона для новой темы), игра стоит на паузе,
+    // а реклама показывается поверх этой загрузки. Заставку уровня запускаем после.
+    async withInterstitial(fn, label = 'loadingLevel') {
       if (this.busy) return;
       if (!AdPace.shouldShow(Game.levelIdx)) { fn(); return; }
       this.busy = true;
-      try { if (await P.showInterstitial()) AdPace.shownInterstitial(); else AdPace.breaks = AD_RULES.everyBreaks; } finally { this.busy = false; }
-      fn();
+      const tr = $('#screen-transit'); tr.querySelector('p').textContent = I18n.t(label); tr.classList.remove('hidden');
+      Game.extPause.add('transit'); this._inTransit = true; $('#level-banner').classList.add('hidden');
+      try {
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));   // экран загрузки успел появиться
+        fn();                                                                              // настоящая загрузка следующего экрана
+        if (await P.showInterstitial()) AdPace.shownInterstitial(); else AdPace.breaks = AD_RULES.everyBreaks;
+      } finally {
+        this.busy = false; this._inTransit = false; Game.extPause.delete('transit');
+        tr.classList.add('hidden');
+        const after = this._afterTransit; this._afterTransit = null; if (after) after();
+      }
     },
+
 
     // ---------- Обработка кнопок ----------
     async act(a, el) {
@@ -4779,6 +5548,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       switch (a) {
         case 'play': this.startLevel(Math.min(LEVELS.length, s.unlocked) - 1); break;
         case 'levels': this.buildLevels(); this.show('levels'); break;
+        case 'world-prev': this.buildLevels(this.levelPage - 1); A.play('click'); break;
+        case 'world-next': this.buildLevels(this.levelPage + 1); A.play('click'); break;
         case 'settings': this.refreshSettings(); this.modal('settings', true); break;
         case 'ach': this.buildAch(); this.modal('ach', true); break;
         case 'close-ach': this.modal('ach', false); break;
@@ -4807,7 +5578,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         case 'reset':
           // сброс в два нажатия: сначала спрашиваем, потом сбрасываем
           if (!this._resetArmed) { this._resetArmed = true; $('#btn-reset span').textContent = I18n.t('resetSure'); return; }
-          s.unlocked = 1; s.stars = []; s.best = []; s.ach = {}; s.seen = {}; s.stats = {}; s.skin = 'none';
+          s.unlocked = 1; s.stars = []; s.best = []; s.ach = {}; s.seen = {}; s.stats = {}; s.skin = 'none'; s.nukes = 0;
           R.setSkin('none'); this.persist(); this.refreshSettings(); this.refreshStars(); this.toast('resetDone');
           break;
         case 'lang':
@@ -4821,19 +5592,31 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         case 'resume': this.modal('pause', false); Game.paused = false; P.gameplayStart(); Game.tryPendingNuke(); break;
         case 'restart': this.startLevel(Game.levelIdx); break;
         case 'retry': this.startLevel(Game.levelIdx); break;
-        case 'menu': this.withInterstitial(() => this.toMenu()); break;
+        case 'menu': this.withInterstitial(() => this.toMenu(), 'loading'); break;
         case 'next': this.withInterstitial(() => this.startLevel(Math.min(LEVELS.length - 1, Game.levelIdx + 1))); break;
         case 'booster':
           if (!Game.useBooster(el.dataset.b)) this.toast('boosterNA');
           break;
         case 'nuke': {
           if (this.busy || !Game.canNuke()) return;
+          // Есть заработанная Царь-Бомба — тратим её без рекламы
+          if ((s.nukes || 0) > 0) { s.nukes--; this.persist(); Game.grantNuke(); this.refreshNukeBtn(); break; }
+          // Иначе честно объясняем, что даёт реклама, и ждём согласия
+          $('#nuke-offer-how').textContent = I18n.t('nukeHow');
+          this.modal('nuke', true); Game.extPause.add('nuke');
+          break;
+        }
+        case 'nuke-cancel': this.modal('nuke', false); Game.extPause.delete('nuke'); break;
+        case 'nuke-ad': {
+          if (this.busy) return;
+          this.modal('nuke', false); Game.extPause.delete('nuke');
+          if (!Game.canNuke()) return;
           this.busy = true;
           const ok = await P.showRewarded();
           this.busy = false;
           if (ok) AdPace.shownRewarded();
-          // Награду выдаём всегда. Если игра на паузе — ядерка включится сразу после «Продолжить».
-          if (ok) Game.grantNuke();
+          // Награду выдаём всегда. Если игра на паузе — Царь-Бомба включится сразу после «Продолжить».
+          if (ok) { Game.used.ad = true; Game.grantNuke(); }
           else this.toast('adFail');
           break;
         }
@@ -4899,7 +5682,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         this.act(b.dataset.action, b);
       });
       // Первый жест пользователя разблокирует звук и запускает музыку
-      const unlock = () => { A.unlock(); A.startMusic(); };
+      const unlock = () => { A.unlock(); A.startMusic(); Game.lockLandscape(); };
       root.addEventListener('pointerdown', unlock, { once: false, passive: true });
       root.addEventListener('keydown', unlock, { once: false });
 
