@@ -680,6 +680,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     normal: { r: 26, density: 0.0045 },
     speed:  { r: 23, density: 0.0040 },
     bomb:   { r: 30, density: 0.0050 },
+    split:  { r: 25, density: 0.0045 },   // Тройняшка: в полёте делится на троих
   };
 
   class Sim {
@@ -692,7 +693,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.engine = Engine.create({ enableSleeping: true, positionIterations: 10, velocityIterations: 8 });
       this.world = this.engine.world;
       this.blocks = []; this.enemies = []; this.statics = [];
-      this.bird = null; this.trail = []; this.toRemove = []; this.pendingBlasts = [];
+      this.bird = null; this.minis = []; this.trail = []; this.toRemove = []; this.pendingBlasts = [];
       this.score = 0; this.steps = 0; this.damageOn = false; this.quietSteps = 0; this.asleep = false;
       this.seed = 0x9E3779B9 ^ (def.id || 1);
 
@@ -876,6 +877,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         density: bd.density * (opts.power ? 2.4 : 1), friction: 0.6, restitution: 0.35, frictionAir: 0.004, label: 'bird',
       });
       b.sleepThreshold = -1;
+      b.collisionFilter.group = -1;   // птенцы не сталкиваются друг с другом (важно для Тройняшки)
       this.wakeAll();
       b.game = { kind: 'bird', type, r, t: 0, still: 0, hit: false, hitT: 0, used: false, fuse: 0,
         power: !!opts.power, launchAng: Math.atan2(vy, vx) };
@@ -901,8 +903,40 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         return true;
       }
       if (g.type === 'bomb') { this.explode(b); return true; }
+      if (g.type === 'split') {
+        if (g.hit) return false;
+        this.split(b); return true;
+      }
       return false;
     }
+
+    // Тройняшка: основной птенец уменьшается, рядом появляются ещё два, разлёт веером ±12°
+    split(b) {
+      const g = b.game; g.used = true;
+      const v = Body.getVelocity(b), sp = Math.hypot(v.x, v.y) || 1, a0 = Math.atan2(v.y, v.x);
+      const k = 0.72;
+      Body.scale(b, k, k); g.r = Math.round(g.r * k);
+      for (const da of [-0.21, 0.21]) {
+        const m = Bodies.circle(b.position.x, b.position.y, g.r, { density: BIRDS.split.density, friction: 0.6, restitution: 0.35, frictionAir: 0.004, label: 'bird' });
+        m.sleepThreshold = -1; m.collisionFilter.group = -1;
+        m.game = { kind: 'bird', type: 'split', r: g.r, t: g.t, still: 0, hit: false, hitT: 0, used: true, fuse: 0, mini: true, launchAng: a0 + da };
+        Composite.add(this.world, m);
+        Body.setVelocity(m, { x: Math.cos(a0 + da) * sp, y: Math.sin(a0 + da) * sp });
+        this.minis.push(m);
+      }
+      this.emit('split', { x: b.position.x, y: b.position.y, ang: a0 });
+    }
+
+    // Обновление одного летящего птенца; true — пора убрать
+    tickBird(b) {
+      const g = b.game; g.t++;
+      if (g.passV) { Body.setVelocity(b, g.passV); g.passV = null; }
+      g.still = Body.getSpeed(b) < 0.35 ? g.still + 1 : 0;
+      const out = b.position.x > C.W + 250 || b.position.x < -250 || b.position.y > C.H + 150;
+      g.out = out;
+      return g.still > 50 || g.t > 720 || out || (g.hit && g.t - g.hitT > 240);
+    }
+    flying() { return !!this.bird || this.minis.length > 0; }
 
     explode(bird) {
       const g = bird.game; g.used = true;
@@ -995,6 +1029,14 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           const out = b.position.x > C.W + 250 || b.position.x < -250 || b.position.y > C.H + 150;
           if (g.still > 50 || g.t > 720 || out || (g.hit && g.t - g.hitT > 240)) this.retireBird(out);
         }
+      }
+      if (this.minis.length) {
+        this.minis = this.minis.filter((m) => {
+          if (!this.tickBird(m)) return true;
+          Composite.remove(this.world, m);
+          if (!m.game.out) this.emit('birdDone', { x: m.position.x, y: m.position.y, type: 'split' });
+          return false;
+        });
       }
 
       // Сопротивление качению: враги и валуны не катятся по ровной земле бесконечно
@@ -1159,7 +1201,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     // ---------- 4. Очень сложно: две башни ----------
     {
       id: 4, nameKey: 'lvl4',
-      birds: ['normal', 'speed', 'bomb', 'normal', 'speed', 'normal'],
+      birds: ['normal', 'split', 'bomb', 'normal', 'speed'],
       stars: [0, 46000, 58000],
       theme: 'noon',
       statics: [],
@@ -1261,7 +1303,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     // ---------- 8. Стеклянный дворец ----------
     {
       id: 8, nameKey: 'lvl8',
-      birds: ['speed', 'normal', 'bomb', 'speed'],
+      birds: ['speed', 'split', 'bomb'],
       stars: [0, 42000, 54000],
       theme: 'sunset',
       statics: [{ x: 1880, y: 890, w: 70, h: 140 }],
@@ -1335,7 +1377,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     // ---------- 11. Небоскрёб ----------
     {
       id: 11, nameKey: 'lvl11',
-      birds: ['normal', 'speed', 'bomb', 'speed'],
+      birds: ['normal', 'split', 'bomb', 'speed'],
       stars: [0, 48000, 60000],
       theme: 'dusk',
       statics: [],
@@ -1412,7 +1454,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     // ---------- 14. Пороховой склад ----------
     {
       id: 14, nameKey: 'lvl14',
-      birds: ['normal', 'speed', 'bomb', 'speed'],
+      birds: ['split', 'speed', 'bomb'],
       stars: [0, 44000, 56000],
       theme: 'night',
       statics: [],
@@ -1492,7 +1534,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       ach_combo3: 'Комбо x3', ach_combo3_d: 'Сбей трёх чувачков одним птенцом',
       ach_combo5: 'Страйк!', ach_combo5_d: 'Сбей пятерых одним птенцом',
       ach_clean: 'Чистая победа', ach_clean_d: 'Пройди уровень 7 или выше без бустеров, ядерки и рекламы',
-      ach_king: 'Цареубийца', ach_king_d: 'Победи Короля чувачков',
+      ach_king: 'Король повержен', ach_king_d: 'Победи Короля чувачков',
       ach_final: 'Гроза королей', ach_final_d: 'Возьми Цитадель',
       ach_nuke: 'Красная кнопка', ach_nuke_d: 'Сбрось ядерку',
       ach_tnt10: 'Подрывник', ach_tnt10_d: 'Взорви 10 ящиков TNT',
@@ -1506,12 +1548,14 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       intro_speed: 'Шустрик', intro_speed_d: 'Нажми на экран, пока он летит, и он рванёт вперёд. Отлично пробивает дерево.',
       intro_bomb: 'Бомбик', intro_bomb_d: 'Нажми в полёте — взорвётся. Если не нажать, взорвётся сам после удара.',
       intro_tnt: 'Ящик TNT', intro_tnt_d: 'Взрывается от удара или если его опрокинуть. Соседние ящики взрываются по цепочке.',
+      intro_split: 'Тройняшка', intro_split_d: 'Нажми в полёте — разделится на троих птенцов. Отлично против стекла и врагов, стоящих врассыпную.',
+      hintSplit: 'Розовая Тройняшка: нажми в полёте — их станет трое!',
       intro_boulder: 'Валун', intro_boulder_d: 'Тяжёлый камень. Столкни его — покатится и раздавит всё на пути.',
       intro_boss: 'Король чувачков', intro_boss_d: 'Большой и очень крепкий. Одного птенца на него не хватит — бей бомбами и роняй на него камни.',
       vibration: 'Вибрация', reset: 'Сбросить прогресс', resetSure: 'Точно сбросить?', resetDone: 'Прогресс сброшен',
       statShots: 'Выстрелов', statLeft: 'Птенцов в запасе', statCombo: 'Лучшее комбо', needMore: 'До следующей звезды', enemiesLeft: 'Осталось чувачков',
       tips: 'Стекло ломается легче всего, камень — тяжелее всего.|Каждый птенец в запасе — это +10 000 очков.|Сломанный блок птенец пробивает насквозь и летит дальше.|Опрокинутый ящик TNT тоже взрывается.|Сбей несколько чувачков одним птенцом — получишь комбо-бонус.|Бустер «Прицел» показывает весь путь птенца до земли.|Бей по опорам: рухнувшая крыша сделает работу за тебя.|«Тряска» сильнее всего бьёт по стеклу.',
-      comicHit: 'БАМ!|ХРЯСЬ!|БАЦ!|ТРАХ!', comicBoom: 'БУМ!|БАБАХ!|БАХ!',
+      comicHit: 'БАМ!|БУХ!|БАЦ!|ШМЯК!', comicBoom: 'БУМ!|БАБАХ!|БАХ!',
       taunt1: 'Ха-ха!', taunt2: 'Мимо!', taunt3: 'Промазал!', taunt4: 'Не попал!',
       hintTnt: 'Ящики TNT взрываются от удара — и цепляют соседей!',
       hintBoulder: 'Толкни валун — пусть покатится!',
@@ -1552,7 +1596,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       ach_combo3: 'Combo x3', ach_combo3_d: 'Knock out three dudes with one chick',
       ach_combo5: 'Strike!', ach_combo5_d: 'Knock out five with one chick',
       ach_clean: 'Clean Win', ach_clean_d: 'Complete level 7 or later without boosters, nuke or ads',
-      ach_king: 'Kingslayer', ach_king_d: 'Defeat the Dude King',
+      ach_king: 'Down With the King', ach_king_d: 'Defeat the Dude King',
       ach_final: 'Terror of Kings', ach_final_d: 'Take the Citadel',
       ach_nuke: 'Red Button', ach_nuke_d: 'Drop the nuke',
       ach_tnt10: 'Demolition Man', ach_tnt10_d: 'Blow up 10 TNT crates',
@@ -1566,12 +1610,14 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       intro_speed: 'Zippy', intro_speed_d: 'Tap the screen while it flies and it dashes forward. Great against wood.',
       intro_bomb: 'Boomer', intro_bomb_d: 'Tap in flight to explode. If you don\'t, it blows up by itself after impact.',
       intro_tnt: 'TNT crate', intro_tnt_d: 'Explodes when hit or tipped over. Nearby crates go off in a chain.',
+      intro_split: 'Triplet', intro_split_d: 'Tap in flight to split into three chicks. Great against glass and scattered dudes.',
+      hintSplit: 'Pink Triplet: tap in flight and there will be three!',
       intro_boulder: 'Boulder', intro_boulder_d: 'A heavy rock. Push it and it rolls over everything in its way.',
       intro_boss: 'The Dude King', intro_boss_d: 'Big and very tough. One chick is not enough: use bombs and drop rocks on him.',
       vibration: 'Vibration', reset: 'Reset progress', resetSure: 'Really reset?', resetDone: 'Progress reset',
       statShots: 'Shots', statLeft: 'Chicks left', statCombo: 'Best combo', needMore: 'To the next star', enemiesLeft: 'Dudes left',
       tips: 'Glass breaks easiest, stone is the toughest.|Every spare chick is worth +10,000 points.|A chick smashes through a broken block and keeps flying.|A tipped-over TNT crate explodes too.|Knock out several dudes with one chick for a combo bonus.|The Aim booster shows the full flight path.|Hit the supports: a falling roof does the job for you.|Quake hits glass the hardest.',
-      comicHit: 'POW!|BAM!|WHAM!|CRASH!', comicBoom: 'BOOM!|KABOOM!|BANG!',
+      comicHit: 'POW!|BAM!|BONK!|BOING!', comicBoom: 'BOOM!|KABOOM!|BANG!',
       taunt1: 'Ha-ha!', taunt2: 'Missed!', taunt3: 'Nope!', taunt4: 'Too bad!',
       hintTnt: 'TNT crates blow up on impact — and set off their neighbours!',
       hintBoulder: 'Push the boulder and let it roll!',
@@ -1979,6 +2025,12 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this._tone({ type: 'sawtooth', f: 300, f2: 1400, t, d: 0.22, vol: 0.08, lp: 2500 });
       this._tone({ type: 'sine', f: 2200, f2: 3400, t: t + 0.02, d: 0.08, vol: 0.14 });
     },
+    // Тройняшка разделяется: хлопок и три «чирика» разной высоты
+    split(t) {
+      this._noise({ t, a: 0.002, d: 0.08, vol: 0.22, filter: 'bandpass', freq: 1800, q: 1.5 });
+      this._tone({ type: 'sine', f: 700, f2: 1400, t, d: 0.07, vol: 0.18 });
+      [2100, 2600, 3100].forEach((f, i) => this._tone({ type: 'sine', f, f2: f * 1.25, t: t + 0.03 + i * 0.05, d: 0.06, vol: 0.12 }));
+    },
     explode(t) {
       this._noise({ t, a: 0.003, d: 0.12, vol: 0.7, filter: 'highpass', freq: 1500 });
       this._noise({ t, a: 0.005, d: 1.0, vol: 0.8, filter: 'lowpass', freq: 2400, freq2: 90, q: 0.7 });
@@ -2361,11 +2413,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     },
   };
   let theme = THEMES.noon;
-  function setTheme(name) { theme = THEMES[name] || THEMES.noon; }
+  function setTheme(name) { theme = THEMES[name] || THEMES.noon; themeName = THEMES[name] ? name : 'noon'; }
 
   // ---------- Фон ----------
   const clouds = [];
-  { const r = rng(42); for (let i = 0; i < 8; i++) clouds.push({ x: i * 300 + r() * 150 - 200, y: 70 + r() * 260, s: 0.55 + r() * 0.8, v: 5 + r() * 9 }); }
+  { const r = rng(42); for (let i = 0; i < 7; i++) clouds.push({ x: i * 560 + r() * 200 - 300, y: 70 + r() * 260, s: 1.7 + r() * 1.2, v: 4 + r() * 7 }); }
   const starsPos = [];
   { const r = rng(5); for (let i = 0; i < 70; i++) starsPos.push({ x: r() * 2600 - 340, y: r() * 420 - 150, s: 1 + r() * 2.2, p: r() * 6 }); }
 
@@ -2376,77 +2428,209 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     ctx.lineTo(x1 + 40, C.GROUND_Y + 5); ctx.closePath();
   }
 
-  function cloud(ctx, x, y, s) {
-    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-    ctx.fillStyle = theme.cloud;
-    circle(ctx, 0, 0, 38); ctx.fill(); circle(ctx, 42, -14, 48); ctx.fill(); circle(ctx, 90, 0, 36); ctx.fill();
-    rr(ctx, -20, -2, 130, 38, 19); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.beginPath(); ctx.ellipse(36, -34, 30, 14, -0.2, 0, TAU); ctx.fill();
-    ctx.fillStyle = theme.cloudShade; ctx.beginPath(); ctx.ellipse(45, 30, 70, 9, 0, 0, TAU); ctx.fill();
-    ctx.restore();
+  // ================= Живописный фон =================
+  // Палитры «картинного» фона для каждого времени суток
+  const PAINT = {
+    noon: {
+      sky: ['#FFC24A', '#FFD978', '#FFEBB0', '#FFF6DA'],
+      hills: [['#F7D58A', '#EFC56E'], ['#E8B958', '#D29E3E'], ['#C99838', '#A87A26']],
+      tree: ['#8E8A2E', '#C9C252', '#6E6A22'], trunk: '#6B4A1E',
+      cloud: ['#FFFFFF', '#FFE9B8', '#F2C987'], haze: 'rgba(255,244,214,0.42)', rays: 'rgba(255,255,235,0.10)',
+    },
+    sunset: {
+      sky: ['#5B4A8E', '#B55C8C', '#F0844E', '#FFC066'],
+      hills: [['#C7768A', '#B0647C'], ['#94566A', '#7A4658'], ['#5E5A3A', '#46452A']],
+      tree: ['#3F4A2A', '#C9853E', '#2C3420'], trunk: '#3A2414',
+      cloud: ['#FFD3A0', '#F59A7A', '#B0628E'], haze: 'rgba(255,170,130,0.30)', rays: 'rgba(255,220,160,0.13)',
+    },
+    dusk: {
+      sky: ['#2C2A68', '#6E4A8E', '#D0708A', '#FFB060'],
+      hills: [['#8E5E8E', '#7A4E7C'], ['#634A78', '#533E66'], ['#3E3A55', '#2E2C44']],
+      tree: ['#2E2C46', '#A86E86', '#1E1E32'], trunk: '#241A26',
+      cloud: ['#FFC2B0', '#C77A9E', '#6E4E8E'], haze: 'rgba(240,150,170,0.22)', rays: null,
+    },
+    night: {
+      sky: ['#0A0F2C', '#18214F', '#2E377A', '#4A4E92'],
+      hills: [['#33407E', '#2A346C'], ['#242C62', '#1C2352'], ['#171C46', '#10143A']],
+      tree: ['#10163A', '#4E62A8', '#0A0E2A'], trunk: '#0E1230',
+      cloud: ['#AAB4E6', '#6E78B8', '#3A4382'], haze: 'rgba(110,130,220,0.16)', rays: null,
+    },
+  };
+  let themeName = 'noon';
+
+  // Задник рисуется один раз на время суток: мир от x −700 до 2620, от y −320 до 990
+  const BG = { X0: -700, Y0: -320, W: 3320, H: 1310 };
+  const bgCache = new Map();
+
+  function paintTree(c, x, y, s, P, sunX, r) {
+    const dir = sunX > x ? 1 : -1, H = s * (1.05 + r() * 0.35);
+    // ствол с лёгким изгибом
+    c.strokeStyle = P.trunk; c.lineCap = 'round'; c.lineWidth = s * 0.17;
+    c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + (r() - 0.5) * s * 0.3, y - H * 0.4, x + (r() - 0.5) * s * 0.2, y - H * 0.62); c.stroke();
+    // крона: случайные «облачка» листвы
+    const cx = x, cy = y - H * 0.95, n = 9 + Math.floor(r() * 4), blobs = [];
+    for (let i = 0; i < n; i++) {
+      const a = r() * TAU, d = s * (0.2 + r() * 0.42);
+      blobs.push([cx + Math.cos(a) * d * 1.2, cy + Math.sin(a) * d * 0.75, s * (0.34 + r() * 0.22)]);
+    }
+    blobs.push([cx, cy, s * 0.55]);
+    c.fillStyle = P.tree[0];
+    for (const [bx, by, br] of blobs) { c.beginPath(); c.arc(bx, by, br, 0, TAU); c.fill(); }
+    // тень на нижней и дальней от солнца стороне
+    c.fillStyle = P.tree[2]; c.globalAlpha = 0.85;
+    for (const [bx, by, br] of blobs) if (by > cy - s * 0.05 || (bx - cx) * dir < -s * 0.15) { c.beginPath(); c.arc(bx - dir * br * 0.2, by + br * 0.3, br * 0.75, 0, TAU); c.fill(); }
+    // освещённая сторона и блики
+    c.fillStyle = P.tree[1]; c.globalAlpha = 0.8;
+    for (const [bx, by, br] of blobs) if ((bx - cx) * dir > -s * 0.1 && by < cy + s * 0.15) { c.beginPath(); c.arc(bx + dir * br * 0.3, by - br * 0.3, br * 0.55, 0, TAU); c.fill(); }
+    c.globalAlpha = 0.35; c.fillStyle = '#FFF4C8';
+    for (const [bx, by, br] of blobs) if ((bx - cx) * dir > s * 0.05 && by < cy) { c.beginPath(); c.arc(bx + dir * br * 0.45, by - br * 0.45, br * 0.22, 0, TAU); c.fill(); }
+    c.globalAlpha = 1; c.lineCap = 'butt';
   }
 
-  function background(ctx, v, t) {
-    const { x0, x1, y0, y1 } = v, T = theme;
-    const sky = ctx.createLinearGradient(0, y0, 0, C.GROUND_Y);
-    sky.addColorStop(0, T.sky[0]); sky.addColorStop(0.55, T.sky[1]); sky.addColorStop(1, T.sky[2]);
-    ctx.fillStyle = sky; ctx.fillRect(x0, y0, x1 - x0, C.GROUND_Y - y0 + 2);
+  function buildBackdrop(name, sc) {
+    const key = name + '|' + sc;
+    if (bgCache.has(key)) return bgCache.get(key);
+    if (typeof document === 'undefined') return null;
+    for (const k of bgCache.keys()) if (k.split('|')[1] !== String(sc)) bgCache.delete(k);
+    const T = THEMES[name] || THEMES.noon, P = PAINT[name] || PAINT.noon, S = T.sun;
+    const cv = document.createElement('canvas'); cv.width = Math.round(BG.W * sc); cv.height = Math.round(BG.H * sc);
+    const c = cv.getContext('2d');
+    c.scale(sc, sc); c.translate(-BG.X0, -BG.Y0);
+    const x0 = BG.X0, x1 = BG.X0 + BG.W, r = rng(77 + name.length);
 
+    // небо
+    const g = c.createLinearGradient(0, BG.Y0, 0, 900);
+    g.addColorStop(0, P.sky[0]); g.addColorStop(0.42, P.sky[1]); g.addColorStop(0.75, P.sky[2]); g.addColorStop(1, P.sky[3]);
+    c.fillStyle = g; c.fillRect(x0, BG.Y0, BG.W, BG.H);
+
+    // огромное мягкое свечение вокруг солнца/луны
+    const glow = c.createRadialGradient(S.x, S.y, S.r * 0.5, S.x, S.y, S.r * 7);
+    glow.addColorStop(0, S.moon ? 'rgba(255,240,190,0.35)' : 'rgba(255,240,190,0.7)'); glow.addColorStop(0.35, S.moon ? 'rgba(160,170,255,0.12)' : 'rgba(255,190,110,0.25)'); glow.addColorStop(1, 'rgba(255,200,120,0)');
+    c.fillStyle = glow; c.fillRect(x0, BG.Y0, BG.W, BG.H);
+    const sg = c.createRadialGradient(S.x, S.y, S.r * 0.2, S.x, S.y, S.r * 1.9);
+    sg.addColorStop(0, S.core); sg.addColorStop(0.5, S.glow); sg.addColorStop(1, 'rgba(255,240,180,0)');
+    c.fillStyle = sg; c.beginPath(); c.arc(S.x, S.y, S.r * 1.9, 0, TAU); c.fill();
+    c.fillStyle = S.core; c.beginPath(); c.arc(S.x, S.y, S.r, 0, TAU); c.fill();
+    if (S.moon) {
+      c.fillStyle = 'rgba(214,180,96,0.38)';
+      [[-22, -16, 15], [24, 8, 11], [-6, 30, 8], [14, -34, 6]].forEach(([dx, dy, rr2]) => { c.beginPath(); c.arc(S.x + dx, S.y + dy, rr2, 0, TAU); c.fill(); });
+    }
+
+    // холмы: три слоя с дымкой между ними, на каждом — деревья
+    const layers = [
+      { base: 640, amp: 46, f: 0.0032, ph: 0.6, a2: 22, f2: 0.009, trees: 20, ts: [20, 30], group: 3 },
+      { base: 735, amp: 44, f: 0.0045, ph: 2.0, a2: 18, f2: 0.012, trees: 13, ts: [34, 50], group: 3 },
+      { base: 830, amp: 34, f: 0.0062, ph: 3.9, a2: 12, f2: 0.018, trees: 8, ts: [58, 84], group: 2 },
+    ];
+    layers.forEach((L, li) => {
+      const hc = P.hills[li];
+      const hg = c.createLinearGradient(0, L.base - L.amp - L.a2, 0, 980);
+      hg.addColorStop(0, hc[0]); hg.addColorStop(1, hc[1]);
+      c.fillStyle = hg; c.beginPath(); c.moveTo(x0, 990);
+      for (let x = x0; x <= x1 + 30; x += 30) c.lineTo(x, hillY(x, L.base, L.amp, L.f, L.ph, L.a2, L.f2));
+      c.lineTo(x1 + 30, 990); c.closePath(); c.fill();
+      // светлая кромка гребня со стороны солнца
+      c.strokeStyle = 'rgba(255,235,190,' + (0.18 - li * 0.04) + ')'; c.lineWidth = 3; c.beginPath();
+      for (let x = x0; x <= x1 + 30; x += 30) { const y = hillY(x, L.base, L.amp, L.f, L.ph, L.a2, L.f2); x === x0 ? c.moveTo(x, y + 2) : c.lineTo(x, y + 2); }
+      c.stroke();
+      // деревья группами (рощицы)
+      // рощицы: деревья разного размера, задние ниже передних
+      for (let i = 0; i < L.trees; i++) {
+        const cx = x0 + ((i + r() * 0.8) / L.trees) * BG.W, n = 1 + Math.floor(r() * L.group);
+        const grove = [];
+        for (let k = 0; k < n; k++) grove.push({ x: cx + (k - (n - 1) / 2) * L.ts[0] * (0.9 + r() * 0.5), s: L.ts[0] + r() * (L.ts[1] - L.ts[0]) });
+        grove.sort((a, b) => a.s - b.s);
+        for (const tr of grove) paintTree(c, tr.x, hillY(tr.x, L.base, L.amp, L.f, L.ph, L.a2, L.f2) + 8, tr.s, P, S.x, r);
+      }
+      // дымка: чем дальше слой, тем больше он «тонет» в воздухе
+      if (li < 2) {
+        const hz = c.createLinearGradient(0, L.base - 120, 0, 990);
+        hz.addColorStop(0, 'rgba(0,0,0,0)'); hz.addColorStop(0.35, P.haze); hz.addColorStop(1, P.haze);
+        c.fillStyle = hz; c.fillRect(x0, L.base - 120, BG.W, 990 - L.base + 120);
+      }
+    });
+    bgCache.set(key, cv);
+    return cv;
+  }
+
+  // Облака: заранее нарисованные объёмные спрайты
+  const cloudSprites = new Map();
+  function cloudSet(name) {
+    if (cloudSprites.has(name)) return cloudSprites.get(name);
+    if (typeof document === 'undefined') return null;
+    const P = PAINT[name] || PAINT.noon, set = [], r = rng(500 + name.length);
+    for (let n = 0; n < 6; n++) {
+      const W = 300 + r() * 220, H = 150 + r() * 50, cv = document.createElement('canvas');
+      cv.width = W; cv.height = H; const c = cv.getContext('2d');
+      const puffs = [];
+      const cnt = 9 + Math.floor(r() * 6);
+      for (let i = 0; i < cnt; i++) {
+        const t = i / (cnt - 1), px = W * (0.12 + 0.76 * t) + (r() - 0.5) * 20;
+        const rad = (H * 0.3 + r() * H * 0.18) * (1 - Math.abs(t - 0.5) * 0.85);
+        puffs.push([px, H * 0.72 - rad * (0.55 + r() * 0.5), rad]);
+      }
+      // плоское тёмное «дно»
+      c.fillStyle = P.cloud[2]; c.beginPath(); c.ellipse(W / 2, H * 0.74, W * 0.42, H * 0.12, 0, 0, TAU); c.fill();
+      for (const [x, y, rad] of puffs) { c.fillStyle = P.cloud[2]; c.beginPath(); c.arc(x, y + rad * 0.12, rad, 0, TAU); c.fill(); }
+      for (const [x, y, rad] of puffs) { c.fillStyle = P.cloud[1]; c.beginPath(); c.arc(x - rad * 0.05, y - rad * 0.06, rad * 0.9, 0, TAU); c.fill(); }
+      for (const [x, y, rad] of puffs) { c.fillStyle = P.cloud[0]; c.beginPath(); c.arc(x - rad * 0.12, y - rad * 0.2, rad * 0.62, 0, TAU); c.fill(); }
+      set.push({ cv, W, H });
+    }
+    cloudSprites.set(name, set);
+    return set;
+  }
+
+  let bgScale = 0.7;
+  function setBgScale(px) { bgScale = Math.max(0.45, Math.min(0.9, Math.round(px * 4) / 4)); }
+
+  function background(ctx, v, t) {
+    const { x0, x1, y0, y1 } = v, T = theme, P = PAINT[themeName] || PAINT.noon, S = T.sun;
+    const bd = buildBackdrop(themeName, bgScale);
+    if (bd) ctx.drawImage(bd, BG.X0, BG.Y0, BG.W, BG.H);
+    if (y0 < BG.Y0) { ctx.fillStyle = P.sky[0]; ctx.fillRect(x0, y0, x1 - x0, BG.Y0 - y0 + 1); }
+
+    // звёзды мерцают (только в небе, выше холмов)
     if (T.stars) {
       for (const s of starsPos) {
-        if (s.x < x0 || s.x > x1) continue;
-        ctx.globalAlpha = 0.35 + 0.55 * (0.5 + 0.5 * Math.sin(t * 2 + s.p));
+        if (s.x < x0 || s.x > x1 || s.y > 420) continue;
+        ctx.globalAlpha = 0.3 + 0.6 * (0.5 + 0.5 * Math.sin(t * 2 + s.p));
         ctx.fillStyle = '#FFF6D8'; star(ctx, s.x, s.y, s.s * 2.2); ctx.fill();
       }
       ctx.globalAlpha = 1;
     }
-
-    // Солнце
-    const S = T.sun;
-    if (S.rays) {
-      ctx.save(); ctx.translate(S.x, S.y); ctx.rotate(t * 0.08);
-      ctx.fillStyle = S.rays;
-      for (let i = 0; i < 12; i++) { ctx.rotate(TAU / 12); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-40, -440); ctx.lineTo(40, -440); ctx.closePath(); ctx.fill(); }
-      ctx.restore();
+    // лучи солнца: медленно поворачиваются и «дышат»
+    if (P.rays) {
+      ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, 700 - y0); ctx.clip();
+      ctx.translate(S.x, S.y); ctx.rotate(t * 0.035);
+      ctx.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 14; i++) {
+        ctx.rotate(TAU / 14);
+        const a = 0.55 + 0.45 * Math.sin(t * 0.9 + i * 1.7);
+        ctx.globalAlpha = a; ctx.fillStyle = P.rays;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-34 - (i % 3) * 14, -900); ctx.lineTo(34 + (i % 3) * 14, -900); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore(); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
     }
-    const sg = ctx.createRadialGradient(S.x, S.y, S.r * 0.2, S.x, S.y, S.r * 2.1);
-    sg.addColorStop(0, S.core); sg.addColorStop(0.45, S.glow); sg.addColorStop(1, 'rgba(255,240,180,0)');
-    ctx.fillStyle = sg; circle(ctx, S.x, S.y, S.r * 2.1); ctx.fill();
-    ctx.fillStyle = S.core; circle(ctx, S.x, S.y, S.r); ctx.fill();
-    if (S.moon) {
-      ctx.fillStyle = 'rgba(214,180,96,0.38)';
-      circle(ctx, S.x - 22, S.y - 16, 15); ctx.fill(); circle(ctx, S.x + 24, S.y + 8, 11); ctx.fill();
-      circle(ctx, S.x - 6, S.y + 30, 8); ctx.fill(); circle(ctx, S.x + 14, S.y - 34, 6); ctx.fill();
+    // облака плывут
+    const set = cloudSet(themeName);
+    if (set) {
+      const span = (x1 - x0) + 900;
+      clouds.forEach((cl, i) => {
+        const sp = set[i % set.length], w = sp.W * cl.s, h = sp.H * cl.s;
+        const cx = x0 - 450 + ((((cl.x + t * cl.v) - (x0 - 450)) % span) + span) % span;
+        ctx.drawImage(sp.cv, cx - w / 2, cl.y - h * 0.6, w, h);
+      });
     }
-    // Стая птиц вдалеке
+    // стая птиц
     if (T.flock) {
       const fw = (x1 - x0) + 500, fx = x0 - 250 + ((t * 38) % fw), fy = 250 + Math.sin(t * 0.4) * 24;
-      ctx.strokeStyle = 'rgba(90,50,10,0.5)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.strokeStyle = 'rgba(70,35,10,0.5)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
       for (let i = 0; i < 5; i++) {
         const bx = fx - Math.abs(i - 2) * 34 - (i % 2) * 6, by = fy + (i - 2) * 20, w = Math.sin(t * 7 + i) * 7;
         ctx.beginPath(); ctx.moveTo(bx - 11, by - 4 + w); ctx.quadraticCurveTo(bx - 4, by - 7, bx, by); ctx.quadraticCurveTo(bx + 4, by - 7, bx + 11, by - 4 + w); ctx.stroke();
       }
       ctx.lineCap = 'butt';
     }
-
-    // Облака
-    const span = (x1 - x0) + 400;
-    for (const c of clouds) {
-      const cx = x0 - 200 + ((((c.x + t * c.v) - (x0 - 200)) % span) + span) % span;
-      cloud(ctx, cx, c.y, c.s);
-    }
-
-    // Холмы (дальний слой с деревцами) и дымка у горизонта
-    ctx.fillStyle = T.hills[0]; hillPath(ctx, x0, x1, 700, 50, 0.0035, 0.5, 25, 0.009); ctx.fill();
-    ctx.fillStyle = T.haze; ctx.fillRect(x0, 640, x1 - x0, 320);
-    ctx.fillStyle = T.hills[1]; hillPath(ctx, x0, x1, 800, 40, 0.005, 2.1, 18, 0.013); ctx.fill();
-    ctx.fillStyle = T.trees;
-    for (let x = Math.floor(x0 / 170) * 170 + 60; x < x1; x += 170) {
-      const y = hillY(x, 800, 40, 0.005, 2.1, 18, 0.013), k = 0.8 + ((x * 7) % 5) / 10;
-      ctx.fillRect(x - 3, y - 6, 6, 18);
-      circle(ctx, x, y - 16 * k, 15 * k); ctx.fill(); circle(ctx, x - 10 * k, y - 8 * k, 11 * k); ctx.fill(); circle(ctx, x + 10 * k, y - 8 * k, 11 * k); ctx.fill();
-    }
-    ctx.fillStyle = T.hills[2]; hillPath(ctx, x0, x1, 880, 26, 0.007, 4.0, 10, 0.02); ctx.fill();
 
     // Земля
     now = t;
@@ -2507,6 +2691,19 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         c.restore();
       });
     }
+    // крупные камни, наполовину ушедшие в землю
+    for (let i = 0; i < 4; i++) {
+      const x = 40 + i * 128 + r() * 60, y = 34 + r() * 26, rx = 16 + r() * 12, ry = rx * (0.55 + r() * 0.15);
+      wrap(() => {
+        c.save(); c.translate(x, y);
+        const sg = c.createLinearGradient(0, -ry, 0, ry);
+        sg.addColorStop(0, mix('#A39A8C', T.ground[0], 0.25)); sg.addColorStop(1, mix('#5E554A', T.ground[1], 0.3));
+        c.fillStyle = sg; c.beginPath(); c.ellipse(0, 0, rx, ry, (r() - 0.5) * 0.3, 0, TAU); c.fill();
+        c.strokeStyle = 'rgba(30,15,0,0.45)'; c.lineWidth = 2; c.stroke();
+        c.fillStyle = 'rgba(255,245,220,0.35)'; c.beginPath(); c.ellipse(-rx * 0.3, -ry * 0.45, rx * 0.45, ry * 0.22, -0.2, 0, TAU); c.fill();
+        c.restore();
+      });
+    }
     // редкие ракушки-завитки и косточки — детали, которые замечаешь не сразу
     for (let i = 0; i < 3; i++) {
       const x = 60 + r() * (TILE_W - 120), y = 120 + r() * 170;
@@ -2542,7 +2739,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   // Травинки рисуются заранее: 12 кадров плитки шириной 480 с разным наклоном от ветра.
   // В каждом кадре полоса травы собирается из узких кусков нужного наклона — это в разы дешевле,
   // чем рисовать сотни травинок заново, а ветер по-прежнему бежит волной вдоль земли.
-  const GT = 480, GUP = 40, GDN = 28, GH = GUP + GDN, GSC = 1.5, GN = 12, WMIN = -0.06, WMAX = 0.58, CHUNK = 16;
+  const GT = 480, GUP = 50, GDN = 28, GH = GUP + GDN, GSC = 1.5, GN = 12, WMIN = -0.06, WMAX = 0.58, CHUNK = 16;
   const grassCache = new Map();
   function drawBlades(c, y, lean0, x0, x1, wrapW) {
     const G = theme.grass, hx = (x) => (wrapW ? ((x % wrapW) + wrapW) % wrapW : x);
@@ -2563,7 +2760,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         const k = hx(x), h1 = hash(k + layer * 7.7), h2 = hash(k * 1.9 + 3.3 + layer);
         if (layer === 1 && h1 < 0.25) continue;
         const bx = x + (h2 - 0.5) * 4;
-        const H = (layer === 0 ? 11 : 8) + h1 * 10 + (h2 > 0.93 ? 9 : 0);
+        const H = (layer === 0 ? 15 : 11) + h1 * 13 + (h2 > 0.9 ? 11 : 0);
         const w = 2.2 + h2 * 2.2;
         const lean = (h1 - 0.5) * 0.5 + lean0 * (0.7 + h1 * 0.6) * (layer ? 1 : 0.85);
         const tx = bx + Math.sin(lean) * H, ty = y + 1 - Math.cos(lean) * H;
@@ -2612,12 +2809,12 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     }
     if (!flowers) return;
     // цветы рисуются вживую — их мало, и они качаются вместе с травой
-    const cols = ['#FFFFFF', '#FF8FB1', '#FFE14D', '#FF9A3C', '#B9A6FF'];
+    const cols = ['#FFFFFF', '#FFFFFF', '#FFE14D', '#FF8FB1', '#FF9A3C', '#B9A6FF'];
     ctx.lineCap = 'round';
-    for (let x = Math.floor(x0 / 90) * 90; x < x1; x += 90) {
+    for (let x = Math.floor(x0 / 55) * 55; x < x1; x += 55) {
       const h = hash(x * 0.71);
-      if (h < 0.45) continue;
-      const fx0 = x + h * 60, stem = 12 + h * 10, lean = wind(fx0, t) * 0.9;
+      if (h < 0.3) continue;
+      const fx0 = x + h * 40, stem = 14 + h * 14, lean = wind(fx0, t) * 0.9;
       const fx = fx0 + Math.sin(lean) * stem, fy = y - Math.cos(lean) * stem;
       ctx.strokeStyle = G[1]; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(fx0, y + 2); ctx.quadraticCurveTo(fx0, y - stem * 0.5, fx, fy); ctx.stroke();
@@ -2626,6 +2823,42 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       ctx.fillStyle = '#E8A300'; circle(ctx, fx, fy, 2.4); ctx.fill();
     }
     ctx.lineCap = 'butt';
+  }
+
+  // ---------- Передний план: крупные листья по нижним углам, слегка размытые и качающиеся ----------
+  const leafSprites = new Map();
+  function leafSprite(name) {
+    if (leafSprites.has(name)) return leafSprites.get(name);
+    if (typeof document === 'undefined') return null;
+    const P = PAINT[name] || PAINT.noon, cv = document.createElement('canvas'), W = 340, H = 240;
+    cv.width = W; cv.height = H; const c = cv.getContext('2d'), r = rng(9 + name.length);
+    try { c.filter = 'blur(2.5px)'; } catch (e) {}
+    const leaf = (x, y, len, w, a, dark) => {
+      c.save(); c.translate(x, y); c.rotate(a);
+      c.fillStyle = dark ? P.tree[2] : P.tree[0];
+      c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(w, -len * 0.45, 0, -len); c.quadraticCurveTo(-w, -len * 0.45, 0, 0); c.fill();
+      c.strokeStyle = 'rgba(255,255,220,0.18)'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, -4); c.lineTo(0, -len * 0.9); c.stroke();
+      c.fillStyle = P.tree[1]; c.globalAlpha = 0.25; c.beginPath(); c.moveTo(0, -len * 0.1); c.quadraticCurveTo(w * 0.8, -len * 0.45, 0, -len * 0.95); c.fill(); c.globalAlpha = 1;
+      c.restore();
+    };
+    for (let i = 0; i < 9; i++) leaf(W * 0.5 + (r() - 0.5) * 70, H + 10, 130 + r() * 90, 26 + r() * 18, (r() - 0.5) * 1.9, i % 3 === 0);
+    for (let i = 0; i < 5; i++) leaf(W * 0.5 + (r() - 0.5) * 90, H + 10, 80 + r() * 50, 20 + r() * 10, (r() - 0.5) * 2.3, false);
+    leafSprites.set(name, cv);
+    return cv;
+  }
+  function foreground(ctx, v, t) {
+    const sp = leafSprite(themeName);
+    if (!sp) return;
+    const bottom = v.y1, h = Math.min(210, bottom - C.GROUND_Y + 70);
+    if (h < 70) return;
+    const w = h * (340 / 240);
+    for (const [x, flip, ph] of [[v.x0 + w * 0.32, -1, 0], [v.x1 - w * 0.3, 1, 1.7]]) {
+      ctx.save(); ctx.translate(x, bottom + 6);
+      ctx.rotate((Math.sin(t * 1.1 + ph) * 0.035 + wind(x, t) * 0.06) * flip);
+      ctx.scale(flip, 1);
+      ctx.drawImage(sp, -w / 2, -h, w, h);
+      ctx.restore();
+    }
   }
 
   // «Живой воздух»: пыльца днём, листья на закате, светлячки в сумерках и ночью
@@ -2954,6 +3187,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     normal: { a: '#FFE95C', b: '#FFC21A', belly: '#FFF6C2', wing: '#F2AE00' },
     speed:  { a: '#FFC067', b: '#FF8A00', belly: '#FFE3B8', wing: '#E06F00' },
     bomb:   { a: '#7A6650', b: '#46372A', belly: '#9C8A73', wing: '#33271D' },
+    split:  { a: '#FFC4DC', b: '#FF6FA8', belly: '#FFE6F0', wing: '#E85590' },
   };
 
   function chick(ctx, x, y, r, ang, type, o = {}) {
@@ -2967,8 +3201,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     ctx.beginPath(); ctx.moveTo(-r * 0.8, -r * 0.1); ctx.lineTo(-r * 1.35, -r * 0.45); ctx.lineTo(-r * 1.2, r * 0.05); ctx.lineTo(-r * 1.4, r * 0.3); ctx.lineTo(-r * 0.8, r * 0.3); ctx.closePath(); ctx.fill(); ctx.stroke();
 
     // хохолок
-    if (type === 'normal') {
-      ctx.fillStyle = c.b;
+    if (type === 'normal' || type === 'split') {
+      ctx.fillStyle = type === 'split' ? '#FFD21F' : c.b;
       for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(-r * 0.15 + i * r * 0.22, -r * 1.02, r * 0.12, r * 0.28, -0.4 + i * 0.4, 0, TAU); ctx.fill(); ctx.stroke(); }
     } else if (type === 'speed') {
       ctx.fillStyle = c.b;
@@ -3008,7 +3242,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       ctx.fillStyle = '#fff'; circle(ctx, ex1 + er * 0.5, ey - er * 0.2, er * 0.16); ctx.fill();
     }
     // брови у особых птенцов
-    if (type !== 'normal') {
+    if (type === 'speed' || type === 'bomb') {
       ctx.lineWidth = r * 0.12; ctx.beginPath();
       ctx.moveTo(ex1 - er, ey - er * 1.3); ctx.lineTo(ex1 + er, ey - er * 0.9);
       ctx.moveTo(ex2 - er * 0.8, ey - er * 0.9); ctx.lineTo(ex2 + er, ey - er * 1.3); ctx.stroke();
@@ -3403,7 +3637,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   }
 
   root.YB = Object.assign(root.YB || {}, {
-    Render: { setDetail, groundFx, setSkin, ambient, decals, bubble, blockSides, background, statics, block, setTheme, surfaceY, chick, dude, slingBack, slingFront, dots, particles, star, rr, aura, nukeTarget, nukeBomb, trefoil, MAT_COLORS, CHICK, OUT },
+    Render: { foreground, setBgScale, setDetail, groundFx, setSkin, ambient, decals, bubble, blockSides, background, statics, block, setTheme, surfaceY, chick, dude, slingBack, slingFront, dots, particles, star, rr, aura, nukeTarget, nukeBomb, trefoil, MAT_COLORS, CHICK, OUT },
   });
 })(window);
 
@@ -3460,6 +3694,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       const s = Math.min(cw / C.W, ch / FH);
       const ox = (cw - C.W * s) / 2, oy = (ch - FH * s) * 0.85 - FY0 * s; // лишнее место по высоте — в основном небу
       this.view = { s, ox, oy, x0: -ox / s, x1: (cw - ox) / s, y0: -oy / s, y1: (ch - oy) / s };
+      R.setBgScale(s);
       const portrait = h > w * 1.05 && root.matchMedia && root.matchMedia('(pointer: coarse)').matches;
       if (portrait) this.extPause.add('rotate'); else this.extPause.delete('rotate');
     },
@@ -3516,6 +3751,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       A.play('hop', { x: SX });
       if (this.ready === 'speed') this.showHint('hintSpeed');
       if (this.ready === 'bomb') this.showHint('hintBomb');
+      if (this.ready === 'split') this.showHint('hintSplit');
     },
 
     addExtraBird() {
@@ -3643,7 +3879,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     flow(dt) {
       const sim = this.sim;
       if (this.phase === 'hop') { this.hopT += dt / 0.45; if (this.hopT >= 1) { this.hopT = 1; this.phase = 'ready'; this.ui.refreshBoosters(); } }
-      if (this.phase === 'flying' && !sim.bird) { this.phase = 'idle'; this.nextT = 0.35; this.maybeTaunt(); }
+      if (this.phase === 'flying' && !sim.flying()) { this.phase = 'idle'; this.nextT = 0.35; this.maybeTaunt(); }
 
       if (!this.ending && sim.enemiesAlive() === 0) {
         this.ending = true; this.endT = 0;
@@ -3786,6 +4022,12 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           G.birdSquash = Math.max(G.birdSquash, 0.25 * d.v + 0.05);
           if (d.v > 0.7 && G.comicT <= 0) { G.comicT = 1.2; G.comic(d.x, d.y - 50, 'comicHit'); }
           if (d.v > 0.3) for (let i = 0; i < 3; i++) G.part({ kind: 'feather', x: d.x, y: d.y, vx: rand(-120, 120), vy: rand(-200, -40), g: 120, s: rand(6, 10), color: R.CHICK[d.type].b, life: 1.2, vr: rand(-4, 4) });
+        },
+        split(d) {
+          A.play('split', { x: d.x });
+          G.part({ kind: 'glow', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: 70, color: 'rgba(255,200,230,0.9)', life: 0.25, vr: 0 });
+          for (let i = 0; i < 10; i++) G.part({ kind: 'feather', x: d.x, y: d.y, vx: rand(-140, 140), vy: rand(-140, 60), g: 120, s: rand(6, 10), color: R.CHICK.split.b, life: 1.1, vr: rand(-4, 4) });
+          for (let i = 0; i < 6; i++) G.part({ kind: 'spark', x: d.x, y: d.y, vx: rand(-200, 200), vy: rand(-200, 200), g: 300, s: rand(6, 10), color: '#FFE14D', life: 0.5 });
         },
         boost(d) {
           A.play('boost', { x: d.x });
@@ -3943,7 +4185,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       if (this.state === 'menu' || !this.sim) { this.drawMenuScene(ctx, t); this.vignette(); return; }
       const sim = this.sim;
       // тени и подпалины: на земле — до холмов (холмы их перекрывают), на холмах — после
-      const casters = sim.bird ? [...sim.blocks, ...sim.enemies, sim.bird] : [...sim.blocks, ...sim.enemies];
+      const casters = [...sim.blocks, ...sim.enemies, ...sim.minis]; if (sim.bird) casters.push(sim.bird);
       R.groundFx(ctx, casters, this.decals, sim.statics, true);
       R.statics(ctx, sim.statics);
       R.groundFx(ctx, casters, this.decals, sim.statics, false);
@@ -4010,6 +4252,10 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         if (g.power) R.aura(ctx, fb.position.x, fb.position.y, g.r, t);
         R.chick(ctx, fb.position.x, fb.position.y, g.r, ang, g.type, { time: t, squash: this.birdSquash, flap: !g.hit });
       }
+      for (const m of sim.minis) {
+        const g = m.game, ang = g.hit ? m.angle + g.launchAng : Math.atan2(m.velocity.y, m.velocity.x);
+        R.chick(ctx, m.position.x, m.position.y, g.r, ang, 'split', { time: t + g.launchAng, flap: !g.hit });
+      }
 
       // Прицел
       if (this.drag && Math.hypot(this.drag.dx, this.drag.dy) >= 25) {
@@ -4030,6 +4276,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       }
       if (!this.lowFx) R.ambient(ctx, v, t);
       R.particles(ctx, this.parts);
+      R.foreground(ctx, v, t);
       this.drawNuke(ctx, t);
 
       // Подсказка-рука на первом уровне
@@ -4093,6 +4340,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       R.dude(ctx, 1760, C.GROUND_Y - 30 - bob(2.7), 30, 0, 'blue', { look: Math.PI, time: t });
       R.ambient(ctx, this.view, t);
       R.particles(ctx, this.parts);
+      R.foreground(ctx, this.view, t);
     },
   };
 
@@ -4121,6 +4369,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   const INTROS = [
     { key: 'speed', has: (d) => d.birds.includes('speed'), draw: (c) => R.chick(c, 0, 4, 52, -0.2, 'speed', { time: 0 }) },
     { key: 'bomb', has: (d) => d.birds.includes('bomb'), draw: (c) => R.chick(c, 0, 10, 56, 0, 'bomb', { time: 0.02 }) },
+    { key: 'split', has: (d) => d.birds.includes('split'), draw: (c) => { R.chick(c, -46, 18, 32, -0.25, 'split', { time: 0 }); R.chick(c, 46, 18, 32, 0.25, 'split', { time: 0.4 }); R.chick(c, 0, -8, 36, 0, 'split', { time: 0.8 }); } },
     { key: 'tnt', has: (d) => d.items.some((i) => i.m === 'tnt'), draw: (c) => R.block(c, fakeBlock('tnt', 'rect', 96)) },
     { key: 'boulder', has: (d) => d.items.some((i) => i.shape === 'circle'), draw: (c) => R.block(c, fakeBlock('stone', 'circle', 104)) },
     { key: 'boss', has: (d) => d.items.some((i) => i.t === 'boss'), draw: (c) => R.dude(c, 0, 12, 60, 0, 'boss', { look: Math.PI * 0.9, time: 0 }) },
