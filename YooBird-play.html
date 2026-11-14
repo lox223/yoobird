@@ -2457,6 +2457,14 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     },
   };
   let themeName = 'noon';
+  // Свет сцены: цвет контрового света, цвет «воздуха» у солнца и цветокоррекция (soft-light)
+  const LIGHT = {
+    noon:   { rim: 'rgba(255,246,200,0.9)', air: 'rgba(255,236,170,0.10)', grade: 'rgba(255,200,90,0.16)',  beams: 'rgba(255,250,220,0.07)' },
+    sunset: { rim: 'rgba(255,190,110,0.95)', air: 'rgba(255,150,80,0.11)', grade: 'rgba(255,120,60,0.26)', beams: 'rgba(255,200,140,0.08)' },
+    dusk:   { rim: 'rgba(255,170,170,0.85)', air: 'rgba(255,140,120,0.09)', grade: 'rgba(190,90,160,0.24)', beams: null },
+    night:  { rim: 'rgba(190,210,255,0.8)', air: 'rgba(150,170,255,0.07)', grade: 'rgba(60,80,180,0.28)', beams: null },
+  };
+  const lightCfg = () => LIGHT[themeName] || LIGHT.noon;
 
   // Задник рисуется один раз на время суток: мир от x −700 до 2620, от y −320 до 990
   const BG = { X0: -700, Y0: -320, W: 3320, H: 1310 };
@@ -3072,7 +3080,10 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     ctx.fillStyle = g; ctx.fillRect(-r, -r, r * 2, r * 2);
     // отражённый свет с теневой стороны
     ctx.strokeStyle = 'rgba(255,236,190,0.5)'; ctx.lineWidth = r * 0.09; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.arc(0, 0, r * 0.8, la + Math.PI - 0.6, la + Math.PI + 0.6); ctx.stroke(); ctx.lineCap = 'butt';
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.8, la + Math.PI - 0.6, la + Math.PI + 0.6); ctx.stroke();
+    // контровой свет по краю со стороны солнца
+    ctx.strokeStyle = lightCfg().rim; ctx.lineWidth = r * 0.13;
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.9, la - 0.85, la + 0.85); ctx.stroke(); ctx.lineCap = 'butt';
     ctx.restore();
     // блик
     ctx.save(); ctx.translate(lx * r * 0.52, ly * r * 0.52); ctx.rotate(la + Math.PI / 2);
@@ -3102,6 +3113,70 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     else if (g.shape === 'circle') circle(ctx, 0, 0, w / 2);
     else rr(ctx, -w / 2, -h / 2, w, h, g.m === 'stone' ? 6 : g.m === 'glass' ? 3 : 4);
   }
+
+  // Контровой свет: светлая кромка на гранях, повёрнутых к солнцу
+  function rimLight(ctx, g, ang) {
+    const L = theme.light, ca = Math.cos(ang), sa = Math.sin(ang);
+    const lx = L[0] * ca + L[1] * sa, ly = -L[0] * sa + L[1] * ca;   // направление на свет в координатах блока
+    const w = g.w, h = g.h, col = lightCfg().rim, inset = 2.5;
+    ctx.save(); ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.lineWidth = g.m === 'glass' ? 3.5 : 3;
+    if (g.shape === 'circle') {
+      const a = Math.atan2(ly, lx);
+      ctx.globalAlpha = 0.9; ctx.beginPath(); ctx.arc(0, 0, w / 2 - inset, a - 1.0, a + 1.0); ctx.stroke();
+    } else {
+      const vs = g.shape === 'tri' ? [[-w / 2, h / 3], [w / 2, h / 3], [0, -2 * h / 3]] : [[-w / 2, -h / 2], [w / 2, -h / 2], [w / 2, h / 2], [-w / 2, h / 2]];
+      let cx = 0, cy = 0; vs.forEach(([x, y]) => { cx += x; cy += y; }); cx /= vs.length; cy /= vs.length;
+      for (let i = 0; i < vs.length; i++) {
+        const [ax, ay] = vs[i], [bx, by] = vs[(i + 1) % vs.length];
+        let nx = by - ay, ny = ax - bx; const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
+        if (((ax + bx) / 2 - cx) * nx + ((ay + by) / 2 - cy) * ny < 0) { nx = -nx; ny = -ny; }
+        const k = nx * lx + ny * ly;
+        if (k < 0.2) continue;
+        ctx.globalAlpha = Math.min(1, (k - 0.1) * 1.1);
+        // кромка чуть внутри контура, концы не доходят до углов
+        const ix = -nx * inset, iy = -ny * inset, tx = (bx - ax) * 0.06, ty = (by - ay) * 0.06;
+        ctx.beginPath(); ctx.moveTo(ax + ix + tx, ay + iy + ty); ctx.lineTo(bx + ix - tx, by + iy - ty); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  // Свет поверх сцены (в координатах мира): широкие солнечные лучи и тёплый «воздух» со стороны солнца
+  function lighting(ctx, v, t) {
+    const S = theme.sun, Lc = lightCfg();
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    if (Lc.beams) {
+      for (let i = 0; i < 3; i++) {
+        const a = Math.PI * 0.64 + i * 0.17 + Math.sin(t * 0.25 + i * 1.9) * 0.025;   // лучи падают от солнца вниз-влево
+        const len = 2600, wd = 80 + (i % 2) * 55;
+        const ex = S.x + Math.cos(a) * len, ey = S.y + Math.sin(a) * len;
+        const px = -Math.sin(a) * wd, py = Math.cos(a) * wd;
+        const g = ctx.createLinearGradient(S.x, S.y, ex, ey);
+        g.addColorStop(0, Lc.beams); g.addColorStop(0.55, Lc.beams.replace(/[\d.]+\)$/, '0.035)')); g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.globalAlpha = 0.6 + 0.4 * Math.sin(t * 0.6 + i * 2.3);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(S.x, S.y); ctx.lineTo(ex + px, ey + py); ctx.lineTo(ex - px, ey - py); ctx.closePath(); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+  }
+
+  // Цветокоррекция всего кадра одним проходом: у солнца — тёплый свет «в воздухе», дальше — общий тон времени суток.
+  // sx, sy — положение солнца на экране в пикселях.
+  const gradeCache = { key: '', g: null };
+  function grade(ctx, w, h, sx, sy) {
+    const Lc = lightCfg(), key = [themeName, w, h, Math.round(sx), Math.round(sy)].join();
+    if (gradeCache.key !== key) {
+      const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, Math.max(w, h) * 1.1);
+      g.addColorStop(0, mix(Lc.air, Lc.grade, 0.15).replace(/[\d.]+\)$/, '0.55)'));
+      g.addColorStop(0.4, Lc.grade); g.addColorStop(1, Lc.grade);
+      gradeCache.key = key; gradeCache.g = g;
+    }
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = gradeCache.g; ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+  }
+  function sunPos() { return theme.sun; }
 
   const MAT_STYLE = {
     wood:  { a: '#EDBB6C', b: '#C7883A', line: '#6E4216', grain: 'rgba(140,82,30,0.55)' },
@@ -3170,6 +3245,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     ctx.restore();
 
     shapePath(ctx, g); ctx.strokeStyle = st.line; ctx.lineWidth = 3; ctx.stroke();
+    rimLight(ctx, g, b.angle);
 
     const dmg = 1 - g.hp / g.maxHp;
     if (dmg > 0.2) {
@@ -3637,7 +3713,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   }
 
   root.YB = Object.assign(root.YB || {}, {
-    Render: { foreground, setBgScale, setDetail, groundFx, setSkin, ambient, decals, bubble, blockSides, background, statics, block, setTheme, surfaceY, chick, dude, slingBack, slingFront, dots, particles, star, rr, aura, nukeTarget, nukeBomb, trefoil, MAT_COLORS, CHICK, OUT },
+    Render: { sunPos, lighting, grade, foreground, setBgScale, setDetail, groundFx, setSkin, ambient, decals, bubble, blockSides, background, statics, block, setTheme, surfaceY, chick, dude, slingBack, slingFront, dots, particles, star, rr, aura, nukeTarget, nukeBomb, trefoil, MAT_COLORS, CHICK, OUT },
   });
 })(window);
 
@@ -4275,6 +4351,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         R.bubble(ctx, b.position.x, b.position.y - b.game.r - 12, this.taunt.text, 1.7 - this.taunt.t);
       }
       if (!this.lowFx) R.ambient(ctx, v, t);
+      if (!this.lowFx) R.lighting(ctx, v, t);
       R.particles(ctx, this.parts);
       R.foreground(ctx, v, t);
       this.drawNuke(ctx, t);
@@ -4287,6 +4364,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     // Мягкое затемнение по краям экрана
     vignette() {
       if (this.lowFx) return;
+      { const S = R.sunPos(), v = this.view; R.grade(this.ctx, this.canvas.width, this.canvas.height, S.x * v.s + v.ox, S.y * v.s + v.oy); }
       const ctx = this.ctx, w = this.canvas.width, h = this.canvas.height;
       if (!this._vig || this._vig.w !== w || this._vig.h !== h) {
         const g = ctx.createRadialGradient(w / 2, h * 0.45, Math.min(w, h) * 0.45, w / 2, h * 0.45, Math.max(w, h) * 0.75);
@@ -4339,6 +4417,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       R.dude(ctx, 1660, C.GROUND_Y - 34 - bob(1.6), 34, 0, 'red', { look: Math.PI, time: t, blink: ((t + 1.3) % 3.7) < 0.12 });
       R.dude(ctx, 1760, C.GROUND_Y - 30 - bob(2.7), 30, 0, 'blue', { look: Math.PI, time: t });
       R.ambient(ctx, this.view, t);
+      if (!this.lowFx) R.lighting(ctx, this.view, t);
       R.particles(ctx, this.parts);
       R.foreground(ctx, this.view, t);
     },
