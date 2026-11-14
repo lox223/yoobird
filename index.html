@@ -119,16 +119,16 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 .seg button.active { background: var(--yellow); }
 
 /* ---------- Уровни ---------- */
-.level-grid { display: grid; grid-template-columns: repeat(6, auto); gap: clamp(8px, 1.8vmin, 18px); justify-content: center; }
+.level-grid { display: grid; grid-template-columns: repeat(8, auto); gap: clamp(8px, 1.8vmin, 18px); justify-content: center; }
 .level-card {
-  width: clamp(78px, min(13vw, 22vh), 150px); aspect-ratio: 1 / 1.05; border-width: 4px; border-radius: 20px;
+  width: clamp(64px, min(10.4vw, 22vh), 138px); aspect-ratio: 1 / 1.05; border-width: 4px; border-radius: 20px;
   background: linear-gradient(#FFF1A8, var(--yellow)); border: 5px solid var(--dark); border-radius: 24px;
   box-shadow: 0 8px 0 var(--dark); cursor: pointer; font-family: var(--font); color: var(--dark);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative;
 }
 .level-card:active { transform: translateY(5px); box-shadow: 0 3px 0 var(--dark); }
 .level-card .num { font-size: clamp(26px, 6.5vmin, 54px); font-weight: 900; -webkit-text-stroke: 3px var(--dark); color: #fff; paint-order: stroke fill; line-height: 1; }
-.level-card .name { font-weight: 900; font-size: clamp(10px, 2vmin, 15px); text-align: center; line-height: 1.1; padding: 0 4px; }
+.level-card .name { font-weight: 900; font-size: clamp(8.5px, 1.75vmin, 14px); text-align: center; line-height: 1.1; padding: 0 3px; max-width: 100%; overflow-wrap: anywhere; }
 .level-card .mini-stars { display: flex; gap: 3px; }
 .level-card .mini-stars i { width: clamp(13px, 2.8vmin, 22px); height: clamp(13px, 2.8vmin, 22px); background: rgba(43,29,14,0.22); clip-path: var(--star); }
 .level-card .mini-stars i.on { background: #FF8A00; }
@@ -240,6 +240,181 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 #btn-ad em { font-style: normal; opacity: 0.85; }
 @media (prefers-reduced-motion: reduce) { #nuke-btn, #nuke-btn .tre { animation: none !important; } }
 
+/* Подпись «Очки» читается и на ночном небе */
+.hud-score span { color: #fff; -webkit-text-stroke: 3px var(--dark); paint-order: stroke fill; }
+
+/* Блик пробегает по главной кнопке */
+.btn-big { position: relative; overflow: hidden; }
+.btn-big::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.75), transparent);
+  transform: skewX(-20deg); animation: btn-shine 3.2s ease-in-out infinite; pointer-events: none;
+}
+@keyframes btn-shine { 0%, 60% { left: -60%; } 100% { left: 130%; } }
+/* Плавное появление экранов */
+.screen:not(.hidden) { animation: screen-in 0.22s ease-out; }
+@keyframes screen-in { from { opacity: 0; } }
+.level-card:not(.locked):hover { filter: brightness(1.06); transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) { .btn-big::after, .screen:not(.hidden) { animation: none; } }
+
+/* ================= Версия 1.0: заставка, достижения, наряды, карточки ================= */
+.panel { touch-action: pan-y; }
+.panel.wide { min-width: min(640px, 92vw); }
+.tip { font-size: clamp(12px, 2.3vmin, 16px); font-weight: 700; color: var(--dark-2); text-align: center; max-width: 520px; align-self: center; }
+.tip:not(:empty)::before { content: "💡 "; }
+#screen-loading .tip { margin-top: 6px; }
+
+/* Меню: ряд значков и счётчик звёзд */
+.menu-row { display: flex; gap: clamp(8px, 1.8vmin, 14px); align-items: center; justify-content: center; flex-wrap: wrap; }
+.total-stars { display: inline-flex; align-items: center; gap: 6px; background: var(--dark); color: var(--yellow-hi); font-weight: 900;
+  font-size: clamp(14px, 2.8vmin, 20px); padding: 6px 14px; border-radius: 999px; border: 3px solid var(--yellow); }
+.total-stars i { width: 1.1em; height: 1.1em; background: var(--yellow-hi); clip-path: var(--star); }
+.levels-head { display: flex; align-items: center; gap: 16px; }
+.version { position: absolute; right: 10px; bottom: 6px; font-size: 11px; font-weight: 700; color: rgba(43,29,14,0.45); }
+.btn-danger { background: linear-gradient(#FFB3A3, #F2674F); }
+
+/* Карточки уровней по времени суток */
+.level-card.w-sunset:not(.locked) { background: linear-gradient(#FFE0A8, #FF9A3C); }
+.level-card.w-dusk:not(.locked) { background: linear-gradient(#F3D3F7, #C07AD6); }
+.level-card.w-night:not(.locked) { background: linear-gradient(#C9D4FF, #6C80E0); }
+.level-card.gold:not(.locked) { box-shadow: 0 8px 0 var(--dark), 0 0 0 4px #FFF3A0 inset; }
+.level-card.current { animation: card-pulse 1.5s ease-in-out infinite; }
+@keyframes card-pulse { 50% { transform: translateY(-4px) scale(1.04); box-shadow: 0 12px 0 var(--dark); } }
+
+/* HUD: враги и шкала звёзд */
+.hud-mid { display: flex; align-items: center; gap: 8px; pointer-events: none !important; }
+.hud-enemies { display: inline-flex; align-items: center; gap: 5px; background: var(--panel); border: 3px solid var(--dark); border-radius: 14px;
+  padding: 5px 10px; font-weight: 900; font-size: clamp(13px, 2.8vmin, 20px); box-shadow: 0 4px 0 var(--dark); }
+.hud-enemies i { width: 1em; height: 1em; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FF9C8C, #DE3427); border: 2px solid var(--dark); }
+.hud-enemies.bump { animation: bump 0.3s ease-out; }
+@keyframes bump { 40% { transform: scale(1.3); } }
+.star-bar { position: relative; width: clamp(90px, 18vmin, 150px); height: 10px; margin-top: 5px; background: rgba(43,29,14,0.55); border: 2px solid var(--dark); border-radius: 6px; }
+.star-bar span { display: block; height: 100%; width: 0; border-radius: 4px; background: linear-gradient(#FFF07A, #FFB800); transition: width 0.35s ease-out; }
+.star-bar i { position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; background: #6B5A3A; clip-path: var(--star); transition: background 0.2s, transform 0.2s; }
+.star-bar i.on { background: #FFF; transform: scale(1.35); }
+#star-t2 { left: 100%; }
+
+/* Заставка уровня */
+#level-banner {
+  position: absolute; left: 50%; top: 34%; z-index: 7; transform: translate(-50%, -50%); pointer-events: none; text-align: center;
+  display: flex; flex-direction: column; align-items: center; animation: banner 2.3s ease-in-out both;
+}
+#level-banner b { font-size: clamp(34px, 9vmin, 84px); font-weight: 900; color: var(--yellow-hi); -webkit-text-stroke: clamp(5px, 1.1vmin, 10px) var(--dark); paint-order: stroke fill; line-height: 1; }
+#level-banner span { font-size: clamp(16px, 4vmin, 34px); font-weight: 900; color: #fff; -webkit-text-stroke: 5px var(--dark); paint-order: stroke fill; }
+@keyframes banner {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(-6deg); }
+  14% { opacity: 1; transform: translate(-50%, -50%) scale(1.08) rotate(-2deg); }
+  22%, 78% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-2deg); }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(0.9) rotate(-2deg); }
+}
+
+/* Всплывающее достижение */
+#ach-toast {
+  position: absolute; right: max(12px, env(safe-area-inset-right)); top: clamp(70px, 16vmin, 110px); z-index: 60; pointer-events: none;
+  display: flex; align-items: center; gap: 10px; background: var(--dark); color: #fff; border: 3px solid var(--yellow); border-radius: 16px;
+  padding: 8px 16px 8px 10px; animation: ach-in 2.6s ease-in-out both; max-width: 80vw;
+}
+#ach-toast svg { width: 34px; height: 34px; fill: var(--yellow-hi); flex: none; }
+#ach-toast small { display: block; color: var(--yellow-hi); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+#ach-toast b { font-size: clamp(14px, 2.8vmin, 19px); }
+@keyframes ach-in { 0% { transform: translateX(120%); } 10%, 88% { transform: translateX(0); } 100% { transform: translateX(120%); } }
+
+/* Список достижений */
+.ach-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; max-height: 56vh; overflow-y: auto; padding: 2px 4px 6px; }
+.ach { display: flex; align-items: center; gap: 10px; background: #F1E3B0; border: 3px solid rgba(43,29,14,0.35); border-radius: 14px; padding: 7px 10px; opacity: 0.6; }
+.ach i { flex: none; width: 30px; height: 30px; background: #9C8F6E; clip-path: var(--star); }
+.ach b { display: block; font-size: 14px; line-height: 1.15; }
+.ach small { display: block; font-size: 11px; font-weight: 700; color: var(--dark-2); line-height: 1.2; }
+.ach.on { opacity: 1; background: linear-gradient(#FFF6C7, #FFE27A); border-color: var(--dark); }
+.ach.on i { background: linear-gradient(#FFB800, #FF8A00); }
+
+/* Наряды */
+.skin-list { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+@media (max-width: 620px) { .skin-list { grid-template-columns: repeat(3, 1fr); } }
+.skin { display: flex; flex-direction: column; align-items: center; background: linear-gradient(#FFF6C7, #FFE27A); border: 3px solid var(--dark); border-radius: 16px;
+  padding: 4px 4px 6px; cursor: pointer; font-family: var(--font); color: var(--dark); box-shadow: 0 4px 0 var(--dark); }
+.skin canvas { width: 92px; height: 100px; max-width: 100%; }
+.skin span { font-weight: 900; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+.skin span i { width: 13px; height: 13px; background: var(--orange); clip-path: var(--star); }
+.skin.locked { background: linear-gradient(#EFE6CE, #CFC2A0); cursor: not-allowed; }
+.skin.current { background: linear-gradient(#D6F5B0, #8FD14F); box-shadow: 0 4px 0 var(--dark), 0 0 0 3px #fff inset; }
+.skin:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--dark); }
+
+/* Карточка знакомства */
+.intro-card { align-items: center; max-width: min(460px, 92vw); position: relative; }
+.intro-card canvas { width: 240px; height: 180px; max-height: 34vh; object-fit: contain; }
+.intro-new { position: absolute; top: -14px; left: 50%; transform: translateX(-50%) rotate(-3deg); background: var(--orange); color: #fff; font-weight: 900;
+  padding: 3px 14px; border-radius: 10px; border: 3px solid var(--dark); font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Итоги уровня */
+.win-stats { display: flex; gap: 6px 14px; justify-content: center; flex-wrap: wrap; font-weight: 700; font-size: clamp(12px, 2.3vmin, 15px); color: var(--dark-2); }
+.win-stats b { color: var(--dark); }
+#win-next:empty { display: none; }
+@media (prefers-reduced-motion: reduce) { .level-card.current, #level-banner, #ach-toast { animation-duration: 0.01s; } }
+
+.intro-card { overflow: visible; margin-top: 14px; }
+.star-bar { margin-right: 10px; }
+.panel.wide { min-width: min(800px, 94vw); }
+.ach-list { grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); max-height: 62vh; }
+
+/* ===== «Объём» кнопок и панелей без шва =====
+   box-shadow рисуется только снаружи элемента, и при масштабе экрана 125–150% между обводкой и тенью
+   видна светлая линия. filter: drop-shadow рисует тень под всем элементом — стыка нет. */
+.btn { box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.6); filter: drop-shadow(0 6px 0 var(--dark)); }
+.btn:active { box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.6); filter: drop-shadow(0 2px 0 var(--dark)); }
+.icon-btn { box-shadow: none; filter: drop-shadow(0 4px 0 var(--dark)); }
+.icon-btn:active { box-shadow: none; filter: drop-shadow(0 1px 0 var(--dark)); }
+.panel { box-shadow: inset 0 0 0 6px #FFE27A; filter: drop-shadow(0 10px 0 var(--dark)); }
+.level-card { box-shadow: none; filter: drop-shadow(0 8px 0 var(--dark)); }
+.level-card:active { box-shadow: none; filter: drop-shadow(0 3px 0 var(--dark)); }
+.level-card.gold:not(.locked) { box-shadow: inset 0 0 0 4px #FFF3A0; }
+.level-card:not(.locked):hover { filter: drop-shadow(0 8px 0 var(--dark)) brightness(1.06); }
+@keyframes card-pulse { 50% { transform: translateY(-4px) scale(1.04); filter: drop-shadow(0 12px 0 var(--dark)); } }
+.boost { box-shadow: none; filter: drop-shadow(0 4px 0 var(--dark)); }
+.boost:active { box-shadow: none; filter: drop-shadow(0 1px 0 var(--dark)); }
+.boost.active { box-shadow: 0 0 0 4px #fff; }
+.boost.used { filter: grayscale(1) drop-shadow(0 4px 0 var(--dark)); }
+#nuke-btn { box-shadow: none; filter: drop-shadow(0 5px 0 var(--dark)); }
+#nuke-btn:active { box-shadow: none; filter: drop-shadow(0 1px 0 var(--dark)); }
+#nuke-btn.used { filter: grayscale(1) drop-shadow(0 5px 0 var(--dark)); }
+@keyframes nuke-lure {
+  0%, 70%, 100% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0); }
+  82% { box-shadow: 0 0 22px 8px rgba(255, 150, 0, 0.55); }
+}
+.hud-title, .hud-enemies { box-shadow: none; filter: drop-shadow(0 4px 0 var(--dark)); }
+.skin { box-shadow: none; filter: drop-shadow(0 4px 0 var(--dark)); }
+.skin.current { box-shadow: inset 0 0 0 3px #fff; }
+.skin:active { box-shadow: none; filter: drop-shadow(0 1px 0 var(--dark)); }
+
+/* «Лицо» элемента — градиент поверх сплошного тёмного цвета фона. На дробных масштабах экрана (125–175%)
+   браузер выравнивает градиент по целым пикселям, и между ним и обводкой остаётся щель в долю пикселя.
+   Раньше сквозь неё был виден фон страницы (и щель повторялась в тени); теперь в ней тёмный цвет обводки. */
+.btn, .btn-big, .btn-ad, .btn-next, .btn-danger, .icon-btn, .icon-btn.off,
+.level-card, .level-card.locked, .level-card.w-sunset:not(.locked), .level-card.w-dusk:not(.locked), .level-card.w-night:not(.locked),
+.boost, .boost.active, #nuke-btn, .skin, .skin.locked, .skin.current, .hud-title, .hud-enemies, .panel {
+  /* градиент не повторяется и занимает только область внутри обводки; всё остальное, включая возможную щель
+     на его краю, закрашено сплошным тёмным цветом фона (он идёт под обводку) */
+  background: var(--face) no-repeat var(--dark);
+}
+.btn, .icon-btn { --face: linear-gradient(#FFE77A, var(--yellow)); }
+.btn-big { --face: linear-gradient(#FFEF9C, #FFB800); }
+.btn-ad { --face: linear-gradient(#78B2FF, var(--ad)); }
+.btn-next { --face: linear-gradient(#B8E986, var(--ok)); }
+.btn-danger { --face: linear-gradient(#FFB3A3, #F2674F); }
+.icon-btn.off { --face: linear-gradient(#E8DCC0, #C9B990); }
+.level-card { --face: linear-gradient(#FFF1A8, var(--yellow)); }
+.level-card.w-sunset:not(.locked) { --face: linear-gradient(#FFE0A8, #FF9A3C); }
+.level-card.w-dusk:not(.locked) { --face: linear-gradient(#F3D3F7, #C07AD6); }
+.level-card.w-night:not(.locked) { --face: linear-gradient(#C9D4FF, #6C80E0); }
+.level-card.locked { --face: linear-gradient(#E5DAC0, #C3B48E); }
+.boost { --face: linear-gradient(#FFF3B8, #FFD54A); }
+.boost.active { --face: linear-gradient(#FFB36B, #FF7A00); }
+#nuke-btn { --face: radial-gradient(circle at 40% 35%, #FFF07A, #FFC400 55%, #F08A00); }
+.skin { --face: linear-gradient(#FFF6C7, #FFE27A); }
+.skin.locked { --face: linear-gradient(#EFE6CE, #CFC2A0); }
+.skin.current { --face: linear-gradient(#D6F5B0, #8FD14F); }
+.hud-title, .hud-enemies, .panel { --face: linear-gradient(var(--panel), var(--panel)); }
+
 </style>
 </head>
 <body>
@@ -256,8 +431,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           <svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
         </button>
       </div>
-      <div class="hud-title" id="hud-level"></div>
-      <div class="hud-score"><span data-i18n="score">Очки</span><b id="hud-score">0</b></div>
+      <div class="hud-mid"><div class="hud-title" id="hud-level"></div><div class="hud-enemies" aria-label="Осталось врагов"><i></i><b id="hud-enemies">0</b></div></div>
+      <div class="hud-score"><span data-i18n="score">Очки</span><b id="hud-score">0</b><div class="star-bar"><span id="star-fill"></span><i id="star-t1"></i><i id="star-t2"></i></div></div>
     </div>
 
     <!-- Бустеры: по одному бесплатно за попытку -->
@@ -284,12 +459,15 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     </button>
 
     <div id="toast" class="hidden"></div>
+    <div id="level-banner" class="hidden"><b></b><span></span></div>
+    <div id="ach-toast" class="hidden"><svg viewBox="0 0 24 24"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1.2 1.8zm10 0v2.8A2 2 0 0 0 18 8V7z"/></svg><div><small data-i18n="achNew">Достижение!</small><b></b></div></div>
 
     <!-- Загрузка -->
     <section id="screen-loading" class="screen">
       <div class="logo">Yoo<span>Bird</span></div>
       <div class="loader"><span></span></div>
       <p class="muted" data-i18n="loading">Загрузка…</p>
+      <p class="tip" id="load-tip"></p>
     </section>
 
     <!-- Главное меню -->
@@ -302,11 +480,19 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         <button class="btn" data-action="levels"><span data-i18n="levels">Уровни</span></button>
         <button class="btn" data-action="settings"><span data-i18n="settings">Настройки</span></button>
       </div>
+      <div class="menu-row">
+        <button class="icon-btn big" data-action="ach" aria-label="Достижения"><svg viewBox="0 0 24 24"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1.2 1.8zm10 0v2.8A2 2 0 0 0 18 8V7z"/></svg></button>
+        <button class="icon-btn big" data-action="wardrobe" aria-label="Наряды"><svg viewBox="0 0 24 24"><path d="M7 4h10v10h4v4H3v-4h4z"/></svg></button>
+        <button class="icon-btn big vk-only hidden" data-action="share" aria-label="Поделиться"><svg viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.5a3 3 0 0 0 0-1.4l6.7-3.5A3 3 0 1 0 15 7c0 .2 0 .5.1.7L8.4 11.2a3 3 0 1 0 0 3.6l6.7 3.5A3 3 0 1 0 18 16z"/></svg></button>
+        <button class="icon-btn big vk-only hidden" data-action="favorite" aria-label="В избранное"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.1.8-5.3 4.8 1.5 7-6.3-3.6-6.3 3.6 1.5-7L1.9 9.4 9 8.6z"/></svg></button>
+        <div class="total-stars"><i></i><b class="ts-val">0 / 45</b></div>
+      </div>
+      <div class="version">v1.0</div>
     </section>
 
     <!-- Выбор уровня -->
     <section id="screen-levels" class="screen hidden">
-      <h2 class="title" data-i18n="levels">Уровни</h2>
+      <div class="levels-head"><h2 class="title" data-i18n="levels">Уровни</h2><div class="total-stars"><i></i><b class="ts-val">0 / 45</b></div></div>
       <div id="level-grid" class="level-grid"></div>
       <button class="btn btn-small" data-action="back"><span data-i18n="back">Назад</span></button>
     </section>
@@ -330,6 +516,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
             <button data-action="lang" data-lang="en">EN</button>
           </div>
         </div>
+        <div class="row">
+          <span data-i18n="vibration">Вибрация</span>
+          <button class="toggle" id="tg-vib" data-action="toggle-vib"><i></i></button>
+        </div>
+        <button class="btn btn-small btn-danger" data-action="reset" id="btn-reset"><span data-i18n="reset">Сбросить прогресс</span></button>
         <button class="btn btn-small" data-action="back"><span data-i18n="back">Назад</span></button>
       </div>
     </section>
@@ -338,6 +529,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     <section id="screen-pause" class="screen modal hidden">
       <div class="panel">
         <h2 class="title" data-i18n="pause">Пауза</h2>
+        <p class="tip" id="pause-tip"></p>
         <button class="btn" data-action="resume"><span data-i18n="resume">Продолжить</span></button>
         <button class="btn" data-action="restart"><span data-i18n="restart">Заново</span></button>
         <div class="row-btns">
@@ -361,10 +553,13 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         <div class="stars"><i></i><i></i><i></i></div>
         <div class="result-score"><b id="win-score">0</b></div>
         <div class="muted"><span data-i18n="best">Рекорд</span>: <span id="win-best">0</span> <span id="win-record" class="badge hidden" data-i18n="newRecord">Новый рекорд!</span></div>
+        <div class="win-stats" id="win-stats"></div>
+        <div class="muted" id="win-next"></div>
         <p id="win-alldone" class="muted hidden" data-i18n="allDone"></p>
         <div class="row-btns">
           <button class="icon-btn big" data-action="menu" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/></svg></button>
           <button class="icon-btn big" data-action="restart" aria-label="Заново"><svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
+          <button class="icon-btn big vk-only hidden" data-action="share" aria-label="Поделиться"><svg viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.5a3 3 0 0 0 0-1.4l6.7-3.5A3 3 0 1 0 15 7c0 .2 0 .5.1.7L8.4 11.2a3 3 0 1 0 0 3.6l6.7 3.5A3 3 0 1 0 18 16z"/></svg></button>
           <button class="btn btn-next" data-action="next" id="btn-next"><span data-i18n="next">Дальше</span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
         </div>
       </div>
@@ -374,13 +569,44 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     <section id="screen-lose" class="screen modal hidden">
       <div class="panel">
         <h2 class="title" data-i18n="loseTitle">Чувачки уцелели!</h2>
-        <p class="muted" data-i18n="loseSub">Не сдавайся — у тебя получится!</p>
+        <p class="muted" id="lose-left"></p>
+        <p class="tip" id="lose-tip"></p>
         <button class="btn btn-big" data-action="retry"><span data-i18n="retry">Попробовать ещё раз</span></button>
         <button class="btn btn-ad" data-action="watch-ad" id="btn-ad">
           <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9v6l5-3z" fill="#FFC72C"/></svg>
           <span data-i18n="watchAd">Реклама: +1 птенец</span> <em id="ad-left">(2)</em>
         </button>
         <button class="btn btn-small" data-action="menu"><span data-i18n="menu">Меню</span></button>
+      </div>
+    </section>
+
+    <!-- Достижения -->
+    <section id="screen-ach" class="screen modal hidden">
+      <div class="panel wide">
+        <h2 class="title" data-i18n="achTitle">Достижения</h2>
+        <div id="ach-list" class="ach-list"></div>
+        <button class="btn btn-small" data-action="close-ach"><span data-i18n="back">Назад</span></button>
+      </div>
+    </section>
+
+    <!-- Наряды птенцов -->
+    <section id="screen-wardrobe" class="screen modal hidden">
+      <div class="panel wide">
+        <h2 class="title" data-i18n="wardTitle">Наряды</h2>
+        <p class="muted" data-i18n="wardSub">Открываются за звёзды</p>
+        <div id="skin-list" class="skin-list"></div>
+        <button class="btn btn-small" data-action="close-wardrobe"><span data-i18n="back">Назад</span></button>
+      </div>
+    </section>
+
+    <!-- Карточка знакомства с новым элементом -->
+    <section id="screen-intro" class="screen modal hidden">
+      <div class="panel intro-card">
+        <small class="intro-new" data-i18n="introNew">Новинка!</small>
+        <canvas id="intro-canvas" width="480" height="360"></canvas>
+        <h2 class="title" id="intro-title"></h2>
+        <p class="muted" id="intro-text"></p>
+        <button class="btn" data-action="intro-ok"><span data-i18n="gotIt">Понятно!</span></button>
       </div>
     </section>
 
@@ -415,7 +641,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 (function (root) {
   'use strict';
   const Matter = root.Matter || (typeof require !== 'undefined' ? require('./lib/matter.min.js') : null);
-  const { Engine, Bodies, Body, Composite, Events, Sleeping } = Matter;
+  const { Engine, Bodies, Body, Composite, Events, Sleeping, Vertices } = Matter;
 
   const C = {
     W: 1920, H: 1080,
@@ -432,10 +658,14 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   };
 
   const MATERIALS = {
-    wood:  { density: 0.0012, friction: 0.7, restitution: 0.05, hp: 110, dmgMul: 1.0, score: 500 },
-    glass: { density: 0.0010, friction: 0.3, restitution: 0.05, hp: 55,  dmgMul: 1.4, score: 300 },
-    stone: { density: 0.0030, friction: 0.9, restitution: 0.02, hp: 280, dmgMul: 0.6, score: 800 },
+    // Трение в Matter «липкое»: при значениях выше ~0.2 блок не съезжает даже с крутого склона,
+    // а медленно ползёт. Поэтому коэффициенты небольшие.
+    wood:  { density: 0.0012, friction: 0.2,  fs: 0.5, restitution: 0.05, hp: 110, dmgMul: 1.0, score: 500 },
+    glass: { density: 0.0010, friction: 0.14, fs: 0.5, restitution: 0.05, hp: 55,  dmgMul: 1.4, score: 300 },
+    stone: { density: 0.0030, friction: 0.22, fs: 0.6, restitution: 0.02, hp: 280, dmgMul: 0.6, score: 800 },
+    tnt:   { density: 0.0011, friction: 0.2,  fs: 0.5, restitution: 0.05, hp: 22,  dmgMul: 1.0, score: 1000 },
   };
+  const TNT_BLAST = { R: 190, dmg: 230, push: 12 };
 
   const ENEMIES = {
     blue: { r: 30, hp: 45,  density: 0.0015, score: 5000 },
@@ -444,6 +674,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   };
 
   const ZERO = { x: 0, y: 0 };
+  let ENEMY_FRICTION = 0.3;
 
   const BIRDS = {
     normal: { r: 26, density: 0.0045 },
@@ -461,8 +692,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.engine = Engine.create({ enableSleeping: true, positionIterations: 10, velocityIterations: 8 });
       this.world = this.engine.world;
       this.blocks = []; this.enemies = []; this.statics = [];
-      this.bird = null; this.trail = []; this.toRemove = [];
-      this.score = 0; this.steps = 0; this.damageOn = false;
+      this.bird = null; this.trail = []; this.toRemove = []; this.pendingBlasts = [];
+      this.score = 0; this.steps = 0; this.damageOn = false; this.quietSteps = 0; this.asleep = false;
       this.seed = 0x9E3779B9 ^ (def.id || 1);
 
       const ground = Bodies.rectangle(C.W / 2, C.GROUND_Y + 250, C.W * 6, 500,
@@ -470,8 +701,17 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       Composite.add(this.world, ground);
 
       for (const s of def.statics || []) {
-        const b = Bodies.rectangle(s.x, s.y, s.w, s.h, { isStatic: true, friction: 1, label: 'static' });
-        b.game = null; b.size = { w: s.w, h: s.h };
+        let b;
+        if (s.tri) {
+          // Скат: треугольник по трём точкам мира
+          const cx = (s.tri[0][0] + s.tri[1][0] + s.tri[2][0]) / 3, cy = (s.tri[0][1] + s.tri[1][1] + s.tri[2][1]) / 3;
+          b = Body.create({ position: { x: cx, y: cy }, vertices: Vertices.clockwiseSort(s.tri.map(([x, y]) => ({ x, y }))), isStatic: true, friction: 1, label: 'static' });
+          b.size = null; b.poly = true;
+        } else {
+          b = Bodies.rectangle(s.x, s.y, s.w, s.h, { isStatic: true, friction: 1, label: 'static' });
+          b.size = { w: s.w, h: s.h };
+        }
+        b.game = null;
         this.statics.push(b);
         Composite.add(this.world, b);
       }
@@ -480,19 +720,32 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       for (const it of def.items) {
         if (it.k === 'block') {
           const m = MATERIALS[it.m];
-          const b = Bodies.rectangle(it.x, it.y, it.w, it.h, {
-            density: m.density, friction: m.friction, frictionStatic: 1,
-            restitution: m.restitution, angle: it.a || 0, label: 'block',
-          });
-          const hp = m.hp * Math.max(0.5, Math.min(3, (it.w * it.h) / 3000));
-          b.game = { kind: 'block', m: it.m, w: it.w, h: it.h, hp, maxHp: hp, seed: seed++, dead: false };
+          const shape = it.shape || 'rect';
+          const opts = { density: m.density, friction: m.friction, frictionStatic: m.fs == null ? 1 : m.fs, restitution: m.restitution, angle: it.a || 0, label: 'block' };
+          let b, area;
+          if (shape === 'tri') {
+            // Равнобедренный треугольник: основание w внизу, вершина вверху (центр масс на h/6 ниже середины)
+            b = Body.create(Object.assign({ position: { x: it.x, y: it.y + it.h / 6 },
+              vertices: Vertices.clockwiseSort([{ x: -it.w / 2, y: it.h / 2 }, { x: it.w / 2, y: it.h / 2 }, { x: 0, y: -it.h / 2 }]) }, opts));
+            area = (it.w * it.h) / 2;
+          } else if (shape === 'circle') {
+            b = Bodies.circle(it.x, it.y, it.w / 2, Object.assign(opts, { density: m.density * 1.2, friction: 0.5, frictionStatic: 0.5 }));
+            area = Math.PI * (it.w / 2) * (it.w / 2);
+          } else {
+            b = Bodies.rectangle(it.x, it.y, it.w, it.h, opts);
+            area = it.w * it.h;
+          }
+          const hp = m.hp * Math.max(0.5, Math.min(3, area / 3000));
+          b.sleepThreshold = -1;   // тела не засыпают поодиночке: см. sleepAll()
+          b.game = { kind: 'block', m: it.m, shape, w: it.w, h: it.h, hp, maxHp: hp, seed: seed++, dead: false };
           this.blocks.push(b);
           Composite.add(this.world, b);
         } else if (it.k === 'enemy') {
           const e = ENEMIES[it.t];
           const b = Bodies.circle(it.x, it.y, e.r, {
-            density: e.density, friction: 0.6, restitution: 0.15, label: 'enemy',
+            density: e.density, friction: ENEMY_FRICTION, frictionStatic: 0.2, restitution: 0.15, label: 'enemy',
           });
+          b.sleepThreshold = -1;
           b.game = { kind: 'enemy', t: it.t, r: e.r, hp: e.hp, maxHp: e.hp, seed: seed++, dead: false };
           this.enemies.push(b);
           Composite.add(this.world, b);
@@ -503,6 +756,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
       // Даём постройкам «осесть» до начала игры, без урона.
       for (let i = 0; i < C.SETTLE_STEPS; i++) Engine.update(this.engine, C.STEP_MS);
+      // Если что-то ещё движется (например, съезжает со склона), даём доехать; затем мир засыпает до первого выстрела
+      for (let i = 0; i < 240 && !this.isQuiet(); i++) Engine.update(this.engine, C.STEP_MS);
+      if (this.isQuiet()) this.sleepAll();
       this.damageOn = true;
     }
 
@@ -564,7 +820,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       g.dead = true; this.toRemove.push(b);
       if (silent) return;
       this.addScore(MATERIALS[g.m].score, b.position.x, b.position.y);
-      this.emit('break', { m: g.m, x: b.position.x, y: b.position.y, w: g.w, h: g.h, angle: b.angle });
+      this.emit('break', { m: g.m, x: b.position.x, y: b.position.y, w: g.w, h: g.h, angle: b.angle, shape: g.shape });
+      // Ящик TNT взрывается (после текущего шага физики — так работают и цепные реакции)
+      if (g.m === 'tnt') this.pendingBlasts.push({ x: b.position.x, y: b.position.y });
     }
 
     killEnemy(b) {
@@ -572,6 +830,15 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       g.dead = true; this.toRemove.push(b);
       this.addScore(ENEMIES[g.t].score || C.ENEMY_SCORE, b.position.x, b.position.y - 40);
       this.emit('enemyDie', { t: g.t, x: b.position.x, y: b.position.y, r: g.r });
+    }
+
+    flushBlasts() {
+      let guard = 0;
+      while (this.pendingBlasts.length && guard++ < 20) {
+        const { x, y } = this.pendingBlasts.shift();
+        this.emit('explode', { x, y, R: TNT_BLAST.R, tnt: true });
+        this.blast(x, y, TNT_BLAST.R, TNT_BLAST.dmg, TNT_BLAST.push, 1);
+      }
     }
 
     flushRemovals() {
@@ -583,8 +850,15 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.wakeAll();
     }
 
+    // Сон — только для всего мира сразу. Пока хоть что-то движется, просчитываются все тела,
+    // поэтому ни один блок не может «уснуть» в воздухе или на склоне, потеряв опору.
     wakeAll() {
       for (const b of Composite.allBodies(this.world)) if (!b.isStatic && b.isSleeping) Sleeping.set(b, false);
+      this.asleep = false; this.quietSteps = 0;
+    }
+    sleepAll() {
+      for (const b of Composite.allBodies(this.world)) if (!b.isStatic && !b.isSleeping) Sleeping.set(b, true);
+      this.asleep = true;
     }
 
     // Детерминированный генератор (чтобы проверка уровней давала повторяемый результат)
@@ -601,6 +875,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       const b = Bodies.circle(x, y, r, {
         density: bd.density * (opts.power ? 2.4 : 1), friction: 0.6, restitution: 0.35, frictionAir: 0.004, label: 'bird',
       });
+      b.sleepThreshold = -1;
+      this.wakeAll();
       b.game = { kind: 'bird', type, r, t: 0, still: 0, hit: false, hitT: 0, used: false, fuse: 0,
         power: !!opts.power, launchAng: Math.atan2(vy, vx) };
       Composite.add(this.world, b);
@@ -646,14 +922,15 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
     // Бустер «Землетрясение»: трясёт все постройки, стекло трескается сильнее всего.
     quake() {
-      const Q = { glass: 0.5, wood: 0.25, stone: 0.1 };
+      const Q = { glass: 0.5, wood: 0.25, stone: 0.1, tnt: 0 };
       this.emit('quake', {});
+      this.wakeAll();
       for (const b of this.blocks) {
         if (b.game.dead) continue;
         Sleeping.set(b, false);
         const bv = Body.getVelocity(b);
         Body.setVelocity(b, { x: bv.x + (this.rnd() - 0.5) * 4, y: bv.y - this.rnd() * 3 });
-        Body.setAngularVelocity(b, b.angularVelocity + (this.rnd() - 0.5) * 0.06);
+        Body.setAngularVelocity(b, Body.getAngularVelocity(b) + (this.rnd() - 0.5) * 0.06);
         b.game.hp -= b.game.maxHp * Q[b.game.m];
         if (b.game.hp <= 0) this.destroyBlock(b);
       }
@@ -666,6 +943,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     }
 
     blast(x, y, R, dmgMax, push, curve) {
+      this.wakeAll();
       for (const b of [...this.blocks, ...this.enemies]) {
         if (b.game.dead) continue;
         const dx = b.position.x - x, dy = b.position.y - y;
@@ -677,7 +955,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         Sleeping.set(b, false);
         const bv = Body.getVelocity(b);
         Body.setVelocity(b, { x: bv.x + (dx / d) * dv, y: bv.y + (dy / d) * dv - 2 * f });
-        Body.setAngularVelocity(b, b.angularVelocity + (this.rnd() - 0.5) * 0.2 * f);
+        Body.setAngularVelocity(b, Body.getAngularVelocity(b) + (this.rnd() - 0.5) * 0.2 * f);
         const dmg = dmgMax * Math.pow(f, curve);
         if (b.game.kind === 'block') {
           b.game.hp -= dmg * MATERIALS[b.game.m].dmgMul;
@@ -701,6 +979,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.steps++;
       Engine.update(this.engine, C.STEP_MS);
       this.flushRemovals();
+      if (this.pendingBlasts.length) { this.flushBlasts(); this.flushRemovals(); }
 
       const b = this.bird;
       if (b) {
@@ -718,6 +997,17 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         }
       }
 
+      // Сопротивление качению: враги и валуны не катятся по ровной земле бесконечно
+      if (!this.asleep) {
+        for (const e of this.enemies) { const w = Body.getAngularVelocity(e); if (Math.abs(w) > 0.0005) Body.setAngularVelocity(e, w * 0.972); }
+        for (const bl of this.blocks) if (bl.game.shape === 'circle') { const w = Body.getAngularVelocity(bl); if (Math.abs(w) > 0.0005) Body.setAngularVelocity(bl, w * 0.985); }
+      }
+
+      // Опрокинутый ящик TNT взрывается
+      for (const bl of this.blocks) {
+        if (bl.game.m === 'tnt' && !bl.game.dead && this.damageOn && Math.abs(bl.angle) > 0.85) this.destroyBlock(bl);
+      }
+
       // Вылетевшие за пределы мира объекты
       for (const e of this.enemies) {
         const p = e.position;
@@ -728,9 +1018,17 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         if (!bl.game.dead && (p.x < -300 || p.x > C.W + 400 || p.y > C.H + 300)) this.destroyBlock(bl, true);
       }
       this.flushRemovals();
+      if (this.pendingBlasts.length) { this.flushBlasts(); this.flushRemovals(); }
+      this.updateSleep();
     }
 
     enemiesAlive() { return this.enemies.length; }
+
+    // Вызывается в конце шага: мир засыпает целиком, когда всё улеглось
+    updateSleep() {
+      if (this.asleep) return;
+      if (this.isQuiet()) { if (++this.quietSteps >= 50) this.sleepAll(); } else this.quietSteps = 0;
+    }
 
     // Замедление времени (слоу-мо). Урон считается по нормированным скоростям, поэтому не меняется.
     setTimeScale(ts) { this.engine.timing.timeScale = ts; }
@@ -738,7 +1036,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     isQuiet() {
       for (const b of Composite.allBodies(this.world)) {
         if (b.isStatic || b.isSleeping) continue;
-        if (Body.getSpeed(b) > 0.2 || Math.abs(b.angularVelocity) / this.engine.timing.timeScale > 0.01) return false;
+        if (Body.getSpeed(b) > 0.2 || Math.abs(Body.getAngularVelocity(b)) > 0.01) return false;
       }
       return true;
     }
@@ -756,7 +1054,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     }
   }
 
-  const api = { Sim, C, MATERIALS, ENEMIES, BIRDS };
+  const api = { Sim, C, MATERIALS, ENEMIES, BIRDS, _setEnemyFriction: (v) => { ENEMY_FRICTION = v; } };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.YB = Object.assign(root.YB || {}, api);
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -771,6 +1069,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   // Хелперы: base — y поверхности, на которой стоит объект.
   const post = (x, base, h, m = 'wood', w = 22) => ({ k: 'block', m, x, y: base - h / 2, w, h });
   const beam = (x, base, w, m = 'wood', h = 22) => ({ k: 'block', m, x, y: base - h / 2, w, h });
+  const tri = (x, base, w, h, m = 'wood') => ({ k: 'block', m, shape: 'tri', x, y: base - h / 2, w, h });   // треугольная крыша
+  const tnt = (x, base, s = 44) => ({ k: 'block', m: 'tnt', x, y: base - s / 2, w: s, h: s });              // ящик TNT
+  const boulder = (x, base, r = 30) => ({ k: 'block', m: 'stone', shape: 'circle', x, y: base - r, w: r * 2, h: r * 2 }); // валун
   const R = { blue: 30, red: 34, boss: 46 };
   const enemy = (x, base, t = 'blue') => ({ k: 'enemy', t, x, y: base - R[t] - 1 });
 
@@ -780,9 +1081,10 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       id: 1, nameKey: 'lvl1',
       birds: ['normal', 'normal', 'normal'],
       stars: [0, 18000, 28000],
-      startHint: 'hintDrag',
+      startHint: 'hintDrag', theme: 'noon',
       statics: [],
       items: [
+        tnt(1300, G),
         // Башенка
         post(1100, G, 110), post(1200, G, 110), beam(1150, G - 110, 150),
         enemy(1150, G - 132, 'blue'),
@@ -790,6 +1092,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         post(1420, G, 130, 'glass'), post(1540, G, 130, 'glass'), beam(1480, G - 130, 170),
         enemy(1480, G, 'blue'),
         post(1440, G - 152, 60), post(1520, G - 152, 60), beam(1480, G - 212, 120),
+        tri(1480, G - 234, 140, 46),
       ],
     },
 
@@ -797,9 +1100,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     {
       id: 2, nameKey: 'lvl2',
       birds: ['normal', 'speed', 'normal', 'speed', 'normal'],
-      stars: [0, 33000, 45000],
+      stars: [0, 34000, 45000],
+      startHint: 'hintTnt', theme: 'noon',
       statics: [],
       items: [
+        tnt(1185, G),
         // Этаж 1
         post(1240, G, 120), post(1350, G, 120, 'glass'), post(1460, G, 120),
         beam(1350, G - 120, 262),
@@ -809,25 +1114,30 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         beam(1350, G - 242, 200),
         enemy(1350, G - 142, 'red'),
         post(1350, G - 264, 50, 'stone', 50),
+        tri(1350, G - 314, 80, 36),
         // Бункер: каменные стены, деревянная крыша
         post(1620, G, 80, 'stone', 30), post(1740, G, 80, 'stone', 30),
         beam(1680, G - 80, 180, 'wood', 24),
         enemy(1680, G, 'blue'),
+        tnt(1680, G - 104, 40),
       ],
     },
 
     // ---------- 3. Ещё сложнее ----------
     {
       id: 3, nameKey: 'lvl3',
-      birds: ['normal', 'speed', 'bomb', 'speed', 'bomb', 'normal'],
+      birds: ['normal', 'speed', 'bomb', 'speed', 'bomb'],
       stars: [0, 40000, 52000],
+      theme: 'noon',
       statics: [{ x: 1560, y: 880, w: 560, h: 160 }], // холм: верх на y = 800
       items: [
+        tnt(1200, G),
         // Дозорная вышка на земле
         post(1000, G, 160), post(1100, G, 160), beam(1050, G - 160, 150),
         enemy(1050, G, 'blue'),
         post(1015, G - 182, 70, 'glass'), post(1085, G - 182, 70, 'glass'),
         beam(1050, G - 252, 110, 'glass'),
+        tri(1050, G - 274, 120, 40, 'glass'),
         // Крепость на холме (верх холма y = 800)
         post(1320, 800, 130, 'stone', 28), post(1440, 800, 130, 'stone', 28),
         beam(1380, 670, 160, 'stone'),
@@ -842,6 +1152,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         post(1410, 648, 90), post(1710, 648, 90),
         beam(1560, 558, 340),
         enemy(1560, 536, 'blue'),
+        boulder(1690, 536, 26),
       ],
     },
 
@@ -849,7 +1160,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     {
       id: 4, nameKey: 'lvl4',
       birds: ['normal', 'speed', 'bomb', 'normal', 'speed', 'normal'],
-      stars: [0, 45000, 58000],
+      stars: [0, 46000, 58000],
+      theme: 'noon',
       statics: [],
       items: [
         // Башня A: камень, дерево, стекло
@@ -862,19 +1174,22 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         // Бункер между башнями
         post(1300, G, 70), post(1400, G, 70), beam(1350, G - 70, 130, 'stone'),
         enemy(1350, G, 'blue'),
+        tnt(1350, G - 92, 40),
         // Башня B: стеклянное основание под каменной плитой
         post(1480, G, 130, 'glass'), post(1620, G, 130, 'glass'), beam(1550, G - 130, 180, 'stone', 24),
         enemy(1550, G, 'red'),
         post(1490, G - 154, 110), post(1610, G - 154, 110), beam(1550, G - 264, 160),
         enemy(1550, G - 154, 'blue'),
+        tri(1550, G - 286, 170, 56, 'glass'),
       ],
     },
 
     // ---------- 5. Хардкор: крепость на скале ----------
     {
       id: 5, nameKey: 'lvl5',
-      birds: ['speed', 'normal', 'bomb', 'speed'],
-      stars: [0, 40000, 52000],
+      birds: ['speed', 'normal', 'bomb', 'speed', 'normal'],
+      stars: [0, 42000, 54000],
+      theme: 'sunset',
       statics: [{ x: 1500, y: 830, w: 500, h: 260 }], // скала: верх на y = 700
       items: [
         // Стеклянный пост на земле
@@ -883,6 +1198,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         enemy(1050, G - 112, 'blue'),
         // Крепость (верх скалы y = 700)
         post(1290, 700, 150, 'stone', 30),
+        tnt(1336, 700, 40),
         post(1380, 700, 120, 'stone', 26), post(1500, 700, 120, 'stone', 26), beam(1440, 580, 160, 'stone', 24),
         enemy(1440, 700, 'red'),
         post(1580, 700, 120), post(1700, 700, 120), beam(1640, 580, 160),
@@ -897,7 +1213,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       id: 6, nameKey: 'lvl6',
       birds: ['normal', 'speed', 'bomb', 'speed', 'bomb'],
       stars: [0, 52000, 64000],
-      startHint: 'hintBoss',
+      startHint: 'hintBoss', theme: 'sunset', mood: 'boss',
       statics: [],
       items: [
         // Сторожевая будка
@@ -908,6 +1224,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         post(1330, G, 140, 'stone', 28), post(1500, G, 140, 'stone', 28), post(1670, G, 140, 'stone', 28),
         beam(1500, G - 140, 380, 'stone', 24),
         enemy(1415, G, 'blue'), enemy(1585, G, 'blue'),
+        tnt(1364, G, 38), tnt(1636, G, 38),
         // Тронный зал
         post(1390, G - 164, 120, 'stone', 26), post(1610, G - 164, 120, 'stone', 26), beam(1500, G - 284, 260),
         enemy(1500, G - 164, 'boss'),
@@ -924,18 +1241,20 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       id: 7, nameKey: 'lvl7',
       birds: ['normal', 'speed', 'bomb', 'normal'],
       stars: [0, 36000, 46000],
-      startHint: 'hintBoosters',
+      startHint: 'hintBoosters', theme: 'sunset',
       statics: [{ x: 1700, y: 870, w: 360, h: 180 }], // холм справа: верх на y = 780
       items: [
         // Левый лагерь
         post(900, G, 110), post(1000, G, 110), beam(950, G - 110, 140),
         enemy(950, G, 'blue'), enemy(950, G - 132, 'blue'),
+        tnt(1250, G),
         // Стеклянная вышка в центре
         post(1310, G, 180, 'glass'), post(1390, G, 180, 'glass'), beam(1350, G - 180, 120),
         enemy(1350, G - 202, 'red'),
         // Каменная хижина на холме
         post(1620, 780, 110, 'stone', 28), post(1760, 780, 110, 'stone', 28), beam(1690, 670, 190),
         enemy(1690, 780, 'red'), enemy(1690, 648, 'blue'),
+        boulder(1562, 780, 28),
       ],
     },
 
@@ -944,11 +1263,13 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       id: 8, nameKey: 'lvl8',
       birds: ['speed', 'normal', 'bomb', 'speed'],
       stars: [0, 42000, 54000],
+      theme: 'sunset',
       statics: [{ x: 1880, y: 890, w: 70, h: 140 }],
       items: [
         // Сторожевая вышка слева
         post(920, G, 200, 'glass'), post(980, G, 200, 'glass'), beam(950, G - 200, 110),
         enemy(950, G - 222, 'blue'),
+        tnt(1150, G),
         // Дворец
         post(1330, G, 130, 'glass'), post(1450, G, 130, 'glass'), post(1570, G, 130, 'glass'),
         beam(1450, G - 130, 270, 'stone', 24),
@@ -960,20 +1281,24 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         // Красный за деревянной стенкой справа (скала не даёт ему укатиться)
         post(1690, G, 80, 'wood', 26),
         enemy(1750, G, 'red'),
+        tnt(1640, G, 40),
       ],
     },
 
     // ---------- 9. Мост ----------
     {
       id: 9, nameKey: 'lvl9',
-      birds: ['normal', 'bomb', 'speed', 'normal'],
-      stars: [0, 40000, 52000],
+      birds: ['normal', 'bomb', 'speed', 'normal', 'bomb'],
+      stars: [0, 42000, 54000],
+      startHint: 'hintBoulder', theme: 'dusk',
       statics: [{ x: 1120, y: 870, w: 260, h: 180 }, { x: 1720, y: 870, w: 300, h: 180 }], // верх обоих холмов y = 780
       items: [
         // Мост над пропастью
         beam(1410, 780, 380),
         enemy(1350, 758, 'blue'), enemy(1470, 758, 'blue'),
         enemy(1410, G, 'blue'),
+        boulder(1262, 758, 26),
+        tnt(1330, G, 40),
         // Левый форт
         post(1040, 780, 100), post(1140, 780, 100), beam(1090, 680, 130, 'stone'),
         enemy(1090, 780, 'red'),
@@ -986,18 +1311,21 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     // ---------- 10. Бункеры ----------
     {
       id: 10, nameKey: 'lvl10',
-      birds: ['bomb', 'normal', 'bomb', 'speed'],
+      birds: ['bomb', 'normal', 'bomb'],
       stars: [0, 35000, 46000],
+      theme: 'dusk',
       statics: [],
       items: [
         // Бункер A
         post(940, G, 90, 'stone', 30), post(1060, G, 90, 'stone', 30), beam(1000, G - 90, 160, 'stone', 26),
         enemy(1000, G, 'red'),
+        tnt(1175, G),
         // Бункер B со стеклянной будкой сверху
         post(1290, G, 90, 'stone', 30), post(1410, G, 90, 'stone', 30), beam(1350, G - 90, 160, 'stone', 26),
         enemy(1350, G, 'red'),
         post(1300, G - 116, 70, 'glass'), post(1400, G - 116, 70, 'glass'), beam(1350, G - 186, 130, 'glass'),
         enemy(1350, G - 116, 'blue'),
+        tnt(1540, G),
         // Бункер C
         post(1660, G, 90, 'stone', 30), post(1780, G, 90, 'stone', 30), beam(1720, G - 90, 160, 'wood', 24),
         enemy(1720, G, 'blue'), enemy(1720, G - 114, 'blue'),
@@ -1007,8 +1335,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     // ---------- 11. Небоскрёб ----------
     {
       id: 11, nameKey: 'lvl11',
-      birds: ['normal', 'speed', 'bomb', 'speed', 'normal'],
+      birds: ['normal', 'speed', 'bomb', 'speed'],
       stars: [0, 48000, 60000],
+      theme: 'dusk',
       statics: [],
       items: [
         // Прячется за камнем слева
@@ -1024,9 +1353,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         post(1400, G - 396, 100), post(1500, G - 396, 100), beam(1450, G - 496, 140),
         enemy(1450, G - 396, 'red'),
         enemy(1450, G - 518, 'blue'),
+        tnt(1600, G, 40),
         // Сарайчик справа
         post(1750, G, 80, 'glass'), post(1850, G, 80, 'glass'), beam(1800, G - 80, 130),
         enemy(1800, G, 'blue'),
+        tri(1800, G - 102, 150, 50),
       ],
     },
 
@@ -1035,8 +1366,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       id: 12, nameKey: 'lvl12',
       birds: ['normal', 'speed', 'bomb', 'speed', 'bomb'],
       stars: [0, 50000, 62000],
-      startHint: 'hintBoss2',
-      statics: [{ x: 1600, y: 860, w: 480, h: 200 }], // холм: верх на y = 760
+      startHint: 'hintBoss2', theme: 'dusk', mood: 'boss',
+      statics: [{ x: 1600, y: 860, w: 480, h: 200 }, { tri: [[1250, 960], [1360, 960], [1360, 760]] }], // холм (верх y = 760) и скат слева
       items: [
         // Аванпост на земле
         post(1000, G, 110), post(1100, G, 110), beam(1050, G - 110, 140, 'stone'),
@@ -1045,10 +1376,87 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         post(1420, 760, 130, 'stone', 28), post(1600, 760, 130, 'stone', 28), post(1780, 760, 130, 'stone', 28),
         beam(1600, 630, 400, 'stone', 26),
         enemy(1510, 760, 'blue'), enemy(1690, 760, 'red'),
+        tnt(1455, 760, 38), tnt(1745, 760, 38),
+        boulder(1384, 760, 20),
         // Тронный зал
         post(1490, 604, 130, 'stone', 26), post(1710, 604, 130, 'stone', 26), beam(1600, 474, 260),
         enemy(1600, 604, 'boss'),
         enemy(1600, 452, 'red'),
+      ],
+    },
+
+    // ===== Уровни 13–15: ночь =====
+
+    // ---------- 13. Домино ----------
+    {
+      id: 13, nameKey: 'lvl13',
+      birds: ['normal', 'speed', 'bomb'],
+      stars: [0, 36000, 46000],
+      startHint: 'hintDomino', theme: 'night',
+      statics: [{ x: 1790, y: 880, w: 200, h: 160 }], // холм справа: верх на y = 800
+      items: [
+        // Ряд «доминошек»: толкни первую — последняя сбросит ящик TNT со стеклянной стойки
+        post(960, G, 150), post(1045, G, 150), post(1130, G, 150), post(1215, G, 150), post(1300, G, 150),
+        post(1400, G, 100, 'glass'), tnt(1400, G - 100, 36),
+        // Стеклянный домик
+        post(1500, G, 110, 'glass'), post(1620, G, 110, 'glass'), beam(1560, G - 110, 170),
+        enemy(1560, G, 'blue'), enemy(1560, G - 132, 'red'),
+        // Бункер на холме
+        post(1730, 800, 90, 'stone', 26), post(1850, 800, 90, 'stone', 26), beam(1790, 710, 170, 'wood', 24),
+        enemy(1790, 800, 'red'), enemy(1790, 686, 'blue'),
+        // Караульный у первой доминошки
+        enemy(880, G, 'blue'),
+      ],
+    },
+
+    // ---------- 14. Пороховой склад ----------
+    {
+      id: 14, nameKey: 'lvl14',
+      birds: ['normal', 'speed', 'bomb', 'speed'],
+      stars: [0, 44000, 56000],
+      theme: 'night',
+      statics: [],
+      items: [
+        // Каменная стена прикрывает склад спереди
+        post(1150, G, 190, 'stone', 34),
+        // Первый этаж
+        post(1240, G, 110), post(1410, G, 110), post(1580, G, 110), beam(1410, G - 110, 380),
+        enemy(1325, G, 'red'), enemy(1495, G, 'blue'),
+        // Второй этаж: ящики TNT и охрана под каменной крышей на стеклянных опорах
+        tnt(1290, G - 132, 40), enemy(1350, G - 132, 'blue'), tnt(1410, G - 132, 40), enemy(1470, G - 132, 'blue'), tnt(1530, G - 132, 40),
+        post(1240, G - 132, 80, 'glass'), post(1580, G - 132, 80, 'glass'), beam(1410, G - 212, 380, 'stone', 22),
+        enemy(1410, G - 234, 'red'),
+        // Дальний бункер
+        post(1730, G, 90, 'stone', 28), post(1850, G, 90, 'stone', 28), beam(1790, G - 90, 170, 'wood', 24),
+        enemy(1790, G, 'red'),
+      ],
+    },
+
+    // ---------- 15. Цитадель ----------
+    {
+      id: 15, nameKey: 'lvl15',
+      birds: ['normal', 'speed', 'bomb', 'speed', 'bomb', 'normal'],
+      stars: [0, 54000, 66000],
+      startHint: 'hintBoss3', theme: 'night', mood: 'boss',
+      // нижний уступ (верх y = 820), верхний уступ (верх y = 700) и скат с земли
+      statics: [{ x: 1375, y: 890, w: 250, h: 140 }, { x: 1690, y: 830, w: 380, h: 260 }, { tri: [[1140, 960], [1250, 960], [1250, 820]] }],
+      items: [
+        // Аванпост на земле
+        post(950, G, 100), post(1050, G, 100), beam(1000, G - 100, 140),
+        enemy(1000, G, 'blue'),
+        boulder(1000, G - 122, 26),
+        // Каменный бункер на нижнем уступе
+        post(1300, 820, 90, 'stone', 28), post(1420, 820, 90, 'stone', 28), beam(1360, 730, 170, 'stone', 24),
+        enemy(1360, 820, 'red'), enemy(1360, 706, 'blue'),
+        tnt(1463, 820, 38),
+        // Тронный зал на верхнем уступе
+        enemy(1548, 700, 'blue'),
+        post(1610, 700, 130, 'stone', 28), post(1790, 700, 130, 'stone', 28), beam(1700, 570, 240, 'wood', 24),
+        enemy(1700, 700, 'boss'),
+        post(1650, 546, 80, 'glass'), post(1750, 546, 80, 'glass'), beam(1700, 466, 150, 'glass'),
+        enemy(1700, 546, 'red'),
+        tri(1700, 444, 140, 44),
+        tnt(1840, 700, 36),
       ],
     },
   ];
@@ -1071,10 +1479,42 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       lvl1: 'Лёгкий', lvl2: 'Сложнее', lvl3: 'Ещё сложнее',
       lvl4: 'Очень сложно', lvl5: 'Хардкор', lvl6: 'Король чувачков',
       hintBoss: 'Король чувачков! Он большой и крепкий — бей бомбами!',
+      lvl13: 'Домино', lvl14: 'Пороховой склад', lvl15: 'Цитадель',
+      hintDomino: 'Толкни первую доску — пойдёт цепная реакция!',
+      hintBoss3: 'Цитадель Короля: последняя битва!',
       lvl7: 'Два лагеря', lvl8: 'Стеклянный дворец', lvl9: 'Мост', lvl10: 'Бункеры', lvl11: 'Небоскрёб', lvl12: 'Возвращение Короля',
       hintBoosters: 'Слева бустеры: каждый можно взять один раз за попытку!',
       hintBoss2: 'Король вернулся и засел на холме!',
       bSight: 'Прицел', bPower: 'Мощь', bQuake: 'Тряска', bNuke: 'Ядерка',
+      achNew: 'Достижение!', achTitle: 'Достижения',
+      ach_first: 'Первая победа', ach_first_d: 'Пройди любой уровень',
+      ach_oneshot: 'Один выстрел', ach_oneshot_d: 'Пройди уровень одним птенцом (со 2-го уровня)',
+      ach_combo3: 'Комбо x3', ach_combo3_d: 'Сбей трёх чувачков одним птенцом',
+      ach_combo5: 'Страйк!', ach_combo5_d: 'Сбей пятерых одним птенцом',
+      ach_clean: 'Чистая победа', ach_clean_d: 'Пройди уровень 7 или выше без бустеров, ядерки и рекламы',
+      ach_king: 'Цареубийца', ach_king_d: 'Победи Короля чувачков',
+      ach_final: 'Гроза королей', ach_final_d: 'Возьми Цитадель',
+      ach_nuke: 'Красная кнопка', ach_nuke_d: 'Сбрось ядерку',
+      ach_tnt10: 'Подрывник', ach_tnt10_d: 'Взорви 10 ящиков TNT',
+      ach_kills100: 'Сотня', ach_kills100_d: 'Сбей 100 чувачков',
+      ach_stars15: 'Звездочёт', ach_stars15_d: 'Собери 15 звёзд',
+      ach_stars30: 'Звёздный путь', ach_stars30_d: 'Собери 30 звёзд',
+      ach_stars45: 'Перфекционист', ach_stars45_d: 'Собери все звёзды',
+      wardTitle: 'Наряды', wardSub: 'Открываются за звёзды', skinOn: 'Надето', skinLocked: 'Собери больше звёзд',
+      skin_none: 'Без наряда', skin_cap: 'Кепка', skin_glasses: 'Очки', skin_bandana: 'Бандана', skin_tophat: 'Цилиндр', skin_crown: 'Корона',
+      introNew: 'Новинка!', gotIt: 'Понятно!',
+      intro_speed: 'Шустрик', intro_speed_d: 'Нажми на экран, пока он летит, и он рванёт вперёд. Отлично пробивает дерево.',
+      intro_bomb: 'Бомбик', intro_bomb_d: 'Нажми в полёте — взорвётся. Если не нажать, взорвётся сам после удара.',
+      intro_tnt: 'Ящик TNT', intro_tnt_d: 'Взрывается от удара или если его опрокинуть. Соседние ящики взрываются по цепочке.',
+      intro_boulder: 'Валун', intro_boulder_d: 'Тяжёлый камень. Столкни его — покатится и раздавит всё на пути.',
+      intro_boss: 'Король чувачков', intro_boss_d: 'Большой и очень крепкий. Одного птенца на него не хватит — бей бомбами и роняй на него камни.',
+      vibration: 'Вибрация', reset: 'Сбросить прогресс', resetSure: 'Точно сбросить?', resetDone: 'Прогресс сброшен',
+      statShots: 'Выстрелов', statLeft: 'Птенцов в запасе', statCombo: 'Лучшее комбо', needMore: 'До следующей звезды', enemiesLeft: 'Осталось чувачков',
+      tips: 'Стекло ломается легче всего, камень — тяжелее всего.|Каждый птенец в запасе — это +10 000 очков.|Сломанный блок птенец пробивает насквозь и летит дальше.|Опрокинутый ящик TNT тоже взрывается.|Сбей несколько чувачков одним птенцом — получишь комбо-бонус.|Бустер «Прицел» показывает весь путь птенца до земли.|Бей по опорам: рухнувшая крыша сделает работу за тебя.|«Тряска» сильнее всего бьёт по стеклу.',
+      comicHit: 'БАМ!|ХРЯСЬ!|БАЦ!|ТРАХ!', comicBoom: 'БУМ!|БАБАХ!|БАХ!',
+      taunt1: 'Ха-ха!', taunt2: 'Мимо!', taunt3: 'Промазал!', taunt4: 'Не попал!',
+      hintTnt: 'Ящики TNT взрываются от удара — и цепляют соседей!',
+      hintBoulder: 'Толкни валун — пусть покатится!',
       boosterNA: 'Сейчас этот бустер не сработает',
       nukeAim: 'Нажми, куда сбросить ядерку!',
       nukeLater: 'Ядерку можно сбросить, когда никто не летит',
@@ -1099,10 +1539,42 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       lvl1: 'Easy', lvl2: 'Harder', lvl3: 'Even harder',
       lvl4: 'Very hard', lvl5: 'Hardcore', lvl6: 'Dude King',
       hintBoss: 'The Dude King! He is big and tough — use bombs!',
+      lvl13: 'Dominoes', lvl14: 'Powder Store', lvl15: 'The Citadel',
+      hintDomino: 'Push the first plank and start a chain reaction!',
+      hintBoss3: 'The King\'s Citadel: the final battle!',
       lvl7: 'Two Camps', lvl8: 'Glass Palace', lvl9: 'The Bridge', lvl10: 'Bunkers', lvl11: 'Skyscraper', lvl12: 'King\'s Return',
       hintBoosters: 'Boosters on the left: each one is free once per try!',
       hintBoss2: 'The King is back and hiding on the hill!',
       bSight: 'Aim', bPower: 'Power', bQuake: 'Quake', bNuke: 'Nuke',
+      achNew: 'Achievement!', achTitle: 'Achievements',
+      ach_first: 'First Win', ach_first_d: 'Complete any level',
+      ach_oneshot: 'One Shot', ach_oneshot_d: 'Complete a level with a single chick (level 2 or later)',
+      ach_combo3: 'Combo x3', ach_combo3_d: 'Knock out three dudes with one chick',
+      ach_combo5: 'Strike!', ach_combo5_d: 'Knock out five with one chick',
+      ach_clean: 'Clean Win', ach_clean_d: 'Complete level 7 or later without boosters, nuke or ads',
+      ach_king: 'Kingslayer', ach_king_d: 'Defeat the Dude King',
+      ach_final: 'Terror of Kings', ach_final_d: 'Take the Citadel',
+      ach_nuke: 'Red Button', ach_nuke_d: 'Drop the nuke',
+      ach_tnt10: 'Demolition Man', ach_tnt10_d: 'Blow up 10 TNT crates',
+      ach_kills100: 'The Hundred', ach_kills100_d: 'Knock out 100 dudes',
+      ach_stars15: 'Stargazer', ach_stars15_d: 'Collect 15 stars',
+      ach_stars30: 'Star Road', ach_stars30_d: 'Collect 30 stars',
+      ach_stars45: 'Perfectionist', ach_stars45_d: 'Collect every star',
+      wardTitle: 'Outfits', wardSub: 'Unlocked with stars', skinOn: 'Wearing', skinLocked: 'Collect more stars',
+      skin_none: 'No outfit', skin_cap: 'Cap', skin_glasses: 'Shades', skin_bandana: 'Bandana', skin_tophat: 'Top hat', skin_crown: 'Crown',
+      introNew: 'New!', gotIt: 'Got it!',
+      intro_speed: 'Zippy', intro_speed_d: 'Tap the screen while it flies and it dashes forward. Great against wood.',
+      intro_bomb: 'Boomer', intro_bomb_d: 'Tap in flight to explode. If you don\'t, it blows up by itself after impact.',
+      intro_tnt: 'TNT crate', intro_tnt_d: 'Explodes when hit or tipped over. Nearby crates go off in a chain.',
+      intro_boulder: 'Boulder', intro_boulder_d: 'A heavy rock. Push it and it rolls over everything in its way.',
+      intro_boss: 'The Dude King', intro_boss_d: 'Big and very tough. One chick is not enough: use bombs and drop rocks on him.',
+      vibration: 'Vibration', reset: 'Reset progress', resetSure: 'Really reset?', resetDone: 'Progress reset',
+      statShots: 'Shots', statLeft: 'Chicks left', statCombo: 'Best combo', needMore: 'To the next star', enemiesLeft: 'Dudes left',
+      tips: 'Glass breaks easiest, stone is the toughest.|Every spare chick is worth +10,000 points.|A chick smashes through a broken block and keeps flying.|A tipped-over TNT crate explodes too.|Knock out several dudes with one chick for a combo bonus.|The Aim booster shows the full flight path.|Hit the supports: a falling roof does the job for you.|Quake hits glass the hardest.',
+      comicHit: 'POW!|BAM!|WHAM!|CRASH!', comicBoom: 'BOOM!|KABOOM!|BANG!',
+      taunt1: 'Ha-ha!', taunt2: 'Missed!', taunt3: 'Nope!', taunt4: 'Too bad!',
+      hintTnt: 'TNT crates blow up on impact — and set off their neighbours!',
+      hintBoulder: 'Push the boulder and let it roll!',
       boosterNA: 'This booster can\'t be used right now',
       nukeAim: 'Tap where to drop the nuke!',
       nukeLater: 'You can drop the nuke when nothing is flying',
@@ -1137,7 +1609,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
 </script>
   <script>/* js/audio.js */
-/* YooBird — процедурные звуки и фоновая музыка (WebAudio, без внешних файлов). */
+/* YooBird — процедурные звуки и фоновая музыка (WebAudio, без внешних файлов).
+ * Реверберация, стереопанорама по положению на экране, музыка из двух частей с настроениями.
+ */
 (function (root) {
   'use strict';
 
@@ -1146,30 +1620,83 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     for (let o = 1; o <= 7; o++) names.forEach((n, i) => { NOTE[n + o] = 440 * Math.pow(2, ((o + 1) * 12 + i - 69) / 12); });
   })();
+  const bars = (list) => list.join(' ').split(' ');
 
-  // 8 тактов по 16 шестнадцатых. «.» — пауза/продолжение.
-  const MELODY = [
-    'E5 . G5 . C6 . G5 . E5 . G5 . A5 G5 E5 .',
-    'D5 . G5 . B5 . G5 . D5 . G5 . B5 A5 G5 .',
-    'C5 . E5 . A5 . E5 . C6 . B5 . A5 . E5 .',
-    'F5 . A5 . C6 . A5 . G5 . F5 . E5 . D5 .',
-    'E5 . . G5 . . C6 . B5 . A5 . G5 . E5 .',
-    'D5 . . G5 . . B5 . A5 . G5 . F5 . D5 .',
-    'C5 . F5 . A5 . F5 . C6 . A5 . G5 . F5 .',
-    'G5 . . . B5 . . . D6 . C6 . B5 . G5 .',
-  ].join(' ').split(' ');
-  const CHORDS = [
-    ['C3', 'C4', 'E4', 'G4'], ['G2', 'B3', 'D4', 'G4'], ['A2', 'C4', 'E4', 'A4'], ['F2', 'A3', 'C4', 'F4'],
-    ['C3', 'C4', 'E4', 'G4'], ['G2', 'B3', 'D4', 'G4'], ['F2', 'A3', 'C4', 'F4'], ['G2', 'B3', 'D4', 'F4'],
-  ];
-  const BPM = 116;
+  // ---------- Мелодии: 16 тактов (часть A + часть B) по 16 шестнадцатых. «.» — пауза ----------
+  const TUNES = {
+    major: {
+      melody: bars([
+        'E5 . G5 . C6 . G5 . E5 . G5 . A5 G5 E5 .',
+        'D5 . G5 . B5 . G5 . D5 . G5 . B5 A5 G5 .',
+        'C5 . E5 . A5 . E5 . C6 . B5 . A5 . E5 .',
+        'F5 . A5 . C6 . A5 . G5 . F5 . E5 . D5 .',
+        'E5 . . G5 . . C6 . B5 . A5 . G5 . E5 .',
+        'D5 . . G5 . . B5 . A5 . G5 . F5 . D5 .',
+        'C5 . F5 . A5 . F5 . C6 . A5 . G5 . F5 .',
+        'G5 . . . B5 . . . D6 . C6 . B5 . G5 .',
+        // часть B
+        'A5 . . C6 . . A5 . F5 . A5 . C6 . A5 .',
+        'B5 . . D6 . . B5 . G5 . B5 . D6 . B5 .',
+        'G5 . . B5 . . G5 . E5 . G5 . B5 . G5 .',
+        'A5 . . C6 . . E6 . D6 . C6 . B5 . A5 .',
+        'F5 . A5 . C6 . F6 . E6 . C6 . A5 . F5 .',
+        'G5 . B5 . D6 . G6 . F6 . D6 . B5 . G5 .',
+        'E6 . . D6 . . C6 . G5 . . E5 . . G5 .',
+        'C6 . . . G5 . . . C5 . . . . . . .',
+      ]),
+      chords: [
+        ['C3', 'C4', 'E4', 'G4'], ['G2', 'B3', 'D4', 'G4'], ['A2', 'C4', 'E4', 'A4'], ['F2', 'A3', 'C4', 'F4'],
+        ['C3', 'C4', 'E4', 'G4'], ['G2', 'B3', 'D4', 'G4'], ['F2', 'A3', 'C4', 'F4'], ['G2', 'B3', 'D4', 'F4'],
+        ['F2', 'A3', 'C4', 'F4'], ['G2', 'B3', 'D4', 'G4'], ['E2', 'G3', 'B3', 'E4'], ['A2', 'C4', 'E4', 'A4'],
+        ['F2', 'A3', 'C4', 'F4'], ['G2', 'B3', 'D4', 'G4'], ['C3', 'C4', 'E4', 'G4'], ['C3', 'C4', 'E4', 'G4'],
+      ],
+    },
+    minor: {
+      melody: bars([
+        'A4 . C5 . E5 . C5 . A4 . C5 . E5 . A5 .',
+        'F4 . A4 . C5 . A4 . F5 . E5 . C5 . A4 .',
+        'G4 . C5 . E5 . C5 . G5 . E5 . C5 . G4 .',
+        'G4 . B4 . D5 . B4 . D5 . . B4 . . G4 .',
+        'A4 . C5 . E5 . A5 . G5 . E5 . C5 . A4 .',
+        'F4 . A4 . C5 . F5 . E5 . C5 . A4 . F4 .',
+        'E4 . G#4 . B4 . E5 . D5 . B4 . G#4 . E4 .',
+        'E5 . . . D5 . . . B4 . . . G#4 . . .',
+        // часть B
+        'D5 . F5 . A5 . F5 . D5 . F5 . A5 . D6 .',
+        'C6 . A5 . E5 . A5 . C6 . . A5 . . E5 .',
+        'B5 . G#5 . E5 . G#5 . B5 . . E6 . . B5 .',
+        'A5 . . . E5 . . . C5 . E5 . A5 . . .',
+        'D5 . F5 . A5 . D6 . C6 . A5 . F5 . D5 .',
+        'E5 . A5 . C6 . E6 . D6 . C6 . A5 . E5 .',
+        'F5 . A5 . C6 . A5 . F5 . . A5 . . C6 .',
+        'B5 . . G#5 . . E5 . D5 . . B4 . . . .',
+      ]),
+      chords: [
+        ['A2', 'C4', 'E4', 'A4'], ['F2', 'A3', 'C4', 'F4'], ['C3', 'C4', 'E4', 'G4'], ['G2', 'B3', 'D4', 'G4'],
+        ['A2', 'C4', 'E4', 'A4'], ['F2', 'A3', 'C4', 'F4'], ['E2', 'G#3', 'B3', 'E4'], ['E2', 'G#3', 'B3', 'E4'],
+        ['D3', 'A3', 'D4', 'F4'], ['A2', 'C4', 'E4', 'A4'], ['E2', 'G#3', 'B3', 'E4'], ['A2', 'C4', 'E4', 'A4'],
+        ['D3', 'A3', 'D4', 'F4'], ['A2', 'C4', 'E4', 'A4'], ['F2', 'A3', 'C4', 'F4'], ['E2', 'G#3', 'B3', 'E4'],
+      ],
+    },
+  };
+
+  // Настроения: день (меню, полдень), закат, ночь (сумерки и ночь), босс
+  const MOODS = {
+    day:    { tune: 'major', bpm: 116, lead: 'square',   leadVol: 0.060, cutoff: 2600, drums: 1,    four: false, arp: true },
+    sunset: { tune: 'major', bpm: 104, lead: 'triangle', leadVol: 0.085, cutoff: 2000, drums: 0.7,  four: false, arp: false },
+    night:  { tune: 'minor', bpm: 100, lead: 'triangle', leadVol: 0.085, cutoff: 1800, drums: 0.55, four: false, arp: true },
+    boss:   { tune: 'minor', bpm: 134, lead: 'sawtooth', leadVol: 0.050, cutoff: 2400, drums: 1.15, four: true,  arp: true },
+  };
+  const MUSIC_VOL = 0.34;
+  const NO_DETUNE = new Set(['click', 'score', 'bonus', 'star', 'win', 'lose', 'combo', 'sight', 'powerUp', 'nukeOffer', 'whoosh', 'ach', 'tick']);
 
   const A = {
-    ctx: null, master: null, musicBus: null, sfxBus: null, noiseBuf: null,
+    ctx: null, master: null, musicBus: null, sfxBus: null, noiseBuf: null, reverb: null, delay: null,
     musicOn: true, sfxOn: true,
     externalPause: 0,          // реклама / скрытая вкладка — счётчик причин паузы
     musicWanted: false, timer: null, step: 0, nextTime: 0,
-    last: {},
+    mood: 'day', nextMood: null,
+    last: {}, _cur: null, _det: 1,
 
     init() {
       if (this.ctx) return true;
@@ -1178,15 +1705,37 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       try { this.ctx = new AC(); } catch (e) { return false; }
       const c = this.ctx;
       const comp = c.createDynamicsCompressor();
-      comp.threshold.value = -14; comp.ratio.value = 4;
+      comp.threshold.value = -16; comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.18;
       comp.connect(c.destination);
       this.master = c.createGain(); this.master.gain.value = 0.9; this.master.connect(comp);
-      this.musicBus = c.createGain(); this.musicBus.gain.value = this.musicOn ? 0.32 : 0; this.musicBus.connect(this.master);
+      this.musicBus = c.createGain(); this.musicBus.gain.value = this.musicOn ? MUSIC_VOL : 0; this.musicBus.connect(this.master);
       this.sfxBus = c.createGain(); this.sfxBus.gain.value = this.sfxOn ? 0.9 : 0; this.sfxBus.connect(this.master);
+
+      // Шум для ударных и эффектов
       const len = c.sampleRate * 2;
       this.noiseBuf = c.createBuffer(1, len, c.sampleRate);
       const d = this.noiseBuf.getChannelData(0);
       for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+
+      // Реверберация: синтезированный импульс «открытого поля»
+      try {
+        const rl = Math.floor(c.sampleRate * 1.7), ir = c.createBuffer(2, rl, c.sampleRate);
+        for (let ch = 0; ch < 2; ch++) {
+          const x = ir.getChannelData(ch);
+          for (let i = 0; i < rl; i++) x[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / rl, 2.6);
+        }
+        this.reverb = c.createConvolver(); this.reverb.buffer = ir;
+        const out = c.createGain(); out.gain.value = 0.55; this.reverb.connect(out); out.connect(this.master);
+        const sSend = c.createGain(); sSend.gain.value = 0.22; this.sfxBus.connect(sSend); sSend.connect(this.reverb);
+        const mSend = c.createGain(); mSend.gain.value = 0.16; this.musicBus.connect(mSend); mSend.connect(this.reverb);
+      } catch (e) { this.reverb = null; }
+
+      // Эхо для мелодии
+      this.delay = c.createDelay(1); this.delay.delayTime.value = 0.3;
+      const fb = c.createGain(); fb.gain.value = 0.3;
+      const dl = c.createBiquadFilter(); dl.type = 'lowpass'; dl.frequency.value = 1800;
+      const dOut = c.createGain(); dOut.gain.value = 0.32;
+      this.delay.connect(dl); dl.connect(fb); fb.connect(this.delay); dl.connect(dOut); dOut.connect(this.musicBus);
       return true;
     },
 
@@ -1208,7 +1757,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
     setMusic(on) {
       this.musicOn = on;
-      if (this.musicBus) this.musicBus.gain.setTargetAtTime(on ? 0.32 : 0, this.ctx.currentTime, 0.05);
+      if (this.musicBus) this.musicBus.gain.setTargetAtTime(on ? MUSIC_VOL : 0, this.ctx.currentTime, 0.05);
       if (on && this.musicWanted) this._startScheduler(); else if (!on) this._stopScheduler();
     },
     setSfx(on) {
@@ -1216,9 +1765,21 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       if (this.sfxBus) this.sfxBus.gain.setTargetAtTime(on ? 0.9 : 0, this.ctx.currentTime, 0.02);
     },
 
+    // Приглушить музыку на время (ядерный взрыв), затем плавно вернуть.
+    duck(sec) {
+      if (!this.ctx || !this.musicOn) return;
+      const g = this.musicBus.gain, t = this.ctx.currentTime;
+      g.cancelScheduledValues(t); g.setValueAtTime(g.value, t);
+      g.linearRampToValueAtTime(0.03, t + 0.3);
+      g.setValueAtTime(0.03, t + sec - 1.5);
+      g.linearRampToValueAtTime(MUSIC_VOL, t + sec);
+    },
+
     // ---------- Музыка ----------
     startMusic() { this.musicWanted = true; if (this.ctx && this.musicOn) this._startScheduler(); },
     stopMusic() { this.musicWanted = false; this._stopScheduler(); },
+    // Смена настроения — с начала следующего такта, без обрыва
+    setMood(m) { if (!MOODS[m]) m = 'day'; if (m !== this.mood) this.nextMood = m; else this.nextMood = null; },
 
     _startScheduler() {
       if (this.timer || !this.ctx || !this.musicOn) return;
@@ -1230,40 +1791,69 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     _schedule() {
       const c = this.ctx;
       if (!c || c.state !== 'running') return;
-      const stepDur = 60 / BPM / 4;
       if (this.nextTime < c.currentTime - 0.3) this.nextTime = c.currentTime + 0.05;
       while (this.nextTime < c.currentTime + 0.25) {
-        this._playStep(this.step, this.nextTime, stepDur);
-        this.nextTime += stepDur;
-        this.step = (this.step + 1) % (16 * 8);
+        if (this.nextMood && this.step % 4 === 0) {
+          const from = MOODS[this.mood].tune, to = MOODS[this.nextMood].tune;
+          this.mood = this.nextMood; this.nextMood = null;
+          if (from !== to) this.step = 0; else this.step -= this.step % 16;
+        }
+        const M = MOODS[this.mood], sd = 60 / M.bpm / 4;
+        this.delay.delayTime.setValueAtTime(sd * 3, this.nextTime);
+        this._playStep(this.step, this.nextTime, sd, M);
+        this.nextTime += sd;
+        this.step = (this.step + 1) % 256;
       }
     },
 
-    _playStep(s, t, sd) {
-      const bar = Math.floor(s / 16), i = s % 16, ch = CHORDS[bar];
-      const bus = this.musicBus;
-      // Мелодия
-      const n = MELODY[s];
+    _playStep(s, t, sd, M) {
+      const T = TUNES[M.tune], bar = Math.floor(s / 16), i = s % 16, ch = T.chords[bar], partB = bar >= 8;
+      const bus = this.musicBus, dv = M.drums;
+
+      // Мелодия: «щипок» из двух слегка расстроенных голосов + эхо
+      const n = T.melody[s];
       if (n && n !== '.') {
-        let len = 1; while (len < 4 && MELODY[(s + len) % MELODY.length] === '.') len++;
-        this._tone({ type: 'square', f: NOTE[n], t, a: 0.01, d: sd * len * 0.9, vol: 0.07, dest: bus, lp: 2600 });
-        this._tone({ type: 'triangle', f: NOTE[n] * 2, t, a: 0.01, d: sd * 1.2, vol: 0.025, dest: bus });
+        let len = 1; while (len < 4 && T.melody[(s + len) % 256] === '.') len++;
+        const f = NOTE[n], d = sd * len * 0.92;
+        this._pluck({ type: M.lead, f, t, d, vol: M.leadVol, cutoff: M.cutoff, dest: bus, send: true });
+        this._pluck({ type: 'triangle', f: f * 1.006, t, d: d * 0.8, vol: M.leadVol * 0.55, cutoff: M.cutoff, dest: bus });
+        this._tone({ type: 'sine', f: f * 2, t, a: 0.005, d: sd * 1.1, vol: 0.018, dest: bus });
       }
-      // Бас
-      if (i === 0 || i === 6 || i === 8 || i === 14) {
-        const f = NOTE[ch[0]] * (i === 6 || i === 14 ? 2 : 1);
-        this._tone({ type: 'triangle', f, t, a: 0.005, d: sd * 1.8, vol: 0.22, dest: bus });
-      }
-      // Аккордовые «чики» на слабые доли
-      if (i % 4 === 2) for (let k = 1; k < 4; k++) this._tone({ type: 'triangle', f: NOTE[ch[k]], t, a: 0.005, d: sd * 0.9, vol: 0.035, dest: bus });
-      // Ударные
-      if (i === 0 || i === 8 || (i === 10 && bar % 2 === 1)) this._kick(t, bus);
-      if (i === 4 || i === 12) this._noise({ t, d: 0.12, vol: 0.12, filter: 'bandpass', freq: 1900, q: 0.8, dest: bus });
-      if (i % 2 === 0) this._noise({ t, d: 0.03, vol: i % 4 === 2 ? 0.06 : 0.035, filter: 'highpass', freq: 7500, dest: bus });
-    },
 
-    _kick(t, dest) {
-      this._tone({ type: 'sine', f: 140, f2: 42, t, a: 0.003, d: 0.16, vol: 0.4, dest });
+      // Пэд: мягкий аккорд на весь такт
+      if (i === 0) for (let k = 1; k < 4; k++) {
+        this._tone({ type: 'triangle', f: NOTE[ch[k]], t, a: sd * 3, d: sd * 12, vol: 0.022, dest: bus });
+        this._tone({ type: 'sine', f: NOTE[ch[k]] * 1.004, t, a: sd * 3, d: sd * 12, vol: 0.02, dest: bus });
+      }
+
+      // Бас: треугольник + суб
+      const bassOn = M.four ? (i % 2 === 0) : (i === 0 || i === 6 || i === 8 || i === 11 || i === 14);
+      if (bassOn) {
+        const up = M.four ? (i % 4 === 2) : (i === 6 || i === 14);
+        const f = NOTE[ch[0]] * (up ? 2 : 1);
+        this._tone({ type: 'triangle', f, t, a: 0.005, d: sd * (M.four ? 1.3 : 1.9), vol: 0.2, dest: bus });
+        this._tone({ type: 'sine', f: f / (up ? 2 : 1), t, a: 0.005, d: sd * 1.6, vol: 0.12, dest: bus });
+      }
+
+      // Аккордовые «чики» на слабые доли; во второй части — арпеджио
+      if (i % 4 === 2) for (let k = 1; k < 4; k++) this._tone({ type: 'triangle', f: NOTE[ch[k]], t, a: 0.004, d: sd * 0.85, vol: 0.032, dest: bus });
+      if (partB && M.arp) this._tone({ type: 'triangle', f: NOTE[ch[1 + (i % 3)]] * 2, t, a: 0.003, d: sd * 0.7, vol: 0.022, dest: bus });
+
+      // Ударные
+      const kick = M.four ? (i % 4 === 0) : (i === 0 || i === 8 || (i === 10 && bar % 2 === 1) || (i === 7 && partB));
+      if (kick) {
+        this._tone({ type: 'sine', f: 150, f2: 40, t, a: 0.002, d: 0.17, vol: 0.42 * dv, dest: bus });
+        this._noise({ t, d: 0.02, vol: 0.08 * dv, filter: 'lowpass', freq: 1200, dest: bus });
+      }
+      if (i === 4 || i === 12) {
+        this._noise({ t, d: 0.13, vol: 0.13 * dv, filter: 'bandpass', freq: 1900, q: 0.8, dest: bus });
+        this._tone({ type: 'triangle', f: 210, f2: 150, t, a: 0.002, d: 0.08, vol: 0.09 * dv, dest: bus });
+        if (partB) this._noise({ t: t + 0.012, d: 0.09, vol: 0.07 * dv, filter: 'bandpass', freq: 1300, q: 1.4, dest: bus });
+      }
+      if (i % 2 === 0) this._noise({ t, d: i % 4 === 2 ? 0.07 : 0.028, vol: (i % 4 === 2 ? 0.055 : 0.032) * dv, filter: 'highpass', freq: 7500, dest: bus });
+      else if (partB || M.four) this._noise({ t, d: 0.02, vol: 0.016 * dv, filter: 'highpass', freq: 9000, dest: bus });
+      // Сбивка в конце каждой части
+      if (bar % 8 === 7 && i >= 12) this._noise({ t, d: 0.07, vol: (0.06 + (i - 12) * 0.025) * dv, filter: 'bandpass', freq: 1700 + (i - 12) * 250, q: 1, dest: bus });
     },
 
     // ---------- Примитивы ----------
@@ -1275,10 +1865,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
     _tone({ type = 'sine', f = 440, f2 = null, t = 0, a = 0.005, d = 0.2, vol = 0.3, dest = null, lp = 0, vib = 0 }) {
       const c = this.ctx;
+      const k = dest ? 1 : this._det;     // лёгкая случайная расстройка — только для эффектов
       const o = c.createOscillator(), g = c.createGain();
       o.type = type;
-      o.frequency.setValueAtTime(f, t);
-      if (f2) o.frequency.exponentialRampToValueAtTime(Math.max(20, f2), t + a + d);
+      o.frequency.setValueAtTime(f * k, t);
+      if (f2) o.frequency.exponentialRampToValueAtTime(Math.max(20, f2 * k), t + a + d);
       let node = o;
       if (lp) { const fl = c.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = lp; o.connect(fl); node = fl; }
       if (vib) {
@@ -1286,9 +1877,23 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         l.frequency.value = vib; lg.gain.value = f * 0.03; l.connect(lg); lg.connect(o.frequency);
         l.start(t); l.stop(t + a + d + 0.05);
       }
-      node.connect(g); g.connect(dest || this.sfxBus);
+      node.connect(g); g.connect(dest || this._cur || this.sfxBus);
       this._env(g, t, a, d, vol);
       o.start(t); o.stop(t + a + d + 0.05);
+    },
+
+    // «Щипок»: фильтр быстро закрывается, как у струны
+    _pluck({ type, f, t, d, vol, cutoff, dest, send }) {
+      const c = this.ctx;
+      const o = c.createOscillator(), fl = c.createBiquadFilter(), g = c.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t);
+      fl.type = 'lowpass'; fl.Q.value = 2;
+      fl.frequency.setValueAtTime(cutoff * 1.6, t);
+      fl.frequency.exponentialRampToValueAtTime(Math.max(300, cutoff * 0.35), t + Math.max(0.08, d));
+      o.connect(fl); fl.connect(g); g.connect(dest);
+      if (send && this.delay) g.connect(this.delay);
+      this._env(g, t, 0.006, d, vol);
+      o.start(t); o.stop(t + d + 0.06);
     },
 
     _noise({ t = 0, a = 0.003, d = 0.2, vol = 0.3, filter = 'lowpass', freq = 1000, freq2 = null, q = 1, dest = null }) {
@@ -1298,22 +1903,13 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       fl.frequency.setValueAtTime(freq, t);
       if (freq2) fl.frequency.exponentialRampToValueAtTime(freq2, t + a + d);
       const g = c.createGain();
-      s.connect(fl); fl.connect(g); g.connect(dest || this.sfxBus);
+      s.connect(fl); fl.connect(g); g.connect(dest || this._cur || this.sfxBus);
       this._env(g, t, a, d, vol);
       s.start(t, Math.random() * 1.5); s.stop(t + a + d + 0.05);
     },
 
-    // Приглушить музыку на время (ядерный взрыв), затем плавно вернуть.
-    duck(sec) {
-      if (!this.ctx || !this.musicOn) return;
-      const g = this.musicBus.gain, t = this.ctx.currentTime;
-      g.cancelScheduledValues(t); g.setValueAtTime(g.value, t);
-      g.linearRampToValueAtTime(0.03, t + 0.3);
-      g.setValueAtTime(0.03, t + sec - 1.5);
-      g.linearRampToValueAtTime(0.32, t + sec);
-    },
-
     // ---------- Звуковые эффекты ----------
+    // o.x — положение в мире (0..1920): звук слышен слева или справа. o.v — сила 0..1.
     play(name, o = {}) {
       if (!this.ctx || !this.sfxOn || this.ctx.state !== 'running') return;
       const now = this.ctx.currentTime;
@@ -1321,7 +1917,16 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       if (this.last[name] && now - this.last[name] < gap) return;
       this.last[name] = now;
       const fn = SFX[name];
-      if (fn) fn.call(this, now, o.v == null ? 1 : o.v, o);
+      if (!fn) return;
+      this._det = NO_DETUNE.has(name) ? 1 : 0.94 + Math.random() * 0.12;
+      this._cur = null;
+      if (o.x != null && this.ctx.createStereoPanner) {
+        const p = this.ctx.createStereoPanner();
+        p.pan.value = Math.max(-0.8, Math.min(0.8, (o.x - 960) / 1100));
+        p.connect(this.sfxBus); this._cur = p;
+      }
+      fn.call(this, now, o.v == null ? 1 : o.v, o);
+      this._cur = null; this._det = 1;
     },
   };
 
@@ -1329,27 +1934,44 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
   const SFX = {
     click(t) {
-      this._tone({ type: 'square', f: 660, f2: 990, t, d: 0.06, vol: 0.12, lp: 3000 });
+      this._tone({ type: 'square', f: 660, f2: 990, t, d: 0.06, vol: 0.1, lp: 3000 });
+      this._tone({ type: 'sine', f: 1320, t: t + 0.03, d: 0.05, vol: 0.05 });
+    },
+    whoosh(t) {
+      this._noise({ t, a: 0.05, d: 0.28, vol: 0.14, filter: 'bandpass', freq: 500, freq2: 2400, q: 1.2 });
     },
     grab(t) {
       this._tone({ type: 'sawtooth', f: 180, f2: 320, t, d: 0.12, vol: 0.08, lp: 900 });
       this._tone({ type: 'sine', f: 1800, f2: 2300, t: t + 0.02, d: 0.05, vol: 0.08 });
     },
+    // скрип натягиваемой резинки: чем сильнее натянута, тем выше
+    stretch(t, v) {
+      this._tone({ type: 'sawtooth', f: 110 + v * 240, f2: 130 + v * 260, t, a: 0.004, d: 0.045, vol: 0.05, lp: 700 + v * 900 });
+      this._noise({ t, d: 0.02, vol: 0.02, filter: 'bandpass', freq: 900 + v * 1400, q: 4 });
+    },
     hop(t) {
       this._tone({ type: 'sine', f: 520, f2: 980, t, d: 0.09, vol: 0.12 });
+      this._tone({ type: 'sine', f: 1900, f2: 2500, t: t + 0.05, d: 0.05, vol: 0.07 });
+    },
+    // чириканье птенцов в очереди
+    chirp(t) {
+      const n = 2 + Math.floor(Math.random() * 2);
+      for (let i = 0; i < n; i++) this._tone({ type: 'sine', f: rand(2300, 2800), f2: rand(3000, 3600), t: t + i * 0.09, a: 0.004, d: 0.05, vol: 0.05 });
     },
     launch(t) {
-      // резинка
-      this._tone({ type: 'triangle', f: 210, f2: 85, t, d: 0.25, vol: 0.35 });
+      // резинка: щелчок и вибрация
+      this._tone({ type: 'triangle', f: 230, f2: 80, t, d: 0.28, vol: 0.34, vib: 38 });
+      this._noise({ t, d: 0.03, vol: 0.2, filter: 'highpass', freq: 2500 });
       // свист воздуха
-      this._noise({ t, a: 0.02, d: 0.4, vol: 0.22, filter: 'bandpass', freq: 600, freq2: 2600, q: 1.5 });
+      this._noise({ t, a: 0.02, d: 0.45, vol: 0.22, filter: 'bandpass', freq: 600, freq2: 2800, q: 1.5 });
       // чирик птенца
-      this._tone({ type: 'sine', f: 1500, f2: 2600, t: t + 0.03, d: 0.07, vol: 0.18 });
-      this._tone({ type: 'sine', f: 1700, f2: 3000, t: t + 0.12, d: 0.08, vol: 0.16 });
-      this._tone({ type: 'sine', f: 2000, f2: 3200, t: t + 0.22, d: 0.06, vol: 0.12 });
+      this._tone({ type: 'sine', f: 1500, f2: 2600, t: t + 0.03, d: 0.07, vol: 0.17 });
+      this._tone({ type: 'sine', f: 1700, f2: 3000, t: t + 0.12, d: 0.08, vol: 0.15 });
+      this._tone({ type: 'sine', f: 2000, f2: 3200, t: t + 0.22, d: 0.06, vol: 0.11 });
     },
     birdHit(t, v) {
       this._tone({ type: 'sine', f: 2400, f2: 1400, t, d: 0.09, vol: 0.12 * v + 0.04 });
+      this._tone({ type: 'sine', f: 190, f2: 110, t, d: 0.08, vol: 0.2 * v });
       this._noise({ t, d: 0.06, vol: 0.12 * v, filter: 'lowpass', freq: 1200 });
     },
     boost(t) {
@@ -1358,9 +1980,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this._tone({ type: 'sine', f: 2200, f2: 3400, t: t + 0.02, d: 0.08, vol: 0.14 });
     },
     explode(t) {
-      this._noise({ t, a: 0.005, d: 0.9, vol: 0.8, filter: 'lowpass', freq: 2400, freq2: 90, q: 0.7 });
-      this._tone({ type: 'sine', f: 120, f2: 28, t, d: 0.7, vol: 0.7 });
-      this._noise({ t: t + 0.05, d: 0.5, vol: 0.2, filter: 'highpass', freq: 2500 });
+      this._noise({ t, a: 0.003, d: 0.12, vol: 0.7, filter: 'highpass', freq: 1500 });
+      this._noise({ t, a: 0.005, d: 1.0, vol: 0.8, filter: 'lowpass', freq: 2400, freq2: 90, q: 0.7 });
+      this._tone({ type: 'sine', f: 130, f2: 28, t, d: 0.75, vol: 0.75 });
+      this._tone({ type: 'triangle', f: 65, f2: 24, t, d: 0.9, vol: 0.35 });
+      for (let i = 0; i < 5; i++) this._noise({ t: t + 0.12 + Math.random() * 0.5, d: 0.07, vol: 0.12, filter: 'bandpass', freq: rand(300, 1500), q: 3 });
     },
     poof(t) {
       this._noise({ t, a: 0.02, d: 0.18, vol: 0.12, filter: 'bandpass', freq: 1300, q: 1.2 });
@@ -1373,41 +1997,59 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     },
     enemyDie(t, v, o) {
       const base = { red: 260, boss: 150 }[o.t] || 400;
-      if (o.t === 'boss') this._tone({ type: 'sine', f: 90, f2: 30, t, d: 0.6, vol: 0.5 });
+      if (o.t === 'boss') {
+        this._tone({ type: 'sine', f: 90, f2: 30, t, d: 0.7, vol: 0.5 });
+        this._tone({ type: 'sawtooth', f: 220, f2: 55, t: t + 0.1, a: 0.02, d: 1.0, vol: 0.12, lp: 900, vib: 5 });
+      }
       this._noise({ t, a: 0.002, d: 0.22, vol: 0.4, filter: 'lowpass', freq: 3500, freq2: 300 });
       this._tone({ type: 'sine', f: 900, f2: 300, t, d: 0.06, vol: 0.25 });
       this._tone({ type: 'sawtooth', f: base * 1.5, f2: base * 0.35, t: t + 0.05, d: 0.55, vol: 0.14, lp: 1400, vib: 9 });
       this._tone({ type: 'triangle', f: 1300, f2: 2400, t: t + 0.12, d: 0.12, vol: 0.08 });
     },
+    taunt(t, v, o) {
+      const base = { red: 330, boss: 220 }[o.t] || 480;
+      for (let i = 0; i < 3; i++) this._tone({ type: 'square', f: base * (1.25 - i * 0.08), f2: base * (1.05 - i * 0.08), t: t + i * 0.13, a: 0.01, d: 0.09, vol: 0.07, lp: 1800, vib: 12 });
+    },
     woodHit(t, v) {
       this._noise({ t, d: 0.09, vol: 0.22 * v + 0.05, filter: 'bandpass', freq: rand(350, 520), q: 3 });
       this._tone({ type: 'sine', f: rand(150, 190), f2: 100, t, d: 0.1, vol: 0.18 * v + 0.04 });
+      this._tone({ type: 'triangle', f: rand(420, 520), f2: 300, t, d: 0.05, vol: 0.06 * v });
     },
     woodBreak(t) {
-      for (let i = 0; i < 4; i++) this._noise({ t: t + i * rand(0.02, 0.04), d: 0.08, vol: 0.25, filter: 'bandpass', freq: rand(300, 900), q: 2.5 });
+      for (let i = 0; i < 5; i++) this._noise({ t: t + i * rand(0.02, 0.04), d: 0.08, vol: 0.25, filter: 'bandpass', freq: rand(300, 900), q: 2.5 });
       this._tone({ type: 'sine', f: 110, f2: 55, t, d: 0.22, vol: 0.3 });
       this._tone({ type: 'square', f: rand(200, 260), f2: 120, t: t + 0.03, d: 0.06, vol: 0.05, lp: 900 });
     },
+    tntHit(t, v) { SFX.woodHit.call(this, t, v); },
+    tntBreak(t) { this._tone({ type: 'sine', f: 1800, f2: 3200, t, d: 0.05, vol: 0.08 }); },
     glassHit(t, v) {
       this._tone({ type: 'sine', f: rand(2400, 3200), t, d: 0.18, vol: 0.1 * v + 0.03 });
       this._tone({ type: 'sine', f: rand(3600, 4400), t, d: 0.1, vol: 0.05 * v + 0.02 });
     },
     glassBreak(t) {
       this._noise({ t, a: 0.002, d: 0.35, vol: 0.3, filter: 'highpass', freq: 3000 });
-      for (let i = 0; i < 7; i++) this._tone({ type: 'sine', f: rand(2000, 5200), t: t + rand(0, 0.18), d: rand(0.06, 0.16), vol: 0.06 });
+      for (let i = 0; i < 9; i++) this._tone({ type: 'sine', f: rand(2000, 5600), t: t + rand(0, 0.25), d: rand(0.06, 0.18), vol: 0.055 });
     },
     stoneHit(t, v) {
       this._tone({ type: 'sine', f: 95, f2: 55, t, d: 0.16, vol: 0.3 * v + 0.08 });
       this._noise({ t, d: 0.12, vol: 0.2 * v + 0.05, filter: 'lowpass', freq: 600 });
+      this._noise({ t, d: 0.03, vol: 0.1 * v, filter: 'bandpass', freq: 2200, q: 2 });
     },
     stoneBreak(t) {
       this._noise({ t, a: 0.005, d: 0.55, vol: 0.45, filter: 'lowpass', freq: 900, freq2: 180 });
       this._tone({ type: 'sine', f: 75, f2: 38, t, d: 0.35, vol: 0.4 });
-      for (let i = 0; i < 3; i++) this._noise({ t: t + 0.1 + i * 0.07, d: 0.06, vol: 0.15, filter: 'bandpass', freq: rand(400, 800), q: 2 });
+      for (let i = 0; i < 4; i++) this._noise({ t: t + 0.1 + i * 0.07, d: 0.06, vol: 0.15, filter: 'bandpass', freq: rand(400, 800), q: 2 });
     },
     score(t) {
       this._tone({ type: 'square', f: 880, t, d: 0.07, vol: 0.06, lp: 3000 });
       this._tone({ type: 'square', f: 1320, t: t + 0.07, d: 0.1, vol: 0.06, lp: 3000 });
+    },
+    // комбо: каждая следующая жертва — на тон выше
+    combo(t, v, o) {
+      const f = 660 * Math.pow(2, (Math.min(6, o.i || 2) * 2) / 12);
+      this._tone({ type: 'triangle', f, t, d: 0.12, vol: 0.2 });
+      this._tone({ type: 'triangle', f: f * 1.5, t: t + 0.07, d: 0.2, vol: 0.18 });
+      this._tone({ type: 'sine', f: f * 3, t: t + 0.07, d: 0.25, vol: 0.05 });
     },
     bonus(t) {
       this._tone({ type: 'triangle', f: 1046, t, d: 0.1, vol: 0.15 });
@@ -1416,9 +2058,10 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     },
     star(t, v, o) {
       const f = [784, 988, 1175][o.i || 0];
-      this._tone({ type: 'triangle', f, t, d: 0.35, vol: 0.22 });
-      this._tone({ type: 'sine', f: f * 2, t: t + 0.03, d: 0.3, vol: 0.08 });
-      this._tone({ type: 'sine', f: f * 3, t: t + 0.06, d: 0.2, vol: 0.04 });
+      this._tone({ type: 'triangle', f, t, d: 0.4, vol: 0.22 });
+      this._tone({ type: 'sine', f: f * 2, t: t + 0.03, d: 0.35, vol: 0.08 });
+      this._tone({ type: 'sine', f: f * 3, t: t + 0.06, d: 0.25, vol: 0.04 });
+      this._noise({ t, d: 0.25, vol: 0.04, filter: 'highpass', freq: 8000 });
     },
     sight(t) {
       this._tone({ type: 'sine', f: 1200, t, d: 0.07, vol: 0.12 });
@@ -1461,13 +2104,25 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       // «звон в ушах» после вспышки
       this._tone({ type: 'sine', f: 3800, t: t + 0.05, a: 0.1, d: 2.2, vol: 0.025 });
     },
-    win(t) {
-      const seq = [523, 659, 784, 1046];
-      seq.forEach((f, i) => {
-        this._tone({ type: 'square', f, t: t + i * 0.11, d: 0.14, vol: 0.08, lp: 3200 });
-        this._tone({ type: 'triangle', f, t: t + i * 0.11, d: 0.16, vol: 0.14 });
+    ach(t) {
+      [784, 988, 1175, 1568].forEach((f, i) => {
+        this._tone({ type: 'triangle', f, t: t + i * 0.07, d: 0.22, vol: 0.16 });
+        this._tone({ type: 'sine', f: f * 2, t: t + i * 0.07, d: 0.18, vol: 0.05 });
       });
-      [523, 659, 784, 1046].forEach((f) => this._tone({ type: 'triangle', f, t: t + 0.5, d: 0.7, vol: 0.09 }));
+      this._noise({ t: t + 0.2, d: 0.4, vol: 0.05, filter: 'highpass', freq: 8000 });
+    },
+    tick(t, v) {
+      this._tone({ type: 'square', f: 900 + v * 700, t, d: 0.03, vol: 0.04, lp: 3500 });
+    },
+    win(t) {
+      const seq = [523, 659, 784, 1046, 1319];
+      seq.forEach((f, i) => {
+        this._tone({ type: 'square', f, t: t + i * 0.1, d: 0.14, vol: 0.07, lp: 3200 });
+        this._tone({ type: 'triangle', f, t: t + i * 0.1, d: 0.16, vol: 0.14 });
+      });
+      [523, 659, 784, 1046].forEach((f) => this._tone({ type: 'triangle', f, t: t + 0.55, a: 0.02, d: 0.9, vol: 0.09 }));
+      this._tone({ type: 'sine', f: 131, t: t + 0.55, a: 0.02, d: 0.9, vol: 0.2 });
+      this._noise({ t: t + 0.55, d: 0.5, vol: 0.06, filter: 'highpass', freq: 7000 });
     },
     lose(t) {
       const seq = [[392, 370], [349, 330], [311, 294], [294, 262]];
@@ -1478,8 +2133,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     },
   };
 
-  root.YB = Object.assign(root.YB || {}, { Audio: A });
-})(window);
+  root.YB = Object.assign(root.YB || {}, { Audio: A, AudioData: { TUNES, MOODS } });
+})(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
   <script>/* js/platform.js */
@@ -1610,6 +2265,26 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       try { localStorage.setItem(SAVE_KEY, s); } catch (e) {}
       if (this.isVK) send('VKWebAppStorageSet', { key: 'save', value: s }).catch(() => {});
     },
+
+    // Тактильный отклик: в ВК — Taptic Engine, в браузере на телефоне — вибрация
+    haptic(style) {
+      try {
+        if (this.isVK) { root.vkBridge.send('VKWebAppTapticImpactOccurred', { style }).catch(() => {}); return; }
+        const ua = navigator.userActivation;
+        if (!navigator.vibrate || (ua && !ua.hasBeenActive) || !root.matchMedia('(pointer: coarse)').matches) return;
+        navigator.vibrate(style === 'heavy' ? 40 : style === 'medium' ? 22 : 10);
+      } catch (e) {}
+    },
+
+    // Социальные функции ВК (кнопки показываются только внутри ВК)
+    share() {
+      if (!this.isVK) return Promise.resolve(false);
+      return send('VKWebAppShare', { link: 'https://vk.com/app' + LAUNCH.get('vk_app_id') }, 60000).then(() => true, () => false);
+    },
+    favorite() {
+      if (!this.isVK) return Promise.resolve(false);
+      return send('VKWebAppAddToFavorites', {}, 60000).then(() => true, () => false);
+    },
   };
 
   function mergeSaves(a, b) {
@@ -1623,6 +2298,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       out.best[i] = Math.max((a.best || [])[i] || 0, (b.best || [])[i] || 0);
     }
     out.settings = Object.assign({}, a.settings, b.settings);
+    out.ach = Object.assign({}, a.ach, b.ach);
+    out.seen = Object.assign({}, a.seen, b.seen);
+    out.stats = {};
+    for (const k of new Set([...Object.keys(a.stats || {}), ...Object.keys(b.stats || {})])) out.stats[k] = Math.max((a.stats || {})[k] || 0, (b.stats || {})[k] || 0);
+    out.skin = b.skin || a.skin || 'none';
     return out;
   }
 
@@ -1649,40 +2329,105 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   }
   function circle(ctx, x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); }
 
+  // ---------- Темы: время суток (полдень, закат, сумерки) ----------
+  const THEMES = {
+    noon: {
+      sky: ['#FFC93C', '#FFE27A', '#FFF4C7'], sun: { x: 1560, y: 170, r: 62, core: '#FFFBE3', glow: '#FFF3B0', rays: 'rgba(255,255,255,0.28)' },
+      cloud: 'rgba(255,255,255,0.94)', cloudShade: 'rgba(255,200,90,0.30)',
+      hills: ['#FFD45C', '#F7B733', '#E99A1C'], trees: '#D98A14', ground: ['#8A5524', '#5E3812'], pebble: 'rgba(60,30,8,0.45)',
+      grass: ['#C2D234', '#93A81E', '#D8E64E'], haze: 'rgba(255,250,225,0.35)', stars: false,
+      light: [0.42, -0.91], ambient: 'pollen', flock: true,
+    },
+    sunset: {
+      sky: ['#FF8A3D', '#FFB45A', '#FFE3A0'], sun: { x: 1440, y: 600, r: 115, core: '#FFF1C4', glow: '#FFC46B', rays: 'rgba(255,240,200,0.20)' },
+      cloud: 'rgba(255,228,208,0.94)', cloudShade: 'rgba(255,120,80,0.35)',
+      hills: ['#F7A452', '#E07B35', '#BF5A24'], trees: '#A94B1C', ground: ['#7A4219', '#4F270C'], pebble: 'rgba(40,18,4,0.45)',
+      grass: ['#CDB833', '#A08A1E', '#E6D04A'], haze: 'rgba(255,205,150,0.30)', stars: false,
+      light: [0.78, -0.62], ambient: 'leaves', flock: true,
+    },
+    dusk: {
+      sky: ['#47388A', '#B45C8E', '#FFB45C'], sun: { x: 1400, y: 720, r: 125, core: '#FFE6A8', glow: '#FF9A5C', rays: null },
+      cloud: 'rgba(252,205,225,0.78)', cloudShade: 'rgba(80,55,140,0.40)',
+      hills: ['#A15E8C', '#77436F', '#543152'], trees: '#3F2440', ground: ['#5A3418', '#33190A'], pebble: 'rgba(20,8,2,0.5)',
+      grass: ['#B9AB3C', '#877C22', '#D2C452'], haze: 'rgba(255,170,140,0.22)', stars: true,
+      light: [0.86, -0.5], ambient: 'fireflies',
+    },
+    night: {
+      sky: ['#10173A', '#27306E', '#5B5A9C'], sun: { x: 1500, y: 215, r: 72, core: '#FFF3BE', glow: 'rgba(255,232,140,0.5)', rays: null, moon: true },
+      cloud: 'rgba(150,165,225,0.45)', cloudShade: 'rgba(20,25,70,0.45)',
+      hills: ['#3A4283', '#2B3168', '#1D214C'], trees: '#12153A', ground: ['#3F2D1E', '#1D120A'], pebble: 'rgba(10,5,0,0.5)',
+      grass: ['#7C9C3C', '#566F24', '#9CBB50'], haze: 'rgba(120,135,230,0.16)', stars: true,
+      light: [0.4, -0.92], ambient: 'fireflies',
+    },
+  };
+  let theme = THEMES.noon;
+  function setTheme(name) { theme = THEMES[name] || THEMES.noon; }
+
   // ---------- Фон ----------
   const clouds = [];
   { const r = rng(42); for (let i = 0; i < 8; i++) clouds.push({ x: i * 300 + r() * 150 - 200, y: 70 + r() * 260, s: 0.55 + r() * 0.8, v: 5 + r() * 9 }); }
+  const starsPos = [];
+  { const r = rng(5); for (let i = 0; i < 70; i++) starsPos.push({ x: r() * 2600 - 340, y: r() * 420 - 150, s: 1 + r() * 2.2, p: r() * 6 }); }
 
+  function hillY(x, base, amp, f, ph, amp2, f2) { return base - Math.sin(x * f + ph) * amp - Math.sin(x * f2 + ph * 2) * amp2; }
   function hillPath(ctx, x0, x1, base, amp, f, ph, amp2, f2) {
     ctx.beginPath(); ctx.moveTo(x0, C.GROUND_Y + 5);
-    for (let x = x0; x <= x1 + 40; x += 40) ctx.lineTo(x, base - Math.sin(x * f + ph) * amp - Math.sin(x * f2 + ph * 2) * amp2);
+    for (let x = x0; x <= x1 + 40; x += 40) ctx.lineTo(x, hillY(x, base, amp, f, ph, amp2, f2));
     ctx.lineTo(x1 + 40, C.GROUND_Y + 5); ctx.closePath();
   }
 
   function cloud(ctx, x, y, s) {
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillStyle = theme.cloud;
     circle(ctx, 0, 0, 38); ctx.fill(); circle(ctx, 42, -14, 48); ctx.fill(); circle(ctx, 90, 0, 36); ctx.fill();
     rr(ctx, -20, -2, 130, 38, 19); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.beginPath(); ctx.ellipse(36, -34, 30, 14, -0.2, 0, TAU); ctx.fill();
+    ctx.fillStyle = theme.cloudShade; ctx.beginPath(); ctx.ellipse(45, 30, 70, 9, 0, 0, TAU); ctx.fill();
     ctx.restore();
   }
 
   function background(ctx, v, t) {
-    const { x0, x1, y0, y1 } = v;
+    const { x0, x1, y0, y1 } = v, T = theme;
     const sky = ctx.createLinearGradient(0, y0, 0, C.GROUND_Y);
-    sky.addColorStop(0, '#FFC93C'); sky.addColorStop(0.55, '#FFE27A'); sky.addColorStop(1, '#FFF4C7');
+    sky.addColorStop(0, T.sky[0]); sky.addColorStop(0.55, T.sky[1]); sky.addColorStop(1, T.sky[2]);
     ctx.fillStyle = sky; ctx.fillRect(x0, y0, x1 - x0, C.GROUND_Y - y0 + 2);
 
-    // Солнце с лучами
-    const sx = 1560, sy = 170;
-    ctx.save(); ctx.translate(sx, sy); ctx.rotate(t * 0.08);
-    ctx.fillStyle = 'rgba(255,255,255,0.28)';
-    for (let i = 0; i < 12; i++) { ctx.rotate(TAU / 12); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-40, -420); ctx.lineTo(40, -420); ctx.closePath(); ctx.fill(); }
-    ctx.restore();
-    const sg = ctx.createRadialGradient(sx, sy, 10, sx, sy, 120);
-    sg.addColorStop(0, '#FFFDF0'); sg.addColorStop(0.55, '#FFF3B0'); sg.addColorStop(1, 'rgba(255,243,176,0)');
-    ctx.fillStyle = sg; circle(ctx, sx, sy, 120); ctx.fill();
-    ctx.fillStyle = '#FFFBE3'; circle(ctx, sx, sy, 62); ctx.fill();
+    if (T.stars) {
+      for (const s of starsPos) {
+        if (s.x < x0 || s.x > x1) continue;
+        ctx.globalAlpha = 0.35 + 0.55 * (0.5 + 0.5 * Math.sin(t * 2 + s.p));
+        ctx.fillStyle = '#FFF6D8'; star(ctx, s.x, s.y, s.s * 2.2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Солнце
+    const S = T.sun;
+    if (S.rays) {
+      ctx.save(); ctx.translate(S.x, S.y); ctx.rotate(t * 0.08);
+      ctx.fillStyle = S.rays;
+      for (let i = 0; i < 12; i++) { ctx.rotate(TAU / 12); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-40, -440); ctx.lineTo(40, -440); ctx.closePath(); ctx.fill(); }
+      ctx.restore();
+    }
+    const sg = ctx.createRadialGradient(S.x, S.y, S.r * 0.2, S.x, S.y, S.r * 2.1);
+    sg.addColorStop(0, S.core); sg.addColorStop(0.45, S.glow); sg.addColorStop(1, 'rgba(255,240,180,0)');
+    ctx.fillStyle = sg; circle(ctx, S.x, S.y, S.r * 2.1); ctx.fill();
+    ctx.fillStyle = S.core; circle(ctx, S.x, S.y, S.r); ctx.fill();
+    if (S.moon) {
+      ctx.fillStyle = 'rgba(214,180,96,0.38)';
+      circle(ctx, S.x - 22, S.y - 16, 15); ctx.fill(); circle(ctx, S.x + 24, S.y + 8, 11); ctx.fill();
+      circle(ctx, S.x - 6, S.y + 30, 8); ctx.fill(); circle(ctx, S.x + 14, S.y - 34, 6); ctx.fill();
+    }
+    // Стая птиц вдалеке
+    if (T.flock) {
+      const fw = (x1 - x0) + 500, fx = x0 - 250 + ((t * 38) % fw), fy = 250 + Math.sin(t * 0.4) * 24;
+      ctx.strokeStyle = 'rgba(90,50,10,0.5)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      for (let i = 0; i < 5; i++) {
+        const bx = fx - Math.abs(i - 2) * 34 - (i % 2) * 6, by = fy + (i - 2) * 20, w = Math.sin(t * 7 + i) * 7;
+        ctx.beginPath(); ctx.moveTo(bx - 11, by - 4 + w); ctx.quadraticCurveTo(bx - 4, by - 7, bx, by); ctx.quadraticCurveTo(bx + 4, by - 7, bx + 11, by - 4 + w); ctx.stroke();
+      }
+      ctx.lineCap = 'butt';
+    }
 
     // Облака
     const span = (x1 - x0) + 400;
@@ -1691,42 +2436,417 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       cloud(ctx, cx, c.y, c.s);
     }
 
-    // Холмы
-    ctx.fillStyle = '#FFD45C'; hillPath(ctx, x0, x1, 700, 50, 0.0035, 0.5, 25, 0.009); ctx.fill();
-    ctx.fillStyle = '#F7B733'; hillPath(ctx, x0, x1, 800, 40, 0.005, 2.1, 18, 0.013); ctx.fill();
-    ctx.fillStyle = '#E99A1C'; hillPath(ctx, x0, x1, 880, 26, 0.007, 4.0, 10, 0.02); ctx.fill();
+    // Холмы (дальний слой с деревцами) и дымка у горизонта
+    ctx.fillStyle = T.hills[0]; hillPath(ctx, x0, x1, 700, 50, 0.0035, 0.5, 25, 0.009); ctx.fill();
+    ctx.fillStyle = T.haze; ctx.fillRect(x0, 640, x1 - x0, 320);
+    ctx.fillStyle = T.hills[1]; hillPath(ctx, x0, x1, 800, 40, 0.005, 2.1, 18, 0.013); ctx.fill();
+    ctx.fillStyle = T.trees;
+    for (let x = Math.floor(x0 / 170) * 170 + 60; x < x1; x += 170) {
+      const y = hillY(x, 800, 40, 0.005, 2.1, 18, 0.013), k = 0.8 + ((x * 7) % 5) / 10;
+      ctx.fillRect(x - 3, y - 6, 6, 18);
+      circle(ctx, x, y - 16 * k, 15 * k); ctx.fill(); circle(ctx, x - 10 * k, y - 8 * k, 11 * k); ctx.fill(); circle(ctx, x + 10 * k, y - 8 * k, 11 * k); ctx.fill();
+    }
+    ctx.fillStyle = T.hills[2]; hillPath(ctx, x0, x1, 880, 26, 0.007, 4.0, 10, 0.02); ctx.fill();
 
     // Земля
-    ctx.fillStyle = '#7A4A1C'; ctx.fillRect(x0, C.GROUND_Y, x1 - x0, y1 - C.GROUND_Y + 2);
-    ctx.fillStyle = '#5E3812';
-    const r = rng(9);
-    for (let i = 0; i < 70; i++) {
-      const px = x0 + r() * (x1 - x0), py = C.GROUND_Y + 40 + r() * Math.max(60, y1 - C.GROUND_Y - 40);
-      ctx.beginPath(); ctx.ellipse(px, py, 6 + r() * 12, 4 + r() * 6, 0, 0, TAU); ctx.fill();
-    }
-    grassStrip(ctx, x0, x1, C.GROUND_Y);
+    now = t;
+    fillSoil(ctx, x0, C.GROUND_Y, x1 - x0, y1 - C.GROUND_Y + 2, C.GROUND_Y);
+    grassStrip(ctx, x0, x1, C.GROUND_Y, true);
   }
 
-  function grassStrip(ctx, x0, x1, y) {
-    ctx.fillStyle = '#B8C92A'; ctx.fillRect(x0, y - 2, x1 - x0, 20);
-    ctx.fillStyle = '#93A81E'; ctx.fillRect(x0, y + 14, x1 - x0, 6);
-    ctx.fillStyle = '#C9D93A';
-    ctx.beginPath();
-    for (let x = Math.floor(x0 / 24) * 24; x < x1 + 24; x += 24) { ctx.moveTo(x, y + 2); ctx.lineTo(x + 8, y - 12); ctx.lineTo(x + 16, y + 2); }
-    ctx.fill();
+  // ---------- Текстура земли: плитка 512×320, рисуется один раз на каждое время суток ----------
+  const TILE_W = 512, TILE_H = 320;
+  const soilCache = new Map();
+  function soilPattern(ctx) {
+    const T = theme, key = T.ground.join() + T.pebble;
+    if (soilCache.has(key)) return soilCache.get(key);
+    if (typeof document === 'undefined') return null;
+    const cv = document.createElement('canvas'); cv.width = TILE_W; cv.height = TILE_H;
+    const c = cv.getContext('2d'), r = rng(2024);
+    // повторяем каждый элемент со сдвигом на ширину плитки, чтобы стык был незаметен
+    const wrap = (fn) => { for (const dx of [-TILE_W, 0, TILE_W]) { c.save(); c.translate(dx, 0); fn(); c.restore(); } };
+    const g = c.createLinearGradient(0, 0, 0, TILE_H);
+    g.addColorStop(0, T.ground[0]); g.addColorStop(0.55, mix(T.ground[0], T.ground[1], 0.6)); g.addColorStop(1, T.ground[1]);
+    c.fillStyle = g; c.fillRect(0, 0, TILE_W, TILE_H);
+    // пласты почвы: волнистые полосы чуть темнее и светлее
+    for (let k = 0; k < 5; k++) {
+      const y = 40 + k * 58 + r() * 14, amp = 4 + r() * 6, ph = r() * 6.28, dark = k % 2 === 0;
+      c.fillStyle = dark ? 'rgba(0,0,0,0.10)' : 'rgba(255,230,190,0.05)';
+      c.beginPath(); c.moveTo(0, y);
+      for (let x = 0; x <= TILE_W; x += 16) c.lineTo(x, y + Math.sin((x / TILE_W) * TAU * 2 + ph) * amp);
+      for (let x = TILE_W; x >= 0; x -= 16) c.lineTo(x, y + 10 + r() * 6 + Math.sin((x / TILE_W) * TAU * 2 + ph) * amp);
+      c.closePath(); c.fill();
+    }
+    // мелкая крошка
+    for (let i = 0; i < 700; i++) {
+      const x = r() * TILE_W, y = r() * TILE_H, z = 0.8 + r() * 1.8;
+      c.fillStyle = r() < 0.55 ? 'rgba(0,0,0,0.18)' : 'rgba(255,225,170,0.10)';
+      c.fillRect(x, y, z, z);
+    }
+    // корешки у самого верха
+    c.lineCap = 'round';
+    for (let i = 0; i < 16; i++) {
+      const x = r() * TILE_W, len = 14 + r() * 30;
+      wrap(() => {
+        c.strokeStyle = 'rgba(40,20,5,0.45)'; c.lineWidth = 1.2 + r() * 1.2;
+        c.beginPath(); c.moveTo(x, 14); c.quadraticCurveTo(x + (r() - 0.5) * 20, 14 + len * 0.6, x + (r() - 0.5) * 18, 14 + len);
+        if (r() < 0.6) { c.moveTo(x + 1, 18 + len * 0.3); c.lineTo(x + (r() < 0.5 ? -8 : 8), 22 + len * 0.55); }
+        c.stroke();
+      });
+    }
+    // камешки: тёмные с бликом, разного размера и формы
+    for (let i = 0; i < 46; i++) {
+      const x = r() * TILE_W, y = 26 + r() * (TILE_H - 40), rx = 3 + r() * (r() < 0.15 ? 15 : 7), ry = rx * (0.55 + r() * 0.3), a = (r() - 0.5) * 0.8;
+      const stone = r() < 0.35;
+      wrap(() => {
+        c.save(); c.translate(x, y); c.rotate(a);
+        c.fillStyle = stone ? mix(T.ground[0], 'rgb(160,150,135)', 0.55) : T.pebble;
+        c.beginPath(); c.ellipse(0, 0, rx, ry, 0, 0, TAU); c.fill();
+        c.fillStyle = 'rgba(0,0,0,0.22)'; c.beginPath(); c.ellipse(rx * 0.15, ry * 0.35, rx * 0.85, ry * 0.55, 0, 0, TAU); c.fill();
+        c.fillStyle = 'rgba(255,240,210,' + (stone ? 0.35 : 0.14) + ')'; c.beginPath(); c.ellipse(-rx * 0.3, -ry * 0.35, rx * 0.4, ry * 0.25, -0.3, 0, TAU); c.fill();
+        c.restore();
+      });
+    }
+    // редкие ракушки-завитки и косточки — детали, которые замечаешь не сразу
+    for (let i = 0; i < 3; i++) {
+      const x = 60 + r() * (TILE_W - 120), y = 120 + r() * 170;
+      c.strokeStyle = 'rgba(255,235,200,0.22)'; c.lineWidth = 2;
+      c.beginPath(); for (let k = 0; k < 26; k++) { const a = k * 0.45, rad = 1 + k * 0.32; c.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad); } c.stroke();
+    }
+    const pat = ctx.createPattern(cv, 'repeat');
+    soilCache.set(key, pat);
+    return pat;
+  }
+  // Залить прямоугольник почвой; top — откуда начинается текстура (верх земли или холма)
+  function fillSoil(ctx, x, y, w, h, top) {
+    const pat = soilPattern(ctx), T = theme;
+    if (!pat) { ctx.fillStyle = T.ground[0]; ctx.fillRect(x, y, w, h); return; }
+    ctx.save(); ctx.translate(0, top); ctx.fillStyle = pat; ctx.fillRect(x, y - top, w, h); ctx.restore();
+    // ниже одной плитки (высокие экраны) — просто тёмная почва без повтора узора
+    if (y + h > top + TILE_H) { ctx.fillStyle = T.ground[1]; ctx.fillRect(x, top + TILE_H, w, y + h - top - TILE_H); }
+  }
+
+  // ---------- Ветер ----------
+  let now = 0, detail = 1;
+  function setDetail(low) { detail = low ? 2 : 1; }
+  // наклон травы в точке x: ровный ветер + волна + порывы, которые пробегают слева направо
+  function wind(x, t) {
+    const gust = Math.pow(Math.max(0, Math.sin(t * 0.42 - x * 0.0016)), 6);
+    return 0.10 + Math.sin(t * 1.35 + x * 0.0065) * 0.11 + Math.sin(t * 3.1 + x * 0.021) * 0.04 + gust * 0.32;
+  }
+
+  // Хеш для травинок: одна и та же x всегда даёт одну и ту же травинку
+  const hash = (n) => { const v = Math.sin(n * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
+
+  // ---------- Трава ----------
+  // Травинки рисуются заранее: 12 кадров плитки шириной 480 с разным наклоном от ветра.
+  // В каждом кадре полоса травы собирается из узких кусков нужного наклона — это в разы дешевле,
+  // чем рисовать сотни травинок заново, а ветер по-прежнему бежит волной вдоль земли.
+  const GT = 480, GUP = 40, GDN = 28, GH = GUP + GDN, GSC = 1.5, GN = 12, WMIN = -0.06, WMAX = 0.58, CHUNK = 16;
+  const grassCache = new Map();
+  function drawBlades(c, y, lean0, x0, x1, wrapW) {
+    const G = theme.grass, hx = (x) => (wrapW ? ((x % wrapW) + wrapW) % wrapW : x);
+    // дёрн
+    c.fillStyle = G[0]; c.fillRect(x0, y - 2, x1 - x0, 15);
+    c.fillStyle = G[1]; c.beginPath(); c.moveTo(x0, y + 11);
+    for (let x = Math.floor(x0 / 14) * 14; x <= x1 + 14; x += 14) {
+      const h = hash(hx(x) * 0.37);
+      c.lineTo(x, y + 11); c.quadraticCurveTo(x + 7, y + 16 + h * 9, x + 14, y + 11);
+    }
+    c.lineTo(x1 + 14, y + 8); c.lineTo(x0, y + 8); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(255,255,200,0.16)'; c.fillRect(x0, y - 2, x1 - x0, 3);
+    // травинки: дальний тёмный слой и ближний светлый
+    const step = 5;
+    for (let layer = 0; layer < 2; layer++) {
+      c.fillStyle = layer === 0 ? mix(G[1], G[0], 0.35) : G[2]; c.beginPath();
+      for (let x = Math.floor(x0 / step) * step - (layer ? 2 : 0); x < x1 + step; x += step) {
+        const k = hx(x), h1 = hash(k + layer * 7.7), h2 = hash(k * 1.9 + 3.3 + layer);
+        if (layer === 1 && h1 < 0.25) continue;
+        const bx = x + (h2 - 0.5) * 4;
+        const H = (layer === 0 ? 11 : 8) + h1 * 10 + (h2 > 0.93 ? 9 : 0);
+        const w = 2.2 + h2 * 2.2;
+        const lean = (h1 - 0.5) * 0.5 + lean0 * (0.7 + h1 * 0.6) * (layer ? 1 : 0.85);
+        const tx = bx + Math.sin(lean) * H, ty = y + 1 - Math.cos(lean) * H;
+        c.moveTo(bx - w, y + 2);
+        c.quadraticCurveTo(bx - w * 0.3 + (tx - bx) * 0.35, y - H * 0.5, tx, ty);
+        c.quadraticCurveTo(bx + w * 0.4 + (tx - bx) * 0.4, y - H * 0.45, bx + w, y + 2);
+      }
+      c.fill();
+    }
+    // светлые кончики
+    c.strokeStyle = 'rgba(255,255,210,0.35)'; c.lineWidth = 1.2; c.beginPath();
+    for (let x = Math.floor(x0 / 37) * 37; x < x1; x += 37) {
+      const h = hash(hx(x) * 3.1); if (h < 0.5) continue;
+      const H = 12 + h * 8, lean = lean0 * 1.1, tx = x + Math.sin(lean) * H, ty = y - Math.cos(lean) * H;
+      c.moveTo(x + (tx - x) * 0.55, y - H * 0.5); c.lineTo(tx, ty);
+    }
+    c.stroke();
+  }
+  function grassFrames() {
+    const key = theme.grass.join();
+    if (grassCache.has(key)) return grassCache.get(key);
+    if (typeof document === 'undefined') return null;
+    const frames = [];
+    for (let f = 0; f < GN; f++) {
+      const cv = document.createElement('canvas'); cv.width = GT * GSC; cv.height = GH * GSC;
+      const c = cv.getContext('2d'); c.scale(GSC, GSC);
+      // рисуем с запасом по краям: травинки, наклонённые через край плитки, приходят от соседней плитки
+      drawBlades(c, GUP, WMIN + (f * (WMAX - WMIN)) / (GN - 1), -40, GT + 40, GT);
+      frames.push(cv);
+    }
+    grassCache.set(key, frames);
+    return frames;
+  }
+
+  function grassStrip(ctx, x0, x1, y, flowers) {
+    const G = theme.grass, t = now, frames = grassFrames();
+    if (!frames) { drawBlades(ctx, y, wind(0, t), x0, x1, 0); return; }
+    const step = CHUNK * detail;
+    for (let cx = Math.floor(x0 / step) * step; cx < x1; cx += step) {
+      const k = (wind(cx + step / 2, t) - WMIN) / (WMAX - WMIN);
+      const fr = frames[Math.max(0, Math.min(GN - 1, Math.round(k * (GN - 1))))];
+      const sx = ((cx % GT) + GT) % GT;
+      const w = Math.min(step, GT - sx);
+      ctx.drawImage(fr, sx * GSC, 0, w * GSC, GH * GSC, cx, y - GUP, w, GH);
+      if (w < step) ctx.drawImage(frames[0] === fr ? fr : fr, 0, 0, (step - w) * GSC, GH * GSC, cx + w, y - GUP, step - w, GH);
+    }
+    if (!flowers) return;
+    // цветы рисуются вживую — их мало, и они качаются вместе с травой
+    const cols = ['#FFFFFF', '#FF8FB1', '#FFE14D', '#FF9A3C', '#B9A6FF'];
+    ctx.lineCap = 'round';
+    for (let x = Math.floor(x0 / 90) * 90; x < x1; x += 90) {
+      const h = hash(x * 0.71);
+      if (h < 0.45) continue;
+      const fx0 = x + h * 60, stem = 12 + h * 10, lean = wind(fx0, t) * 0.9;
+      const fx = fx0 + Math.sin(lean) * stem, fy = y - Math.cos(lean) * stem;
+      ctx.strokeStyle = G[1]; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(fx0, y + 2); ctx.quadraticCurveTo(fx0, y - stem * 0.5, fx, fy); ctx.stroke();
+      ctx.fillStyle = cols[Math.floor(h * 97) % cols.length];
+      for (let q = 0; q < 5; q++) { circle(ctx, fx + Math.cos(q * 1.256 + lean) * 4, fy + Math.sin(q * 1.256 + lean) * 4, 3); ctx.fill(); }
+      ctx.fillStyle = '#E8A300'; circle(ctx, fx, fy, 2.4); ctx.fill();
+    }
+    ctx.lineCap = 'butt';
+  }
+
+  // «Живой воздух»: пыльца днём, листья на закате, светлячки в сумерках и ночью
+  function ambient(ctx, v, t) {
+    const kind = theme.ambient, r = rng(31), W = v.x1 - v.x0;
+    if (kind === 'fireflies') {
+      ctx.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 24; i++) {
+        const bx = v.x0 + r() * W, by = 500 + r() * 430, ph = r() * 6.28, f = 0.3 + r() * 0.5;
+        const x = bx + Math.sin(t * f + ph) * 60 + Math.sin(t * f * 2.3 + ph) * 20, y = by + Math.cos(t * f * 1.3 + ph) * 40;
+        const a = 0.2 + 0.8 * Math.max(0, Math.sin(t * (1 + f * 2) + ph * 3));
+        const g = ctx.createRadialGradient(x, y, 0, x, y, 15);
+        g.addColorStop(0, `rgba(255,244,150,${a.toFixed(2)})`); g.addColorStop(0.3, `rgba(255,220,80,${(a * 0.5).toFixed(2)})`); g.addColorStop(1, 'rgba(255,220,80,0)');
+        ctx.fillStyle = g; circle(ctx, x, y, 15); ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    } else if (kind === 'leaves') {
+      const cols = ['#E8641A', '#F29C2A', '#C9471A'];
+      for (let i = 0; i < 14; i++) {
+        const sp = 26 + r() * 30, ph = r() * 6.28;
+        const y = 160 + ((r() * 820 + t * sp) % 820), x = v.x0 + ((r() * W + t * 14 + Math.sin(t * 1.2 + ph) * 50) % W + W) % W;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(t * 1.5 + ph); ctx.globalAlpha = 0.85;
+        ctx.fillStyle = cols[i % 3]; ctx.beginPath(); ctx.ellipse(0, 0, 9, 4.5, 0, 0, TAU); ctx.fill();
+        ctx.strokeStyle = 'rgba(90,30,0,0.5)'; ctx.lineWidth = 1; line(ctx, -9, 0, 9, 0);
+        ctx.restore();
+      }
+    } else if (kind === 'pollen') {
+      ctx.fillStyle = '#FFFFFF';
+      for (let i = 0; i < 20; i++) {
+        const ph = r() * 6.28, sp = 8 + r() * 14;
+        const x = v.x0 + ((r() * W + t * sp) % W), y = 300 + r() * 620 + Math.sin(t * 0.7 + ph) * 26;
+        ctx.globalAlpha = 0.25 + 0.3 * (0.5 + 0.5 * Math.sin(t * 1.3 + ph));
+        circle(ctx, x, y, 2 + r() * 2.5); ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // Следы взрывов на земле
+  function decals(ctx, list) {
+    for (const d of list) {
+      ctx.save(); ctx.translate(d.x, d.y + 3); ctx.scale(1, 0.2);
+      const g = ctx.createRadialGradient(0, 0, d.r * 0.1, 0, 0, d.r);
+      g.addColorStop(0, 'rgba(25,12,4,0.7)'); g.addColorStop(0.6, 'rgba(25,12,4,0.35)'); g.addColorStop(1, 'rgba(25,12,4,0)');
+      ctx.fillStyle = g; circle(ctx, 0, 0, d.r); ctx.fill();
+      ctx.restore();
+    }
   }
 
   function statics(ctx, list) {
+    const T = theme;
     for (const s of list) {
+      if (s.poly) {
+        // Скат
+        const vs = s.vertices;
+        extrude(ctx, vs, T.ground[0], T.ground[1], null, (nx, ny, lit) => (ny < -0.3 ? T.grass[2] : mix(T.ground[1], T.ground[0], lit * 0.6)));
+        const top = Math.min(...vs.map((p) => p.y)), xs = vs.map((p) => p.x);
+        ctx.save(); ctx.beginPath(); vs.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); ctx.closePath(); ctx.clip();
+        fillSoil(ctx, Math.min(...xs), top, Math.max(...xs) - Math.min(...xs), C.GROUND_Y - top + 4, top);
+        ctx.restore();
+        ctx.beginPath(); vs.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); ctx.closePath();
+        ctx.lineWidth = 5; ctx.strokeStyle = OUT; ctx.stroke();
+        // трава по наклонной стороне (самая длинная грань, кроме основания)
+        let best = null;
+        for (let i = 0; i < vs.length; i++) {
+          const a = vs[i], b = vs[(i + 1) % vs.length];
+          if (Math.abs(a.y - b.y) < 1 && a.y > C.GROUND_Y - 5) continue;
+          if (Math.abs(a.x - b.x) < 1) continue;
+          const len = Math.hypot(a.x - b.x, a.y - b.y);
+          if (!best || len > best.len) best = { a, b, len };
+        }
+        if (best) {
+          ctx.lineCap = 'round';
+          ctx.strokeStyle = T.grass[1]; ctx.lineWidth = 16; line(ctx, best.a.x, best.a.y + 4, best.b.x, best.b.y + 4);
+          ctx.strokeStyle = T.grass[0]; ctx.lineWidth = 10; line(ctx, best.a.x, best.a.y, best.b.x, best.b.y);
+          ctx.lineCap = 'butt';
+        }
+        continue;
+      }
       const w = s.size.w, h = s.size.h, x = s.position.x - w / 2, y = s.position.y - h / 2;
-      ctx.fillStyle = '#8A5524'; rr(ctx, x, y, w, h + 30, 18); ctx.fill();
-      ctx.lineWidth = 5; ctx.strokeStyle = OUT; ctx.stroke();
-      ctx.fillStyle = '#6E4119';
-      const r = rng(77);
-      for (let i = 0; i < 14; i++) { ctx.beginPath(); ctx.ellipse(x + 20 + r() * (w - 40), y + 40 + r() * (h - 50), 8 + r() * 14, 5 + r() * 7, 0, 0, TAU); ctx.fill(); }
-      ctx.save(); rr(ctx, x, y, w, h, 18); ctx.clip(); grassStrip(ctx, x, x + w, y + 2); ctx.restore();
+      extrude(ctx, [{ x, y }, { x: x + w, y }, { x: x + w, y: y + h + 30 }, { x, y: y + h + 30 }], T.ground[0], T.ground[1], null,
+        (nx, ny, lit) => (ny < -0.5 ? T.grass[2] : mix(T.ground[1], T.ground[0], lit * 0.6)));
+      fillSoil(ctx, x, y, w, h + 30, y);
+      // тень у боковых стенок холма — объём
+      const sg = ctx.createLinearGradient(x, 0, x + 40, 0);
+      sg.addColorStop(0, 'rgba(0,0,0,0.28)'); sg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = sg; ctx.fillRect(x, y, 40, h + 30);
+      ctx.beginPath(); ctx.rect(x, y, w, h + 30);
+      ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.strokeStyle = OUT; ctx.stroke();
+      ctx.save(); ctx.beginPath(); ctx.rect(x + 2, y + 2, w - 4, h); ctx.clip(); grassStrip(ctx, x, x + w, y + 2, true); ctx.restore();
     }
   }
+
+  // Высота поверхности под точкой x (земля или верх холма) — для теней
+  function surfaceY(x, list) {
+    let y = C.GROUND_Y;
+    for (const s of list) {
+      if (s.poly || !s.size) continue;
+      if (x > s.position.x - s.size.w / 2 && x < s.position.x + s.size.w / 2) y = Math.min(y, s.position.y - s.size.h / 2);
+    }
+    return y;
+  }
+
+  // Поверхности, на которые ложатся тени и подпалины: земля и верх каждого холма
+  function surfaceList(list, ground) {
+    if (ground) return [{ x0: -1e5, x1: 1e5, y: C.GROUND_Y, ground: true }];
+    return list.filter((s) => !s.poly && s.size).map((s) => ({ x0: s.position.x - s.size.w / 2, x1: s.position.x + s.size.w / 2, y: s.position.y - s.size.h / 2 }));
+  }
+  const shadeCache = new WeakMap();
+  function unitShade(ctx) {
+    if (!shadeCache.has(ctx)) {
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      g.addColorStop(0, 'rgba(30,14,0,1)'); g.addColorStop(0.55, 'rgba(30,14,0,0.7)'); g.addColorStop(1, 'rgba(30,14,0,0)');
+      shadeCache.set(ctx, g);
+    }
+    return shadeCache.get(ctx);
+  }
+  function softEllipse(ctx, x, y, rx, ry, alpha) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(rx, ry); ctx.globalAlpha = alpha;
+    ctx.fillStyle = unitShade(ctx); ctx.beginPath(); ctx.arc(0, 0, 1, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+
+  // Тени и следы взрывов на поверхностях. ground=true — на земле (рисуется до холмов, они её перекрывают),
+  // ground=false — на верхушках холмов. Всё обрезается по краю поверхности, поэтому ничего не висит в воздухе.
+  // Тень есть только у того, что стоит на поверхности или низко над ней.
+  function groundFx(ctx, bodies, decalList, list, ground) {
+    for (const S of surfaceList(list, ground)) {
+      ctx.save();
+      ctx.beginPath();
+      if (S.ground) ctx.rect(-1e5, S.y - 4, 2e5, 60); else ctx.rect(S.x0 + 3, S.y - 10, S.x1 - S.x0 - 6 + DEPTH.x, 32);
+      ctx.clip();
+      for (const d of decalList) {
+        if (Math.abs(d.y - S.y) > 1) continue;
+        softEllipse(ctx, d.x, d.y + 4, d.r, d.r * 0.16, 0.75);
+      }
+      for (const b of bodies) {
+        const bb = b.bounds, cx = (bb.min.x + bb.max.x) / 2, w = bb.max.x - bb.min.x;
+        if (cx < S.x0 - w / 2 || cx > S.x1 + w / 2) continue;
+        if (!S.ground && (cx < S.x0 || cx > S.x1)) continue;
+        if (S.ground && surfaceY(cx, list) !== S.y) continue;
+        const gap = S.y - bb.max.y;
+        if (gap < -8 || gap > 60) continue;
+        const k = 1 - Math.max(0, gap) / 60;
+        softEllipse(ctx, cx + 3, S.y + 4, w * (0.5 + 0.12 * k), 4 + 5 * k, 0.5 * k);
+      }
+      ctx.restore();
+    }
+  }
+
+  // ---------- Объём (2.5D) ----------
+  // Глубина: задняя грань смещена вправо-вверх, будто камера смотрит чуть сверху и сбоку.
+  const DEPTH = { x: 12, y: -9 };
+  const SIDE = {
+    wood:  ['rgb(222,160,84)', 'rgb(122,72,26)'],
+    glass: ['rgba(205,240,255,0.80)', 'rgba(80,150,190,0.75)'],
+    stone: ['rgb(190,185,175)', 'rgb(98,94,86)'],
+    tnt:   ['rgb(230,90,60)', 'rgb(110,26,14)'],
+  };
+  const colorCache = new Map();
+  function parseCol(c) {
+    if (colorCache.has(c)) return colorCache.get(c);
+    let m;
+    if (c[0] === '#') { const n = parseInt(c.slice(1), 16); m = [(n >> 16) & 255, (n >> 8) & 255, n & 255, 1]; }
+    else { m = c.match(/[\d.]+/g).map(Number); if (m.length === 3) m.push(1); }
+    colorCache.set(c, m); return m;
+  }
+  function mix(c1, c2, k) {
+    const a = parseCol(c1), b = parseCol(c2), q = Math.round(k * 8) / 8;
+    return `rgba(${Math.round(a[0] + (b[0] - a[0]) * q)},${Math.round(a[1] + (b[1] - a[1]) * q)},${Math.round(a[2] + (b[2] - a[2]) * q)},${(a[3] + (b[3] - a[3]) * q).toFixed(2)})`;
+  }
+
+  // Боковые грани выпуклого многоугольника (вершины в мировых координатах)
+  function extrude(ctx, vs, lightCol, darkCol, depth, faceCol) {
+    const D = depth || DEPTH, L = theme.light;
+    let cx = 0, cy = 0; for (const v of vs) { cx += v.x; cy += v.y; } cx /= vs.length; cy /= vs.length;
+    ctx.lineJoin = 'round'; ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(43,29,14,0.55)';
+    for (let i = 0; i < vs.length; i++) {
+      const a = vs[i], b = vs[(i + 1) % vs.length];
+      let nx = b.y - a.y, ny = a.x - b.x; const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
+      if (((a.x + b.x) / 2 - cx) * nx + ((a.y + b.y) / 2 - cy) * ny < 0) { nx = -nx; ny = -ny; }
+      if (nx * D.x + ny * D.y <= 0.5) continue;
+      const lit = Math.max(0, Math.min(1, 0.5 + 0.6 * (nx * L[0] + ny * L[1])));
+      ctx.fillStyle = faceCol ? faceCol(nx, ny, lit) : mix(darkCol, lightCol, lit);
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(b.x + D.x, b.y + D.y); ctx.lineTo(a.x + D.x, a.y + D.y); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+    }
+  }
+
+  // Объём круглого тела (валун): «цилиндр» в сторону глубины
+  function extrudeCircle(ctx, x, y, r, col) {
+    const D = DEPTH, dl = Math.hypot(D.x, D.y), px = -D.y / dl * r, py = D.x / dl * r;
+    ctx.fillStyle = col; ctx.strokeStyle = 'rgba(43,29,14,0.55)'; ctx.lineWidth = 2;
+    circle(ctx, x + D.x, y + D.y, r); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + px, y + py); ctx.lineTo(x - px, y - py); ctx.lineTo(x - px + D.x, y - py + D.y); ctx.lineTo(x + px + D.x, y + py + D.y); ctx.closePath(); ctx.fill();
+  }
+
+  function blockSides(ctx, b) {
+    const g = b.game, c = SIDE[g.m];
+    if (g.shape === 'circle') extrudeCircle(ctx, b.position.x, b.position.y, g.w / 2, mix(c[1], c[0], 0.35));
+    else extrude(ctx, b.vertices, c[0], c[1]);
+  }
+
+  // Шаровая светотень персонажа (в его локальных координатах, la — угол на свет)
+  function sphereShade(ctx, r, la) {
+    const lx = Math.cos(la), ly = Math.sin(la);
+    ctx.save(); circle(ctx, 0, 0, r * 0.96); ctx.clip();
+    const g = ctx.createRadialGradient(lx * r * 0.45, ly * r * 0.45, r * 0.1, lx * r * 0.15, ly * r * 0.15, r * 1.15);
+    g.addColorStop(0, 'rgba(255,255,255,0.22)'); g.addColorStop(0.5, 'rgba(255,255,255,0)');
+    g.addColorStop(0.8, 'rgba(40,12,0,0.12)'); g.addColorStop(1, 'rgba(40,12,0,0.42)');
+    ctx.fillStyle = g; ctx.fillRect(-r, -r, r * 2, r * 2);
+    // отражённый свет с теневой стороны
+    ctx.strokeStyle = 'rgba(255,236,190,0.5)'; ctx.lineWidth = r * 0.09; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.8, la + Math.PI - 0.6, la + Math.PI + 0.6); ctx.stroke(); ctx.lineCap = 'butt';
+    ctx.restore();
+    // блик
+    ctx.save(); ctx.translate(lx * r * 0.52, ly * r * 0.52); ctx.rotate(la + Math.PI / 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.ellipse(0, 0, r * 0.2, r * 0.1, 0, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+  function lightAngle() { return Math.atan2(theme.light[1], theme.light[0]); }
 
   // ---------- Блоки ----------
   const crackCache = new Map();
@@ -1742,33 +2862,86 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     crackCache.set(g.seed, out); return out;
   }
 
+  // Контур блока в локальных координатах (центр тела — начало координат)
+  function shapePath(ctx, g) {
+    const w = g.w, h = g.h;
+    if (g.shape === 'tri') { ctx.beginPath(); ctx.moveTo(-w / 2, h / 3); ctx.lineTo(w / 2, h / 3); ctx.lineTo(0, -2 * h / 3); ctx.closePath(); }
+    else if (g.shape === 'circle') circle(ctx, 0, 0, w / 2);
+    else rr(ctx, -w / 2, -h / 2, w, h, g.m === 'stone' ? 6 : g.m === 'glass' ? 3 : 4);
+  }
+
+  const MAT_STYLE = {
+    wood:  { a: '#EDBB6C', b: '#C7883A', line: '#6E4216', grain: 'rgba(140,82,30,0.55)' },
+    glass: { a: 'rgba(232,250,255,0.85)', b: 'rgba(140,210,240,0.55)', line: '#4E9DC4' },
+    stone: { a: '#C4BFB5', b: '#8E897F', line: '#4A463F' },
+    tnt:   { a: '#F05A3A', b: '#B8261A', line: '#5A1A0C' },
+  };
+
   function block(ctx, b) {
-    const g = b.game, w = g.w, h = g.h;
+    const g = b.game, w = g.w, h = g.h, st = MAT_STYLE[g.m];
     ctx.save(); ctx.translate(b.position.x, b.position.y); ctx.rotate(b.angle);
+    const horiz = w >= h;
+    const gr = g.shape === 'circle'
+      ? ctx.createRadialGradient(-w * 0.18, -w * 0.2, w * 0.05, 0, 0, w * 0.55)
+      : (horiz || g.shape === 'tri' ? ctx.createLinearGradient(0, -h / 2, 0, h / 2) : ctx.createLinearGradient(-w / 2, 0, w / 2, 0));
+    gr.addColorStop(0, st.a); gr.addColorStop(1, st.b);
+    shapePath(ctx, g); ctx.fillStyle = gr; ctx.fill();
+
+    ctx.save(); shapePath(ctx, g); ctx.clip();
     if (g.m === 'wood') {
-      ctx.fillStyle = '#D9A04E'; rr(ctx, -w / 2, -h / 2, w, h, 4); ctx.fill();
-      ctx.strokeStyle = '#B07432'; ctx.lineWidth = 2; ctx.beginPath();
-      if (w >= h) { ctx.moveTo(-w / 2 + 6, -h * 0.15); ctx.lineTo(w / 2 - 10, -h * 0.15); ctx.moveTo(-w / 2 + 14, h * 0.2); ctx.lineTo(w / 2 - 6, h * 0.2); }
+      ctx.strokeStyle = st.grain; ctx.lineWidth = 2; ctx.beginPath();
+      if (g.shape === 'tri') { for (let k = 1; k <= 3; k++) { const yy = h / 3 - k * h * 0.22, ww = w * (1 - k * 0.22) / 2; ctx.moveTo(-ww + 4, yy); ctx.lineTo(ww - 4, yy); } }
+      else if (horiz) { ctx.moveTo(-w / 2 + 6, -h * 0.15); ctx.lineTo(w / 2 - 10, -h * 0.15); ctx.moveTo(-w / 2 + 14, h * 0.2); ctx.lineTo(w / 2 - 6, h * 0.2); }
       else { ctx.moveTo(-w * 0.15, -h / 2 + 6); ctx.lineTo(-w * 0.15, h / 2 - 10); ctx.moveTo(w * 0.2, -h / 2 + 14); ctx.lineTo(w * 0.2, h / 2 - 6); }
       ctx.stroke();
-      ctx.strokeStyle = '#6E4216'; ctx.lineWidth = 3; rr(ctx, -w / 2, -h / 2, w, h, 4); ctx.stroke();
+      if (g.shape === 'rect' && Math.max(w, h) > 70) {
+        // сучок и гвозди
+        const r = rng(g.seed); const kx = horiz ? (r() - 0.5) * w * 0.5 : 0, ky = horiz ? 0 : (r() - 0.5) * h * 0.5;
+        ctx.fillStyle = 'rgba(120,70,25,0.6)'; ctx.beginPath(); ctx.ellipse(kx, ky, horiz ? 6 : 3, horiz ? 3 : 6, 0, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#5A3A1A';
+        const nx = horiz ? w / 2 - 7 : 0, ny = horiz ? 0 : h / 2 - 7;
+        circle(ctx, nx, ny, 2.2); ctx.fill(); circle(ctx, -nx, -ny, 2.2); ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.28)';
+      if (g.shape === 'rect') { if (horiz) ctx.fillRect(-w / 2, -h / 2, w, 3); else ctx.fillRect(-w / 2, -h / 2, 3, h); }
     } else if (g.m === 'glass') {
-      ctx.fillStyle = 'rgba(200,238,255,0.62)'; rr(ctx, -w / 2, -h / 2, w, h, 3); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 3; ctx.beginPath();
-      if (w >= h) { ctx.moveTo(-w / 2 + 8, -h / 2 + 5); ctx.lineTo(-w / 2 + 30, -h / 2 + 5); } else { ctx.moveTo(-w / 2 + 5, -h / 2 + 8); ctx.lineTo(-w / 2 + 5, -h / 2 + 30); }
-      ctx.stroke();
-      ctx.strokeStyle = '#5BA7CC'; ctx.lineWidth = 3; rr(ctx, -w / 2, -h / 2, w, h, 3); ctx.stroke();
-    } else {
-      ctx.fillStyle = '#A9A49B'; rr(ctx, -w / 2, -h / 2, w, h, 6); ctx.fill();
-      const r = rng(g.seed); ctx.fillStyle = '#8D877E';
-      for (let i = 0; i < Math.max(2, (w * h) / 900); i++) { circle(ctx, (r() - 0.5) * (w - 10), (r() - 0.5) * (h - 8), 2 + r() * 3); ctx.fill(); }
-      ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(-w / 2 + 4, -h / 2 + 3, w - 8, 3);
-      ctx.strokeStyle = '#4F4B45'; ctx.lineWidth = 3; rr(ctx, -w / 2, -h / 2, w, h, 6); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      const L = Math.max(w, h);
+      ctx.beginPath(); ctx.moveTo(-L * 0.3, -L); ctx.lineTo(-L * 0.18, -L); ctx.lineTo(-L * 0.38 + L * 0.2, L); ctx.lineTo(-L * 0.5 + L * 0.2, L); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.beginPath(); ctx.moveTo(L * 0.05, -L); ctx.lineTo(L * 0.1, -L); ctx.lineTo(L * 0.0, L); ctx.lineTo(-L * 0.05, L); ctx.closePath(); ctx.fill();
+    } else if (g.m === 'stone') {
+      const r = rng(g.seed);
+      if (g.shape === 'rect' && w >= 40 && h >= 40) {
+        // кладка
+        ctx.strokeStyle = 'rgba(60,55,48,0.45)'; ctx.lineWidth = 2; ctx.beginPath();
+        const rowH = 24;
+        for (let y = -h / 2 + rowH, row = 0; y < h / 2; y += rowH, row++) { ctx.moveTo(-w / 2, y); ctx.lineTo(w / 2, y); }
+        for (let y = -h / 2, row = 0; y < h / 2; y += rowH, row++) for (let x = -w / 2 + (row % 2 ? 20 : 40); x < w / 2; x += 40) { ctx.moveTo(x, y); ctx.lineTo(x, Math.min(h / 2, y + rowH)); }
+        ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(80,75,68,0.5)';
+      for (let i = 0; i < Math.max(3, (w * h) / 700); i++) { circle(ctx, (r() - 0.5) * (w - 10), (r() - 0.5) * (h - 8), 1.5 + r() * 3); ctx.fill(); }
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      if (g.shape === 'circle') { ctx.beginPath(); ctx.ellipse(-w * 0.15, -w * 0.2, w * 0.18, w * 0.09, -0.6, 0, TAU); ctx.fill(); }
+      else ctx.fillRect(-w / 2 + 4, -h / 2 + 3, w - 8, 3);
+    } else if (g.m === 'tnt') {
+      // ящик со взрывчаткой
+      ctx.strokeStyle = '#7A4A1C'; ctx.lineWidth = 6; ctx.strokeRect(-w / 2 + 3, -h / 2 + 3, w - 6, h - 6);
+      ctx.strokeStyle = 'rgba(122,74,28,0.8)'; ctx.lineWidth = 4; line(ctx, -w / 2 + 4, -h / 2 + 4, w / 2 - 4, h / 2 - 4);
+      ctx.fillStyle = '#FFE14D'; ctx.fillRect(-w / 2 + 6, -h * 0.17, w - 12, h * 0.34);
+      ctx.font = `900 ${Math.round(h * 0.3)}px "Trebuchet MS", system-ui, sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#B8261A'; ctx.fillText('TNT', 0, 1);
     }
+    ctx.restore();
+
+    shapePath(ctx, g); ctx.strokeStyle = st.line; ctx.lineWidth = 3; ctx.stroke();
+
     const dmg = 1 - g.hp / g.maxHp;
     if (dmg > 0.2) {
       const cs = cracks(g), n = dmg > 0.7 ? 3 : dmg > 0.45 ? 2 : 1;
-      ctx.save(); rr(ctx, -w / 2, -h / 2, w, h, 4); ctx.clip();
+      ctx.save(); shapePath(ctx, g); ctx.clip();
       ctx.strokeStyle = g.m === 'glass' ? 'rgba(255,255,255,0.95)' : 'rgba(40,25,10,0.65)'; ctx.lineWidth = 2;
       for (let k = 0; k < n; k++) { ctx.beginPath(); cs[k].forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke(); }
       ctx.restore();
@@ -1817,8 +2990,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     ctx.save(); circle(ctx, 0, 0, r - ctx.lineWidth / 2); ctx.clip();
     ctx.fillStyle = c.belly; ctx.beginPath(); ctx.ellipse(r * 0.15, r * 0.55, r * 0.7, r * 0.5, 0, 0, TAU); ctx.fill();
     ctx.restore();
+    sphereShade(ctx, r, lightAngle() - ang);
     // крыло
-    ctx.fillStyle = c.wing; ctx.beginPath(); ctx.ellipse(-r * 0.25, r * 0.15, r * 0.38, r * 0.24, 0.5, 0, TAU); ctx.fill(); ctx.stroke();
+    const flap = o.flap ? Math.sin((o.time || 0) * 34) : 0;
+    ctx.fillStyle = c.wing; ctx.beginPath();
+    ctx.ellipse(-r * 0.25, r * 0.15 - (o.flap ? r * 0.12 * (flap + 1) : 0), r * (o.flap ? 0.46 : 0.38), r * 0.24, 0.5 - flap * 0.9, 0, TAU); ctx.fill(); ctx.stroke();
 
     // глаза
     const ex1 = r * 0.12, ex2 = r * 0.52, ey = -r * 0.22, er = r * 0.25;
@@ -1844,7 +3020,53 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     ctx.beginPath(); ctx.moveTo(r * 0.72, r * 0.12); ctx.lineTo(r * 1.08, r * 0.14); ctx.lineTo(r * 0.72, r * 0.3); ctx.closePath(); ctx.fill(); ctx.stroke();
     // румянец
     ctx.fillStyle = 'rgba(255,110,90,0.45)'; ctx.beginPath(); ctx.ellipse(r * 0.35, r * 0.18, r * 0.14, r * 0.08, 0, 0, TAU); ctx.fill();
+    const sk = o.skin !== undefined ? o.skin : skin;
+    if (sk && sk !== 'none') drawSkin(ctx, r, sk);
     ctx.restore();
+  }
+
+  // ---------- Наряды птенцов (открываются за звёзды) ----------
+  let skin = 'none';
+  function setSkin(s) { skin = s || 'none'; }
+  function drawSkin(ctx, r, sk) {
+    ctx.lineJoin = 'round'; ctx.strokeStyle = OUT; ctx.lineWidth = Math.max(2, r * 0.09);
+    if (sk === 'cap') {
+      ctx.fillStyle = '#3D8BFD';
+      ctx.beginPath(); ctx.arc(-r * 0.05, -r * 0.5, r * 0.68, Math.PI * 1.02, Math.PI * 1.98); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#2A62C4'; ctx.beginPath(); ctx.ellipse(r * 0.78, -r * 0.52, r * 0.42, r * 0.1, 0.12, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff'; circle(ctx, -r * 0.05, -r * 1.16, r * 0.08); ctx.fill(); ctx.stroke();
+    } else if (sk === 'glasses') {
+      const ey = -r * 0.22;
+      line(ctx, -r * 0.2, ey - r * 0.05, -r * 0.9, ey - r * 0.22);
+      ctx.fillStyle = '#1B1B1B';
+      rr(ctx, -r * 0.2, ey - r * 0.2, r * 0.5, r * 0.4, r * 0.1); ctx.fill(); ctx.stroke();
+      rr(ctx, r * 0.36, ey - r * 0.2, r * 0.46, r * 0.4, r * 0.1); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = r * 0.06; ctx.lineCap = 'round';
+      line(ctx, -r * 0.1, ey - r * 0.09, r * 0.04, ey - r * 0.09); line(ctx, r * 0.46, ey - r * 0.09, r * 0.58, ey - r * 0.09);
+      ctx.lineCap = 'butt';
+    } else if (sk === 'bandana') {
+      ctx.fillStyle = '#E8343A';
+      ctx.beginPath(); ctx.moveTo(-r * 0.75, -r * 0.62); ctx.lineTo(-r * 1.32, -r * 0.88); ctx.lineTo(-r * 1.15, -r * 0.5); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-r * 0.78, -r * 0.52); ctx.lineTo(-r * 1.36, -r * 0.4); ctx.lineTo(-r * 1.1, -r * 0.2); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.save(); circle(ctx, 0, 0, r); ctx.clip();
+      ctx.fillRect(-r, -r * 0.8, r * 2, r * 0.32);
+      ctx.lineWidth = Math.max(1.5, r * 0.06); line(ctx, -r, -r * 0.48, r, -r * 0.48);
+      ctx.fillStyle = '#fff'; for (let i = -3; i <= 3; i++) { circle(ctx, i * r * 0.26, -r * 0.64, r * 0.05); ctx.fill(); }
+      ctx.restore();
+    } else if (sk === 'tophat') {
+      ctx.fillStyle = '#2B2B33';
+      rr(ctx, -r * 0.42, -r * 1.78, r * 0.84, r * 0.98, r * 0.06); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#FFC72C'; ctx.fillRect(-r * 0.4, -r * 1.14, r * 0.8, r * 0.17);
+      ctx.fillStyle = '#2B2B33'; ctx.beginPath(); ctx.ellipse(0, -r * 0.84, r * 0.74, r * 0.14, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    } else if (sk === 'crown') {
+      ctx.save(); ctx.translate(0, -r * 0.95);
+      ctx.fillStyle = '#FFD21F'; ctx.beginPath();
+      ctx.moveTo(-r * 0.5, r * 0.12); ctx.lineTo(-r * 0.58, -r * 0.4); ctx.lineTo(-r * 0.28, -r * 0.12); ctx.lineTo(0, -r * 0.52);
+      ctx.lineTo(r * 0.28, -r * 0.12); ctx.lineTo(r * 0.58, -r * 0.4); ctx.lineTo(r * 0.5, r * 0.12); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#E8343A'; circle(ctx, 0, -r * 0.05, r * 0.08); ctx.fill();
+      ctx.fillStyle = '#3D8BFD'; circle(ctx, -r * 0.3, 0, r * 0.06); ctx.fill(); circle(ctx, r * 0.3, 0, r * 0.06); ctx.fill();
+      ctx.restore();
+    }
   }
 
   // ---------- Чувачки ----------
@@ -1878,6 +3100,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     ctx.save(); circle(ctx, 0, 0, r - ctx.lineWidth / 2); ctx.clip();
     ctx.fillStyle = c.belly; ctx.beginPath(); ctx.ellipse(0, r * 0.62, r * 0.62, r * 0.42, 0, 0, TAU); ctx.fill();
     ctx.restore();
+    sphereShade(ctx, r, lightAngle() - ang);
 
     // каска у красных
     if (type === 'red') {
@@ -1972,19 +3195,25 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
   // ---------- Рогатка ----------
   const SX = C.SLING_X, SY = C.SLING_Y;
-  const BACK_TIP = { x: SX + 20, y: SY - 14 }, FRONT_TIP = { x: SX - 22, y: SY - 8 };
+  const BACK_TIP = { x: SX + 27, y: SY - 16 }, FRONT_TIP = { x: SX - 26, y: SY - 12 };
 
-  function slingBack(ctx, pouch) {
+  function slingBack(ctx, pouch, wob, t) {
     ctx.lineCap = 'round';
     // ствол
     ctx.strokeStyle = OUT; ctx.lineWidth = 26; line(ctx, SX, C.GROUND_Y + 5, SX, SY + 60);
     ctx.strokeStyle = '#9B6230'; ctx.lineWidth = 18; line(ctx, SX, C.GROUND_Y + 5, SX, SY + 60);
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 4; line(ctx, SX - 4, C.GROUND_Y - 6, SX - 4, SY + 74);
+    ctx.strokeStyle = 'rgba(60,30,5,0.25)'; ctx.lineWidth = 5; line(ctx, SX + 5, C.GROUND_Y - 6, SX + 5, SY + 74);
     // задний рог
     ctx.strokeStyle = OUT; ctx.lineWidth = 22; line(ctx, SX, SY + 62, BACK_TIP.x, BACK_TIP.y);
-    ctx.strokeStyle = '#B87A3D'; ctx.lineWidth = 14; line(ctx, SX, SY + 62, BACK_TIP.x, BACK_TIP.y);
+    ctx.strokeStyle = '#8F5A2A'; ctx.lineWidth = 14; line(ctx, SX, SY + 62, BACK_TIP.x, BACK_TIP.y);
     // задняя резинка
     ctx.strokeStyle = '#4A220A'; ctx.lineWidth = 9;
-    line(ctx, BACK_TIP.x, BACK_TIP.y, pouch ? pouch.x : FRONT_TIP.x, pouch ? pouch.y : FRONT_TIP.y);
+    if (!pouch && wob > 0.02) {
+      // резинка дрожит после выстрела
+      const mx = (BACK_TIP.x + FRONT_TIP.x) / 2 + Math.sin(t * 70) * 26 * wob, my = (BACK_TIP.y + FRONT_TIP.y) / 2 + Math.cos(t * 70) * 8 * wob;
+      ctx.beginPath(); ctx.moveTo(BACK_TIP.x, BACK_TIP.y); ctx.quadraticCurveTo(mx, my, FRONT_TIP.x, FRONT_TIP.y); ctx.stroke();
+    } else line(ctx, BACK_TIP.x, BACK_TIP.y, pouch ? pouch.x : FRONT_TIP.x, pouch ? pouch.y : FRONT_TIP.y);
     ctx.lineCap = 'butt';
   }
   function slingFront(ctx, pouch, r) {
@@ -1992,7 +3221,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     if (pouch) {
       ctx.strokeStyle = '#4A220A'; ctx.lineWidth = 9; line(ctx, FRONT_TIP.x, FRONT_TIP.y, pouch.x, pouch.y);
       // кожаная «люлька»
-      const a = Math.atan2(pouch.y - SY, pouch.x - SX);
+      // в покое накладка — позади птенца (слева), при натяжении — с дальней от рогатки стороны
+      const a = Math.hypot(pouch.x - SX, pouch.y - SY) < 6 ? Math.PI : Math.atan2(pouch.y - SY, pouch.x - SX);
       ctx.save(); ctx.translate(pouch.x, pouch.y); ctx.rotate(a);
       ctx.fillStyle = '#5A2D0C'; rr(ctx, (r || 26) * 0.3, -(r || 26) * 0.75, 14, (r || 26) * 1.5, 6); ctx.fill();
       ctx.restore();
@@ -2018,17 +3248,51 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   // ---------- Частицы ----------
   const MAT_COLORS = {
     wood: ['#D9A04E', '#B07432', '#8A5524'], glass: ['#CFF0FF', '#9FD6F0', '#FFFFFF'], stone: ['#A9A49B', '#7F7A72', '#C4C0B8'],
+    tnt: ['#E2402B', '#7A4A1C', '#FFE14D'],
   };
 
   function particles(ctx, list) {
-    for (const p of list) {
+    // два прохода: надписи и комикс-«звёздочки» рисуются поверх дыма и обломков
+    for (let pass = 0; pass < 2; pass++) for (const p of list) {
+      if ((p.kind === 'text' || p.kind === 'comic') !== (pass === 1)) continue;
       const k = p.life / p.max;
       ctx.globalAlpha = Math.min(1, k * 2);
       if (p.kind === 'chunk') {
+        const z = p.s;
         ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-        ctx.fillStyle = p.color; ctx.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * 0.66);
-        ctx.strokeStyle = 'rgba(43,29,14,0.6)'; ctx.lineWidth = 1.5; ctx.strokeRect(-p.s / 2, -p.s / 3, p.s, p.s * 0.66);
+        ctx.fillStyle = p.color; ctx.strokeStyle = 'rgba(43,29,14,0.6)'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        if (p.m === 'glass') {            // осколок
+          ctx.moveTo(-z * 0.7, z * 0.45); ctx.lineTo(z * 0.8, z * 0.2); ctx.lineTo(-z * 0.1, -z * 0.8);
+          ctx.globalAlpha *= 0.85; ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        } else if (p.m === 'wood') {      // щепка
+          ctx.moveTo(-z, -z * 0.16); ctx.lineTo(z * 0.7, -z * 0.2); ctx.lineTo(z, z * 0.05); ctx.lineTo(z * 0.6, z * 0.2); ctx.lineTo(-z * 0.8, z * 0.18);
+        } else if (p.m === 'stone') {     // обломок
+          ctx.moveTo(-z * 0.55, -z * 0.2); ctx.lineTo(-z * 0.1, -z * 0.55); ctx.lineTo(z * 0.5, -z * 0.3); ctx.lineTo(z * 0.55, z * 0.3); ctx.lineTo(-z * 0.2, z * 0.5);
+        } else ctx.rect(-z / 2, -z / 3, z, z * 0.66);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
         ctx.restore();
+      } else if (p.kind === 'hat') {
+        // слетевшая каска или корона
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.strokeStyle = OUT; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+        const z = p.s;
+        if (p.t === 'boss') {
+          ctx.fillStyle = '#FFD21F'; ctx.beginPath();
+          ctx.moveTo(-z * 0.55, z * 0.3); ctx.lineTo(-z * 0.62, -z * 0.3); ctx.lineTo(-z * 0.3, 0); ctx.lineTo(0, -z * 0.45); ctx.lineTo(z * 0.3, 0); ctx.lineTo(z * 0.62, -z * 0.3); ctx.lineTo(z * 0.55, z * 0.3);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+        } else {
+          ctx.fillStyle = '#B9BEC7'; ctx.beginPath(); ctx.arc(0, 0, z, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#8B919B'; rr(ctx, -z * 1.05, -z * 0.1, z * 2.1, z * 0.22, 3); ctx.fill(); ctx.stroke();
+        }
+        ctx.restore();
+      } else if (p.kind === 'glow') {
+        // вспышка света (сложение цветов)
+        ctx.globalCompositeOperation = 'lighter';
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.s);
+        g.addColorStop(0, p.color); g.addColorStop(1, 'rgba(255,160,40,0)');
+        ctx.globalAlpha = Math.min(1, k * 1.4);
+        ctx.fillStyle = g; circle(ctx, p.x, p.y, p.s); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
       } else if (p.kind === 'feather') {
         ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
         ctx.fillStyle = p.color; ctx.beginPath(); ctx.ellipse(0, 0, p.s, p.s * 0.35, 0, 0, TAU); ctx.fill();
@@ -2039,14 +3303,48 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         ctx.fillStyle = p.color; star(ctx, p.x, p.y, p.s); ctx.fill();
       } else if (p.kind === 'ring') {
         ctx.strokeStyle = p.color; ctx.lineWidth = 14 * k; circle(ctx, p.x, p.y, p.s * (1 - k) + 20); ctx.stroke();
+      } else if (p.kind === 'confetti') {
+        ctx.save(); ctx.translate(p.x + Math.sin(p.rot * 0.7) * 6, p.y); ctx.rotate(p.rot);
+        ctx.scale(1, Math.cos(p.rot * 1.3)); ctx.fillStyle = p.color; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+        ctx.restore();
+      } else if (p.kind === 'comic') {
+        // комикс-надпись в колючей «звёздочке»
+        const pop = Math.min(1, (1 - k) * 7);
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.scale(pop, pop);
+        ctx.fillStyle = p.color; ctx.strokeStyle = OUT; ctx.lineWidth = 5; ctx.lineJoin = 'round';
+        ctx.beginPath();
+        for (let i = 0; i < 22; i++) { const a = (i * TAU) / 22, rad = i % 2 ? p.s * 0.66 : p.s; ctx.lineTo(Math.cos(a) * rad * 1.3, Math.sin(a) * rad * 0.82); }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.font = `900 ${Math.round(p.s * 0.5)}px "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.lineWidth = 7; ctx.strokeStyle = '#FFFFFF'; ctx.strokeText(p.text, 0, 2);
+        ctx.fillStyle = OUT; ctx.fillText(p.text, 0, 2);
+        ctx.restore();
       } else if (p.kind === 'text') {
-        ctx.font = `900 ${p.s}px "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif`;
+        // цифры очков «выпрыгивают» и оседают
+        const pop = 1 + 0.45 * Math.max(0, (k - 0.78) / 0.22);
+        ctx.font = `900 ${Math.round(p.s * pop)}px "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif`;
         ctx.textAlign = 'center'; ctx.lineJoin = 'round';
         ctx.lineWidth = 7; ctx.strokeStyle = OUT; ctx.strokeText(p.text, p.x, p.y);
         ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y);
       }
     }
     ctx.globalAlpha = 1;
+  }
+
+  // Облачко с репликой над врагом
+  function bubble(ctx, x, y, text, k) {
+    const s = 0.6 + 0.4 * Math.min(1, k * 4);
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    ctx.font = '900 26px "Trebuchet MS", system-ui, sans-serif';
+    const w = ctx.measureText(text).width + 30, h = 42;
+    ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = OUT; ctx.lineWidth = 4;
+    rr(ctx, -w / 2, -h - 14, w, h, 16); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-10, -16); ctx.lineTo(0, 0); ctx.lineTo(10, -16); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-10, -14); ctx.lineTo(0, 0); ctx.lineTo(10, -14); ctx.stroke();
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-12, -20, 24, 8);
+    ctx.fillStyle = OUT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 0, -h / 2 - 14);
+    ctx.restore();
   }
 
   // ---------- Бустеры и ядерка ----------
@@ -2105,7 +3403,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   }
 
   root.YB = Object.assign(root.YB || {}, {
-    Render: { background, statics, block, chick, dude, slingBack, slingFront, dots, particles, star, rr, aura, nukeTarget, nukeBomb, trefoil, MAT_COLORS, CHICK, OUT },
+    Render: { setDetail, groundFx, setSkin, ambient, decals, bubble, blockSides, background, statics, block, setTheme, surfaceY, chick, dude, slingBack, slingFront, dots, particles, star, rr, aura, nukeTarget, nukeBomb, trefoil, MAT_COLORS, CHICK, OUT },
   });
 })(window);
 
@@ -2118,6 +3416,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   const DT = 1 / 60;
   const SX = C.SLING_X, SY = C.SLING_Y;
   const rand = (a, b) => a + Math.random() * (b - a);
+  const MOOD_BY_THEME = { noon: 'day', sunset: 'sunset', dusk: 'night', night: 'night' };
 
   const Game = {
     canvas: null, ctx: null, dpr: 1, view: null,
@@ -2131,7 +3430,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     adBirds: 0, hintsShown: new Set(),
     boosters: { sight: 1, power: 1, quake: 1 }, active: { sight: false, power: false },
     nuke: { used: false, mode: null, t: 0, x: 0, y: 0 }, timeScale: 1, flash: 0, pointer: { x: 960, y: 600 },
-    parts: [], shake: 0,
+    parts: [], shake: 0, flyTrail: [], birdSquash: 0, kills: 0, taunt: null,
+    decals: [], wob: 0, finale: 0, zoom: { k: 0, x: 960, y: 700 }, chirpT: 5,
+    hitStop: 0, introT: 0, lowFx: false, slowT: 0, used: {}, bestCombo: 0, comicT: 0, leftCount: 0,
     ui: null, save: null,
 
     init(canvas, ui) {
@@ -2173,10 +3474,20 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     // ---------- Уровень ----------
     startLevel(i) {
       this.levelIdx = i; this.def = LEVELS[i];
+      R.setTheme(this.def.theme || 'noon');
+      this.flyTrail = []; this.birdSquash = 0; this.kills = 0; this.taunt = null;
+      this.decals = []; this.wob = 0; this.finale = 0; this.chirpT = 4;
+      A.setMood(this.def.mood || MOOD_BY_THEME[this.def.theme] || 'day');
+      A.play('whoosh');
       this.sim = new Sim(this.handlers());
       this.sim.load(this.def);
       this.queue = this.def.birds.slice();
-      this.ready = null; this.phase = 'idle'; this.nextT = 0.35;
+      this.ready = null; this.phase = 'idle'; this.nextT = 1.35;
+      this.hitStop = 0; this.used = { booster: false, nuke: false, ad: false }; this.bestCombo = 0; this.comicT = 0; this.leftCount = 0;
+      // Заставка: камера показывает крепость чувачков и отъезжает к рогатке
+      { const es = this.sim.enemies; let ex = 0, ey = 0; es.forEach((e) => { ex += e.position.x; ey += e.position.y; });
+        this.zoom = { k: 1, x: ex / es.length, y: ey / es.length - 30, amt: 0.5 }; this.introT = 1.5; }
+      this.ui.setEnemies(this.sim.enemies.length);
       this.drag = null; this.shots = 0; this.bonus = 0;
       this.ending = false; this.endT = 0; this.bonusList = []; this.waitT = 0;
       this.adBirds = 0; this.hintsShown = new Set();
@@ -2187,7 +3498,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.state = 'play'; this.paused = false;
       this.ui.setScore(0);
       root.YB.Platform.gameplayStart();
-      if (this.def.startHint) this.showHint(this.def.startHint);
+      this.hintT = this.def.startHint ? 2.7 : 0;   // подсказка появляется после заставки
     },
 
     showHint(key) {
@@ -2202,14 +3513,14 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.ready = this.queue.shift();
       this.phase = 'hop'; this.hopT = 0;
       this.ui.refreshBoosters();
-      A.play('hop');
+      A.play('hop', { x: SX });
       if (this.ready === 'speed') this.showHint('hintSpeed');
       if (this.ready === 'bomb') this.showHint('hintBomb');
     },
 
     addExtraBird() {
       this.queue.push('normal');
-      this.adBirds++;
+      this.adBirds++; this.used.ad = true;
       this.state = 'play'; this.waitT = 0; this.phase = 'idle'; this.nextT = 0.3;
       root.YB.Platform.gameplayStart();
       this.ui.toast('extraBird');
@@ -2223,7 +3534,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     },
     useBooster(b) {
       if (!this.canUseBooster(b)) return false;
-      this.boosters[b]--;
+      this.boosters[b]--; this.used.booster = true;
       if (b === 'quake') { this.sim.quake(); this.shake = 22; }
       else { this.active[b] = true; A.play(b === 'sight' ? 'sight' : 'powerUp'); }
       this.ui.refreshBoosters();
@@ -2232,8 +3543,22 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
     // ---------- Ядерка (за рекламу, одна на попытку) ----------
     canNuke() { return this.running() && !this.ending && !this.nuke.used && !this.nuke.mode && this.sim.enemiesAlive() > 0; },
+    // Награда за рекламу: ядерка выдаётся в любом случае и ждёт, пока игра снова пойдёт.
+    grantNuke() {
+      this.nuke.used = true; this.nuke.pending = true;
+      this.ui.refreshBoosters();
+      this.tryPendingNuke();
+    },
+    tryPendingNuke() {
+      const n = this.nuke;
+      if (!n.pending || !this.running() || n.mode) return;
+      n.pending = false;
+      if (this.ending || this.sim.enemiesAlive() === 0) return;
+      this.startNukeAim();
+    },
     startNukeAim() {
-      this.nuke.used = true; this.nuke.mode = 'aim'; this.drag = null;
+      this.nuke.used = true; this.nuke.mode = 'aim'; this.drag = null; this.used.nuke = true;
+      this.save.stats.nukes = (this.save.stats.nukes || 0) + 1; this.ui.unlock('nuke');
       this.ui.toast('nukeAim');
       this.ui.refreshBoosters();
     },
@@ -2276,8 +3601,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       if (this.nuke.mode === 'aim') { this.dropNuke(p.x, p.y); return; }
       if (this.nuke.mode) return;
       if (this.phase === 'ready' && Math.hypot(p.x - SX, p.y - SY) < 130) {
-        this.drag = { id: e.pointerId, dx: 0, dy: 0 };
-        A.play('grab');
+        this.drag = { id: e.pointerId, dx: 0, dy: 0, lastL: 0 };
+        A.play('grab', { x: SX });
         try { this.canvas.setPointerCapture(e.pointerId); } catch (er) {}
         this.onMove(e);
       } else if (this.phase === 'flying' && this.sim.bird && !this.sim.bird.game.used) {
@@ -2291,6 +3616,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       const len = Math.hypot(dx, dy);
       if (len > C.MAX_PULL) { dx *= C.MAX_PULL / len; dy *= C.MAX_PULL / len; }
       this.drag.dx = dx; this.drag.dy = dy;
+      const L = Math.min(len, C.MAX_PULL);
+      if (Math.abs(L - this.drag.lastL) > 9) { this.drag.lastL = L; A.play('stretch', { v: L / C.MAX_PULL, gap: 0.035, x: SX }); }
     },
     onUp(e, cancel) {
       if (!this.drag || e.pointerId !== this.drag.id) return;
@@ -2306,7 +3633,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.sim.launch(this.ready, SX + dx, SY + dy, v.x, v.y, { power: this.active.power });
       this.ready = null; this.phase = 'flying'; this.shots++;
       this.active = { sight: false, power: false };
-      A.play('launch');
+      this.kills = 0; this.flyTrail = []; this.taunt = null; this.wob = 1;
+      this.haptic('light');
+      A.play('launch', { x: SX });
       this.ui.refreshBoosters();
     },
 
@@ -2314,7 +3643,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     flow(dt) {
       const sim = this.sim;
       if (this.phase === 'hop') { this.hopT += dt / 0.45; if (this.hopT >= 1) { this.hopT = 1; this.phase = 'ready'; this.ui.refreshBoosters(); } }
-      if (this.phase === 'flying' && !sim.bird) { this.phase = 'idle'; this.nextT = 0.35; }
+      if (this.phase === 'flying' && !sim.bird) { this.phase = 'idle'; this.nextT = 0.35; this.maybeTaunt(); }
 
       if (!this.ending && sim.enemiesAlive() === 0) {
         this.ending = true; this.endT = 0;
@@ -2323,6 +3652,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         if (this.ready) this.bonusList.push({ type: this.ready, x: SX, y: SY });
         this.queue.forEach((t, i) => this.bonusList.push({ type: t, ...this.queuePos(i) }));
         this.ready = null; this.queue = [];
+        this.leftCount = this.bonusList.length;
         if (this.phase !== 'flying') this.phase = 'idle';
       }
 
@@ -2358,6 +3688,15 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       }
     },
 
+    // Промах (птенец никого не убил): кто-то из чувачков дразнится
+    maybeTaunt() {
+      const sim = this.sim;
+      if (this.kills > 0 || !sim.enemies.length || this.ending || this.nuke.mode) return;
+      const e = sim.enemies[(this.shots * 7) % sim.enemies.length];
+      this.taunt = { body: e, t: 1.7, text: root.YB.I18n.t('taunt' + (1 + (this.shots % 4))) };
+      setTimeout(() => A.play('taunt', { t: e.game.t }), 200);
+    },
+
     finishWin() {
       this.state = 'win';
       root.YB.Platform.gameplayStop();
@@ -2370,14 +3709,17 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       s.unlocked = Math.max(s.unlocked, Math.min(LEVELS.length, i + 2));
       this.ui.persist();
       A.play('win');
-      this.ui.showWin({ score, stars, best: s.best[i], newRecord, hasNext: i + 1 < LEVELS.length });
+      this.confetti();
+      this.ui.showWin({ score, stars, best: s.best[i], newRecord, hasNext: i + 1 < LEVELS.length, level: i,
+        shots: this.shots, combo: this.bestCombo, left: this.leftCount, used: this.used, need: stars < 3 ? st[stars] - score : 0 });
     },
 
     finishLose() {
       this.state = 'lose';
       root.YB.Platform.gameplayStop();
       A.play('lose');
-      this.ui.showLose({ adLeft: 2 - this.adBirds, score: this.totalScore() });
+      this.ui.persist();
+      this.ui.showLose({ adLeft: 2 - this.adBirds, score: this.totalScore(), left: this.sim.enemiesAlive() });
     },
 
     queuePos(i) {
@@ -2386,15 +3728,19 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     },
 
     // ---------- Эффекты ----------
-    part(p) { p.max = p.life; p.rot = p.rot || rand(0, 6.28); p.vr = p.vr == null ? rand(-8, 8) : p.vr; this.parts.push(p); if (this.parts.length > 400) this.parts.shift(); },
+    part(p) { p.max = p.life; p.rot = p.rot || rand(0, 6.28); p.vr = p.vr == null ? rand(-8, 8) : p.vr; this.parts.push(p); if (this.parts.length > (this.lowFx ? 160 : 400)) this.parts.shift(); },
     popup(text, x, y, color, size) { this.part({ kind: 'text', text, x, y, vx: 0, vy: -70, g: 0, s: size || 34, color: color || '#fff', life: 1.1, vr: 0 }); },
 
     handlers() {
       const G = this;
       return {
-        hit(d) { A.play(d.m + 'Hit', { v: d.v, gap: 0.06 }); if (d.v > 0.4) for (let i = 0; i < 2; i++) G.chunk(d.m, d.x, d.y, 0.6); },
+        hit(d) {
+          A.play(d.m + 'Hit', { v: d.v, gap: 0.06, x: d.x });
+          if (d.v > 0.4) for (let i = 0; i < 2; i++) G.chunk(d.m, d.x, d.y, 0.6);
+          if (d.y > C.GROUND_Y - 25 && d.v > 0.25) G.dust(d.x, C.GROUND_Y - 4, 4);
+        },
         break(d) {
-          A.play(d.m + 'Break', { gap: 0.03 });
+          A.play(d.m + 'Break', { gap: 0.03, x: d.x });
           const n = Math.max(6, Math.min(18, Math.round((d.w * d.h) / 250)));
           for (let i = 0; i < n; i++) {
             const t = rand(-0.5, 0.5), along = Math.max(d.w, d.h) * t;
@@ -2406,24 +3752,53 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           G.part({ kind: 'puff', x: d.x, y: d.y, vx: 0, vy: -20, g: 0, s: 22, color: 'rgba(255,255,255,0.55)', life: 0.5 });
           G.shake = Math.max(G.shake, d.m === 'stone' ? 6 : 3);
         },
-        enemyHurt(d) { A.play('enemyHurt', { t: d.t, gap: 0.15 }); },
+        enemyHurt(d) { A.play('enemyHurt', { t: d.t, gap: 0.15, x: d.x }); },
         enemyDie(d) {
-          A.play('enemyDie', { t: d.t, gap: 0.05 });
+          G.kills++; G.bestCombo = Math.max(G.bestCombo, G.kills);
+          G.save.stats.kills = (G.save.stats.kills || 0) + 1;
+          G.ui.setEnemies(G.sim.enemies.filter((e) => !e.game.dead).length);
+          if (G.kills >= 3) G.ui.unlock('combo3');
+          if (G.kills >= 5) G.ui.unlock('combo5');
+          if (d.t === 'boss') G.ui.unlock('king');
+          if (!G.nuke.mode) G.hitStop = Math.max(G.hitStop, 0.06);
+          G.haptic('medium');
+          if (G.taunt) G.taunt = null;
+          A.play('enemyDie', { t: d.t, gap: 0.05, x: d.x });
+          // Комбо: несколько чувачков одним птенцом
+          if (G.kills >= 2) {
+            const pts = 1000 * (G.kills - 1);
+            G.bonus += pts; G.ui.setScore(G.totalScore());
+            G.popup('x' + G.kills + '!  +' + pts, d.x, d.y - 95, '#FF8A00', 44);
+            setTimeout(() => A.play('combo', { i: G.kills, gap: 0 }), 120);
+          }
+          // Каска или корона слетает
+          if (d.t !== 'blue') G.part({ kind: 'hat', t: d.t, x: d.x, y: d.y - d.r * 0.7, vx: rand(-160, 160), vy: rand(-620, -460), g: 1100, s: d.r * (d.t === 'boss' ? 0.9 : 0.75), life: 1.8, vr: rand(-9, 9) });
+          G.part({ kind: 'glow', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.r * 3.2, color: 'rgba(255,255,220,0.8)', life: 0.3, vr: 0 });
+          // Последний враг: замедление и приближение
+          if (!G.sim.enemies.some((e) => !e.game.dead) && !G.nuke.mode) { G.finale = 1.0; G.zoom.x = d.x; G.zoom.y = d.y; G.zoom.amt = 0.22; }
           const col = d.t === 'blue' ? 'rgba(70,150,250,0.75)' : 'rgba(240,80,60,0.75)';
           for (let i = 0; i < 10; i++) G.part({ kind: 'puff', x: d.x + rand(-15, 15), y: d.y + rand(-15, 15), vx: rand(-160, 160), vy: rand(-200, 40), g: -40, s: rand(12, 22), color: i % 2 ? col : 'rgba(255,255,255,0.85)', life: rand(0.4, 0.8) });
           for (let i = 0; i < 6; i++) G.part({ kind: 'spark', x: d.x, y: d.y, vx: rand(-300, 300), vy: rand(-380, -60), g: 700, s: rand(7, 12), color: '#FFE14D', life: 0.8 });
           G.shake = Math.max(G.shake, d.t === 'boss' ? 16 : 5);
         },
         birdHit(d) {
-          A.play('birdHit', { v: d.v, gap: 0.12 });
+          A.play('birdHit', { v: d.v, gap: 0.12, x: d.x });
+          G.birdSquash = Math.max(G.birdSquash, 0.25 * d.v + 0.05);
+          if (d.v > 0.7 && G.comicT <= 0) { G.comicT = 1.2; G.comic(d.x, d.y - 50, 'comicHit'); }
           if (d.v > 0.3) for (let i = 0; i < 3; i++) G.part({ kind: 'feather', x: d.x, y: d.y, vx: rand(-120, 120), vy: rand(-200, -40), g: 120, s: rand(6, 10), color: R.CHICK[d.type].b, life: 1.2, vr: rand(-4, 4) });
         },
         boost(d) {
-          A.play('boost');
+          A.play('boost', { x: d.x });
           for (let i = 0; i < 10; i++) G.part({ kind: 'puff', x: d.x - Math.cos(d.ang) * i * 8, y: d.y - Math.sin(d.ang) * i * 8, vx: rand(-30, 30), vy: rand(-30, 30), g: 0, s: rand(8, 14), color: 'rgba(255,200,90,0.7)', life: 0.5 });
         },
         explode(d) {
-          A.play('explode');
+          A.play('explode', { gap: 0.04, x: d.x });
+          if (d.tnt) { G.dust(d.x, d.y, 10); G.save.stats.tnt = (G.save.stats.tnt || 0) + 1; }
+          G.comic(d.x, d.y - 70, 'comicBoom');
+          if (!G.nuke.mode) G.hitStop = Math.max(G.hitStop, 0.07);
+          G.haptic('heavy');
+          G.part({ kind: 'glow', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.R * 1.5, color: 'rgba(255,225,150,0.95)', life: 0.4, vr: 0 });
+          G.scorch(d.x, d.y, d.R * 0.75);
           G.part({ kind: 'ring', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.R, color: 'rgba(255,230,120,0.9)', life: 0.45, vr: 0 });
           for (let i = 0; i < 26; i++) {
             const a = rand(0, 6.28), sp = rand(100, 520);
@@ -2433,7 +3808,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         },
         nuke(d) {
           A.play('nukeBoom', { gap: 0 });
-          G.flash = 1; G.shake = 34;
+          G.flash = 1; G.shake = 34; G.haptic('heavy');
+          G.part({ kind: 'glow', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.R * 1.6, color: 'rgba(255,240,200,1)', life: 1.6, vr: 0 });
+          G.scorch(d.x, d.y, d.R * 0.8, true);
           G.part({ kind: 'ring', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.R * 1.25, color: 'rgba(255,250,210,0.95)', life: 1.1, vr: 0 });
           G.part({ kind: 'ring', x: d.x, y: d.y, vx: 0, vy: 0, g: 0, s: d.R * 0.8, color: 'rgba(255,170,40,0.9)', life: 0.8, vr: 0 });
           // огненный шар
@@ -2460,26 +3837,55 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           G.ui.setScore(G.totalScore());
         },
         birdDone(d) {
-          A.play('poof');
+          A.play('poof', { x: d.x });
           for (let i = 0; i < 8; i++) G.part({ kind: 'puff', x: d.x + rand(-12, 12), y: d.y + rand(-12, 12), vx: rand(-60, 60), vy: rand(-80, 0), g: 0, s: rand(10, 18), color: 'rgba(255,255,255,0.85)', life: 0.5 });
           for (let i = 0; i < 4; i++) G.part({ kind: 'feather', x: d.x, y: d.y, vx: rand(-90, 90), vy: rand(-160, -40), g: 100, s: rand(6, 9), color: R.CHICK[d.type].b, life: 1.2, vr: rand(-4, 4) });
         },
       };
     },
 
+    dust(x, y, n) {
+      for (let i = 0; i < n; i++) this.part({ kind: 'puff', x: x + rand(-20, 20), y, vx: rand(-90, 90), vy: rand(-60, -10), g: -10, s: rand(8, 16), color: 'rgba(225,190,140,0.55)', life: rand(0.4, 0.8) });
+    },
+
+    confetti() {
+      const v = this.view, cols = ['#FFE14D', '#FF8A00', '#3D8BFD', '#E8343A', '#7BC043', '#FFFFFF'];
+      for (let i = 0; i < 120; i++) this.part({ kind: 'confetti', x: rand(v.x0, v.x1), y: rand(v.y0 - 300, v.y0), vx: rand(-40, 40), vy: rand(80, 200), g: 40, s: rand(10, 18), color: cols[i % cols.length], life: rand(2.5, 4), vr: rand(-6, 6) });
+    },
+
     chunk(m, x, y, k) {
       const cols = R.MAT_COLORS[m];
-      this.part({ kind: 'chunk', x, y, vx: rand(-260, 260) * k, vy: rand(-380, -40) * k, g: 1100, s: rand(6, 14), color: cols[(Math.random() * cols.length) | 0], life: rand(0.6, 1.1) });
+      this.part({ kind: 'chunk', m, x, y, vx: rand(-260, 260) * k, vy: rand(-380, -40) * k, g: 1100, s: rand(7, 15), color: cols[(Math.random() * cols.length) | 0], life: rand(0.7, 1.3) });
+    },
+
+    // Комикс-надпись в «звёздочке»: БАХ!, БУМ!
+    comic(x, y, key) {
+      const words = root.YB.I18n.t(key).split('|');
+      this.part({ kind: 'comic', text: words[(Math.random() * words.length) | 0], x, y, vx: 0, vy: -30, g: 0, s: 64, color: key === 'comicBoom' ? '#FF9A1F' : '#FFE14D', life: 0.75, rot: rand(-0.25, 0.25) || 0.1, vr: 0 });
+    },
+    haptic(style) { if (this.save.settings.vib !== false) root.YB.Platform.haptic(style); },
+
+    // След взрыва на поверхности под ним
+    scorch(x, y, r, always) {
+      const sy = R.surfaceY(x, this.sim.statics);
+      if (!always && sy - y > 170) return;
+      this.decals.push({ x, y: sy, r });
+      if (this.decals.length > 14) this.decals.shift();
     },
 
     updateParts(dt) {
       for (const p of this.parts) {
         p.life -= dt; p.vy += (p.g || 0) * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
         if (p.kind === 'feather') { p.vx *= 0.97; p.vy = Math.min(p.vy, 80); }
+        if (p.kind === 'confetti') p.vy = Math.min(p.vy, 170);
         if (p.kind === 'chunk' && p.y > C.GROUND_Y - 3) { p.y = C.GROUND_Y - 3; p.vy *= -0.3; p.vx *= 0.6; p.vr *= 0.5; }
       }
       this.parts = this.parts.filter((p) => p.life > 0);
       this.shake = Math.max(0, this.shake - dt * 40);
+      this.birdSquash = Math.max(0, this.birdSquash - dt * 2.5);
+      if (this.taunt && (this.taunt.t -= dt) <= 0) this.taunt = null;
+      this.wob = Math.max(0, this.wob - dt * 2.2);
+      this.comicT = Math.max(0, this.comicT - dt);
     },
 
     // ---------- Кадр ----------
@@ -2487,10 +3893,20 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       const dt = Math.min(0.05, this.last ? (now - this.last) / 1000 : 0);
       this.last = now;
       if (this.running()) {
+        if (this.nuke.pending) this.tryPendingNuke();
         this.updateNuke(dt);
+        if (this.introT > 0) this.introT -= dt;
+        if (this.hintT > 0 && (this.hintT -= dt) <= 0) this.showHint(this.def.startHint);
+        if (this.finale > 0 && !this.nuke.mode) {
+          this.finale -= dt;
+          this.setTimeScale(this.finale > 0 ? 0.28 : 1);
+        }
+        // птенцы в очереди иногда чирикают
+        if (this.queue.length && !this.ending && (this.chirpT -= dt) <= 0) { this.chirpT = rand(4, 9); A.play('chirp', { x: 200 }); }
         // В слоу-мо физика шагает с тем же темпом, но движок сам замедляет время (timeScale),
         // а логика уровня (таймеры) идёт медленнее вместе с ним.
-        this.acc += dt;
+        // «Стоп-кадр» на доли секунды в момент сильного удара
+        if (this.hitStop > 0) this.hitStop -= dt; else this.acc += dt;
         let n = 0;
         while (this.acc >= DT && n < 4) { this.sim.step(); this.flow(DT * this.timeScale); this.acc -= DT; n++; }
         if (n === 4) this.acc = 0;
@@ -2500,6 +3916,13 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         this.time += dt;
         this.updateParts(dt);
       }
+      // приближение камеры к последнему сбитому врагу (в реальном времени, не в замедленном)
+      const zt = (this.finale > 0 || this.introT > 0.6) && this.state === 'play' ? 1 : 0;
+      // На слабых устройствах отключаем украшения, чтобы игра шла плавно
+      this.slowT = dt > 0.034 ? this.slowT + dt : Math.max(0, this.slowT - dt * 0.5);
+      if (this.slowT > 2.5 && !this.lowFx) { this.lowFx = true; R.setDetail(true); }
+      this.zoom.k += (zt - this.zoom.k) * Math.min(1, dt * (zt ? 9 : 3.5));
+      if (this.zoom.k < 0.002) this.zoom.k = 0;
       this.draw();
       requestAnimationFrame((t) => this.frame(t));
     },
@@ -2509,12 +3932,21 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       const sh = this.shake;
       const shx = sh ? rand(-sh, sh) * v.s : 0, shy = sh ? rand(-sh, sh) * v.s : 0;
-      ctx.setTransform(v.s, 0, 0, v.s, v.ox + shx, v.oy + shy);
-      R.background(ctx, { x0: v.x0 - 30, x1: v.x1 + 30, y0: v.y0 - 30, y1: v.y1 + 30 }, t);
+      const zk = this.state === 'menu' ? 0 : this.zoom.k, zs = v.s * (1 + (this.zoom.amt || 0.22) * zk);
+      // точка приближения остаётся на месте, а после — мягко смещается к центру экрана
+      const zx = v.ox + this.zoom.x * (v.s - zs) + (this.canvas.width / 2 - (this.zoom.x * v.s + v.ox)) * 0.35 * zk;
+      const zy = v.oy + this.zoom.y * (v.s - zs) + (this.canvas.height / 2 - (this.zoom.y * v.s + v.oy)) * 0.35 * zk;
+      ctx.setTransform(zs, 0, 0, zs, zx + shx, zy + shy);
+      // запас по краям — чтобы при тряске и приближении камеры не было пустых полос
+      R.background(ctx, { x0: v.x0 - 420, x1: v.x1 + 420, y0: v.y0 - 260, y1: v.y1 + 260 }, t);
 
-      if (this.state === 'menu' || !this.sim) { this.drawMenuScene(ctx, t); return; }
+      if (this.state === 'menu' || !this.sim) { this.drawMenuScene(ctx, t); this.vignette(); return; }
       const sim = this.sim;
+      // тени и подпалины: на земле — до холмов (холмы их перекрывают), на холмах — после
+      const casters = sim.bird ? [...sim.blocks, ...sim.enemies, sim.bird] : [...sim.blocks, ...sim.enemies];
+      R.groundFx(ctx, casters, this.decals, sim.statics, true);
       R.statics(ctx, sim.statics);
+      R.groundFx(ctx, casters, this.decals, sim.statics, false);
       if (sim.trail.length) R.dots(ctx, sim.trail, 'rgba(255,255,255,0.85)');
 
       // Птенец на рогатке
@@ -2529,8 +3961,10 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           pouch = readyPos;
         }
       }
-      R.slingBack(ctx, pouch);
+      R.slingBack(ctx, pouch, this.wob, t);
 
+      // 2.5D: сначала боковые грани всех блоков, потом лицевые — так соседние блоки не перекрываются криво
+      for (const b of sim.blocks) R.blockSides(ctx, b);
       for (const b of sim.blocks) R.block(ctx, b);
 
       const fb = sim.bird;
@@ -2540,7 +3974,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         if (fb) { look = Math.atan2(fb.position.y - e.position.y, fb.position.x - e.position.x); scared = Math.hypot(fb.position.x - e.position.x, fb.position.y - e.position.y) < 420; }
         const blink = ((t * 1000 + g.seed * 977) % 3600) < 130;
         if (g.hurtT) g.hurtT--;
-        R.dude(ctx, e.position.x, e.position.y, g.r, e.angle, g.t, { hp: g.hp / g.maxHp, look, blink, scared, time: t, squash: g.hurtT ? Math.sin(g.hurtT) * 0.08 : 0 });
+        const breathe = Math.sin(t * 2.6 + g.seed) * 0.035;
+        const jump = this.taunt && this.taunt.body === e ? Math.abs(Math.sin(this.taunt.t * 9)) * 18 : 0;   // дразнится и подпрыгивает
+        R.dude(ctx, e.position.x, e.position.y - jump, g.r, e.angle, g.t, { hp: g.hp / g.maxHp, look, blink, scared, time: t, squash: g.hurtT ? Math.sin(g.hurtT) * 0.08 : breathe });
       }
 
       // Очередь птенцов
@@ -2562,9 +3998,17 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
       if (fb) {
         const g = fb.game;
+        // шлейф за летящим птенцом
+        this.flyTrail.push({ x: fb.position.x, y: fb.position.y });
+        if (this.flyTrail.length > 9) this.flyTrail.shift();
+        if (!g.hit) {
+          ctx.fillStyle = g.power ? 'rgba(255,120,40,1)' : 'rgba(255,255,255,1)';
+          this.flyTrail.forEach((p, i) => { ctx.globalAlpha = (i / this.flyTrail.length) * 0.45; ctx.beginPath(); ctx.arc(p.x, p.y, g.r * (0.35 + 0.6 * i / this.flyTrail.length), 0, 6.283); ctx.fill(); });
+          ctx.globalAlpha = 1;
+        }
         const ang = g.hit ? fb.angle + g.launchAng : Math.atan2(fb.velocity.y, fb.velocity.x);
         if (g.power) R.aura(ctx, fb.position.x, fb.position.y, g.r, t);
-        R.chick(ctx, fb.position.x, fb.position.y, g.r, ang, g.type, { time: t });
+        R.chick(ctx, fb.position.x, fb.position.y, g.r, ang, g.type, { time: t, squash: this.birdSquash, flap: !g.hit });
       }
 
       // Прицел
@@ -2580,11 +4024,30 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         }
       }
 
+      if (this.taunt && sim.enemies.includes(this.taunt.body)) {
+        const b = this.taunt.body;
+        R.bubble(ctx, b.position.x, b.position.y - b.game.r - 12, this.taunt.text, 1.7 - this.taunt.t);
+      }
+      if (!this.lowFx) R.ambient(ctx, v, t);
       R.particles(ctx, this.parts);
       this.drawNuke(ctx, t);
 
       // Подсказка-рука на первом уровне
       if (this.levelIdx === 0 && this.shots === 0 && this.phase === 'ready' && !this.drag) this.drawHand(ctx, t);
+      this.vignette();
+    },
+
+    // Мягкое затемнение по краям экрана
+    vignette() {
+      if (this.lowFx) return;
+      const ctx = this.ctx, w = this.canvas.width, h = this.canvas.height;
+      if (!this._vig || this._vig.w !== w || this._vig.h !== h) {
+        const g = ctx.createRadialGradient(w / 2, h * 0.45, Math.min(w, h) * 0.45, w / 2, h * 0.45, Math.max(w, h) * 0.75);
+        g.addColorStop(0, 'rgba(60,25,0,0)'); g.addColorStop(1, 'rgba(60,25,0,0.28)');
+        this._vig = { w, h, g };
+      }
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = this._vig.g; ctx.fillRect(0, 0, w, h);
     },
 
     drawNuke(ctx, t) {
@@ -2628,6 +4091,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       R.dude(ctx, 1560, C.GROUND_Y - 30 - bob(0.5), 30, 0, 'blue', { look: Math.PI, time: t, blink: (t % 3.2) < 0.12 });
       R.dude(ctx, 1660, C.GROUND_Y - 34 - bob(1.6), 34, 0, 'red', { look: Math.PI, time: t, blink: ((t + 1.3) % 3.7) < 0.12 });
       R.dude(ctx, 1760, C.GROUND_Y - 30 - bob(2.7), 30, 0, 'blue', { look: Math.PI, time: t });
+      R.ambient(ctx, this.view, t);
       R.particles(ctx, this.parts);
     },
   };
@@ -2637,26 +4101,63 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
 
 </script>
   <script>/* js/ui.js */
-/* YooBird — интерфейс, экраны и запуск игры. */
+/* YooBird — интерфейс, экраны, достижения, наряды и запуск игры. */
 (function (root) {
   'use strict';
-  const { Game, LEVELS, I18n, Audio: A, Platform: P } = root.YB;
+  const { Game, LEVELS, I18n, Audio: A, Platform: P, Render: R } = root.YB;
   const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
   const MAIN = ['loading', 'menu', 'levels'];
+  const MODALS = ['pause', 'win', 'lose', 'settings', 'ach', 'wardrobe', 'intro'];
   const LOCK_SVG = '<svg class="lock" viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 1 1 12 0v2h1v12H5V10zm2 0h8V8a4 4 0 1 0-8 0z"/></svg>';
+  const fmt = (v) => v.toLocaleString('ru-RU');
+
+  // Достижения: названия и описания — в i18n (ach_<id>, ach_<id>_d)
+  const ACH = ['first', 'oneshot', 'combo3', 'combo5', 'clean', 'king', 'final', 'nuke', 'tnt10', 'kills100', 'stars15', 'stars30', 'stars45'];
+  // Наряды птенцов: сколько звёзд нужно, чтобы открыть
+  const SKINS = [{ id: 'none', need: 0 }, { id: 'cap', need: 5 }, { id: 'glasses', need: 10 }, { id: 'bandana', need: 18 }, { id: 'tophat', need: 28 }, { id: 'crown', need: 40 }];
+  // Карточки знакомства: показываются один раз, когда элемент впервые встречается на уровне
+  const fakeBlock = (m, shape, w) => ({ position: { x: 0, y: 0 }, angle: 0, game: { m, shape, w, h: w, seed: 3, hp: 1, maxHp: 1 } });
+  const INTROS = [
+    { key: 'speed', has: (d) => d.birds.includes('speed'), draw: (c) => R.chick(c, 0, 4, 52, -0.2, 'speed', { time: 0 }) },
+    { key: 'bomb', has: (d) => d.birds.includes('bomb'), draw: (c) => R.chick(c, 0, 10, 56, 0, 'bomb', { time: 0.02 }) },
+    { key: 'tnt', has: (d) => d.items.some((i) => i.m === 'tnt'), draw: (c) => R.block(c, fakeBlock('tnt', 'rect', 96)) },
+    { key: 'boulder', has: (d) => d.items.some((i) => i.shape === 'circle'), draw: (c) => R.block(c, fakeBlock('stone', 'circle', 104)) },
+    { key: 'boss', has: (d) => d.items.some((i) => i.t === 'boss'), draw: (c) => R.dude(c, 0, 12, 60, 0, 'boss', { look: Math.PI * 0.9, time: 0 }) },
+  ];
+  const THEME_CLASS = { noon: 'w-noon', sunset: 'w-sunset', dusk: 'w-dusk', night: 'w-night' };
 
   const UI = {
-    save: null, settingsFrom: null, busy: false,
+    save: null, busy: false, noIntro: root.location.hash === '#test',
+    introQueue: [], achQueue: [], achBusy: false,
 
     show(name) {
       MAIN.forEach((n) => $('#screen-' + n).classList.toggle('hidden', n !== name));
       ['#hud', '#boosters', '#nuke-btn'].forEach((sel) => $(sel).classList.toggle('hidden', name !== 'game'));
+      if (name !== 'game') $('#level-banner').classList.add('hidden');
+      if (name === 'menu' || name === 'levels') this.refreshStars();
     },
     modal(name, on) { $('#screen-' + name).classList.toggle('hidden', !on); },
-    closeModals() { ['pause', 'win', 'lose', 'settings'].forEach((m) => this.modal(m, false)); },
+    closeModals() { MODALS.forEach((m) => this.modal(m, false)); },
+
+    totalStars() { return this.save.stars.reduce((a, b) => a + (b || 0), 0); },
+    refreshStars() { const t = `${this.totalStars()} / ${LEVELS.length * 3}`; $$('.ts-val').forEach((e) => { e.textContent = t; }); },
+    tip() { const tips = I18n.t('tips').split('|'); return tips[(Math.random() * tips.length) | 0]; },
 
     // ---------- Вызовы из игры ----------
-    setScore(v) { $('#hud-score').textContent = v.toLocaleString('ru-RU'); },
+    setScore(v) {
+      $('#hud-score').textContent = fmt(v);
+      const st = Game.def && Game.def.stars;
+      if (!st) return;
+      $('#star-fill').style.width = Math.min(100, (v / st[2]) * 100) + '%';
+      $('#star-t1').style.left = (st[1] / st[2]) * 100 + '%';
+      $('#star-t1').classList.toggle('on', v >= st[1]);
+      $('#star-t2').classList.toggle('on', v >= st[2]);
+    },
+    setEnemies(n) {
+      const el = $('#hud-enemies');
+      if (el.textContent !== String(n)) { el.textContent = n; el.parentNode.classList.remove('bump'); void el.offsetWidth; el.parentNode.classList.add('bump'); }
+    },
     hideToast() { clearTimeout(this._toastT); $('#toast').classList.add('hidden'); },
     toast(key) {
       const el = $('#toast');
@@ -2668,20 +4169,136 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     togglePause() { if ($('#screen-pause').classList.contains('hidden')) this.act('pause'); else this.act('resume'); },
     persist() { P.save(this.save); },
 
+    // Заставка уровня: номер и название
+    banner(i) {
+      const el = $('#level-banner');
+      el.querySelector('b').textContent = `${I18n.t('level')} ${i + 1}`;
+      el.querySelector('span').textContent = I18n.t(LEVELS[i].nameKey);
+      el.classList.remove('hidden'); el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+      clearTimeout(this._bannerT);
+      this._bannerT = setTimeout(() => el.classList.add('hidden'), 2300);
+    },
+
+    // ---------- Достижения ----------
+    unlock(id) {
+      if (!this.save || this.save.ach[id]) return;
+      this.save.ach[id] = 1; this.persist();
+      this.achQueue.push(id);
+      if (!this.achBusy) this.nextAch();
+    },
+    nextAch() {
+      const id = this.achQueue.shift();
+      if (!id) { this.achBusy = false; return; }
+      this.achBusy = true;
+      const el = $('#ach-toast');
+      el.querySelector('b').textContent = I18n.t('ach_' + id);
+      el.classList.remove('hidden'); el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+      A.play('ach', { gap: 0 });
+      setTimeout(() => { el.classList.add('hidden'); setTimeout(() => this.nextAch(), 250); }, 2600);
+    },
+    checkProgressAch() {
+      const t = this.totalStars(), st = this.save.stats;
+      if (t >= 15) this.unlock('stars15');
+      if (t >= 30) this.unlock('stars30');
+      if (t >= LEVELS.length * 3) this.unlock('stars45');
+      if ((st.kills || 0) >= 100) this.unlock('kills100');
+      if ((st.tnt || 0) >= 10) this.unlock('tnt10');
+    },
+    buildAch() {
+      const list = $('#ach-list'); list.innerHTML = '';
+      const got = ACH.filter((id) => this.save.ach[id]).length;
+      ACH.forEach((id) => {
+        const on = !!this.save.ach[id];
+        const d = document.createElement('div');
+        d.className = 'ach' + (on ? ' on' : '');
+        d.innerHTML = `<i></i><div><b>${I18n.t('ach_' + id)}</b><small>${I18n.t('ach_' + id + '_d')}</small></div>`;
+        list.appendChild(d);
+      });
+      $('#screen-ach .title').textContent = `${I18n.t('achTitle')} ${got}/${ACH.length}`;
+    },
+
+    // ---------- Наряды ----------
+    buildSkins() {
+      const list = $('#skin-list'); list.innerHTML = '';
+      const total = this.totalStars();
+      SKINS.forEach((sk) => {
+        const open = total >= sk.need, cur = (this.save.skin || 'none') === sk.id;
+        const b = document.createElement('button');
+        b.className = 'skin' + (open ? '' : ' locked') + (cur ? ' current' : '');
+        b.dataset.action = 'skin'; b.dataset.skin = sk.id;
+        const cv = document.createElement('canvas'); cv.width = 192; cv.height = 208;
+        const c = cv.getContext('2d'); c.scale(2, 2); c.translate(46, 66);
+        if (!open) c.globalAlpha = 0.45;
+        R.chick(c, 0, 0, 28, 0, 'normal', { skin: sk.id, time: 0 });
+        b.appendChild(cv);
+        const lab = document.createElement('span');
+        lab.innerHTML = open ? (cur ? I18n.t('skinOn') : I18n.t('skin_' + sk.id)) : `<i></i>${sk.need}`;
+        b.appendChild(lab);
+        list.appendChild(b);
+      });
+    },
+
+    // ---------- Карточки знакомства ----------
+    checkIntro(i) {
+      const def = LEVELS[i];
+      this.introQueue = this.noIntro ? [] : INTROS.filter((it) => !this.save.seen[it.key] && it.has(def));
+      if (this.introQueue.length) { Game.extPause.add('intro'); this.nextIntro(i); } else this.banner(i);
+    },
+    nextIntro(i) {
+      const it = this.introQueue.shift();
+      if (!it) { this.modal('intro', false); Game.extPause.delete('intro'); this.persist(); this.banner(i); return; }
+      this.save.seen[it.key] = 1;
+      $('#intro-title').textContent = I18n.t('intro_' + it.key);
+      $('#intro-text').textContent = I18n.t('intro_' + it.key + '_d');
+      const cv = $('#intro-canvas'), c = cv.getContext('2d');
+      c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height);
+      c.setTransform(2, 0, 0, 2, cv.width / 2, cv.height / 2);
+      const g = c.createRadialGradient(0, 0, 10, 0, 0, 95);
+      g.addColorStop(0, '#FFFFFF'); g.addColorStop(1, 'rgba(255,224,102,0)');
+      c.fillStyle = g; c.beginPath(); c.arc(0, 0, 95, 0, 6.3); c.fill();
+      it.draw(c);
+      this._introLevel = i;
+      this.modal('intro', true); A.play('whoosh');
+    },
+
     showWin(r) {
-      $('#win-score').textContent = r.score.toLocaleString('ru-RU');
-      $('#win-best').textContent = r.best.toLocaleString('ru-RU');
+      // достижения за победу
+      this.unlock('first');
+      if (r.shots === 1 && r.level >= 1) this.unlock('oneshot');
+      if (r.level >= 6 && !r.used.booster && !r.used.nuke && !r.used.ad) this.unlock('clean');
+      if (r.level === LEVELS.length - 1) this.unlock('final');
+      this.checkProgressAch();
+
+      $('#win-score').textContent = '0';
+      $('#win-best').textContent = fmt(r.best);
       $('#win-record').classList.toggle('hidden', !r.newRecord);
       $('#btn-next').classList.toggle('hidden', !r.hasNext);
       $('#win-alldone').classList.toggle('hidden', r.hasNext);
-      const stars = document.querySelectorAll('#screen-win .stars i');
+      $('#win-stats').innerHTML = `<span>${I18n.t('statShots')}: <b>${r.shots}</b></span><span>${I18n.t('statLeft')}: <b>${r.left}</b></span>`
+        + (r.combo >= 2 ? `<span>${I18n.t('statCombo')}: <b>x${r.combo}</b></span>` : '');
+      $('#win-next').textContent = r.need > 0 ? `${I18n.t('needMore')}: ${fmt(r.need)}` : '';
+      const stars = $$('#screen-win .stars i');
       stars.forEach((s) => s.classList.remove('on'));
-      setTimeout(() => this.modal('win', true), 500);
-      for (let i = 0; i < r.stars; i++) setTimeout(() => { stars[i].classList.add('on'); A.play('star', { i, gap: 0 }); }, 1000 + i * 380);
+      setTimeout(() => {
+        this.modal('win', true);
+        // счётчик очков «набегает»
+        const t0 = performance.now(), el = $('#win-score'); let lastTick = 0;
+        const step = (now) => {
+          const k = Math.min(1, (now - t0) / 900), e = 1 - Math.pow(1 - k, 3);
+          el.textContent = fmt(Math.round(r.score * e));
+          if (now - lastTick > 70 && k < 1) { lastTick = now; A.play('tick', { v: e, gap: 0 }); }
+          if (k < 1 && !$('#screen-win').classList.contains('hidden')) requestAnimationFrame(step); else el.textContent = fmt(r.score);
+        };
+        requestAnimationFrame(step);
+      }, 500);
+      for (let i = 0; i < r.stars; i++) setTimeout(() => { stars[i].classList.add('on'); A.play('star', { i, gap: 0 }); }, 1500 + i * 380);
     },
     showLose(r) {
+      this.checkProgressAch();
       $('#btn-ad').classList.toggle('hidden', r.adLeft <= 0);
       $('#ad-left').textContent = `(${r.adLeft})`;
+      $('#lose-left').textContent = `${I18n.t('enemiesLeft')}: ${r.left}`;
+      $('#lose-tip').textContent = this.tip();
       setTimeout(() => this.modal('lose', true), 600);
     },
 
@@ -2708,10 +4325,10 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       const grid = $('#level-grid'); grid.innerHTML = '';
       LEVELS.forEach((lv, i) => {
         const locked = i + 1 > this.save.unlocked;
-        const b = document.createElement('button');
-        b.className = 'level-card' + (locked ? ' locked' : '');
-        b.dataset.action = 'level'; b.dataset.level = i;
         const st = this.save.stars[i] || 0;
+        const b = document.createElement('button');
+        b.className = `level-card ${THEME_CLASS[lv.theme] || 'w-noon'}` + (locked ? ' locked' : '') + (!locked && !st ? ' current' : '') + (st === 3 ? ' gold' : '');
+        b.dataset.action = 'level'; b.dataset.level = i;
         b.innerHTML = `<span class="num">${i + 1}</span>${locked ? LOCK_SVG : ''}<span class="name">${I18n.t(lv.nameKey)}</span>`
           + `<span class="mini-stars">${[0, 1, 2].map((k) => `<i class="${k < st ? 'on' : ''}"></i>`).join('')}</span>`;
         grid.appendChild(b);
@@ -2722,23 +4339,30 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       const s = this.save.settings;
       $('#tg-music').classList.toggle('on', s.music);
       $('#tg-sfx').classList.toggle('on', s.sfx);
+      $('#tg-vib').classList.toggle('on', s.vib !== false);
       $('#pz-music').classList.toggle('off', !s.music);
       $('#pz-sfx').classList.toggle('off', !s.sfx);
-      document.querySelectorAll('[data-action="lang"]').forEach((b) => b.classList.toggle('active', b.dataset.lang === I18n.lang));
+      $$('[data-action="lang"]').forEach((b) => b.classList.toggle('active', b.dataset.lang === I18n.lang));
+      this._resetArmed = false; $('#btn-reset span').textContent = I18n.t('reset');
     },
+
+    hudTitle() { if (Game.def) $('#hud-level').textContent = `${I18n.t('level')} ${Game.levelIdx + 1} · ${I18n.t(Game.def.nameKey)}`; },
 
     startLevel(i) {
       this.closeModals();
-      clearTimeout(this._toastT); $('#toast').classList.add('hidden');
+      this.hideToast();
       this.show('game');
       this._tempted = false; $('#nuke-btn').classList.remove('tempt');
       Game.startLevel(i);
-      $('#hud-level').textContent = `${I18n.t('level')} ${i + 1} · ${I18n.t(LEVELS[i].nameKey)}`;
+      if (this.noIntro) { Game.nextT = 0.35; Game.introT = 0; Game.zoom.k = 0; Game.hintT = Game.hintT ? 0.05 : 0; }   // режим автотестов: без заставки
+      this.hudTitle();
+      this.checkIntro(i);
     },
 
     toMenu() {
       this.closeModals();
-      Game.state = 'menu'; Game.sim = null; Game.parts = [];
+      Game.extPause.delete('intro');
+      Game.state = 'menu'; Game.sim = null; Game.parts = []; R.setTheme('noon'); A.setMood('day');
       P.gameplayStop();
       this.show('menu');
     },
@@ -2758,6 +4382,18 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         case 'play': this.startLevel(Math.min(LEVELS.length, s.unlocked) - 1); break;
         case 'levels': this.buildLevels(); this.show('levels'); break;
         case 'settings': this.refreshSettings(); this.modal('settings', true); break;
+        case 'ach': this.buildAch(); this.modal('ach', true); break;
+        case 'close-ach': this.modal('ach', false); break;
+        case 'wardrobe': this.buildSkins(); this.modal('wardrobe', true); break;
+        case 'close-wardrobe': this.modal('wardrobe', false); break;
+        case 'skin': {
+          const sk = SKINS.find((x) => x.id === el.dataset.skin);
+          if (this.totalStars() < sk.need) { this.toast('skinLocked'); return; }
+          s.skin = sk.id; R.setSkin(sk.id); this.persist(); this.buildSkins(); break;
+        }
+        case 'intro-ok': this.nextIntro(this._introLevel); break;
+        case 'share': P.share(); break;
+        case 'favorite': P.favorite(); break;
         case 'back':
           if (!$('#screen-settings').classList.contains('hidden')) this.modal('settings', false);
           else this.show('menu');
@@ -2769,14 +4405,22 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         }
         case 'toggle-music': s.settings.music = !s.settings.music; A.setMusic(s.settings.music); this.refreshSettings(); this.persist(); break;
         case 'toggle-sfx': s.settings.sfx = !s.settings.sfx; A.setSfx(s.settings.sfx); this.refreshSettings(); this.persist(); break;
+        case 'toggle-vib': s.settings.vib = s.settings.vib === false; this.refreshSettings(); this.persist(); if (s.settings.vib) P.haptic('medium'); break;
+        case 'reset':
+          // сброс в два нажатия: сначала спрашиваем, потом сбрасываем
+          if (!this._resetArmed) { this._resetArmed = true; $('#btn-reset span').textContent = I18n.t('resetSure'); return; }
+          s.unlocked = 1; s.stars = []; s.best = []; s.ach = {}; s.seen = {}; s.stats = {}; s.skin = 'none';
+          R.setSkin('none'); this.persist(); this.refreshSettings(); this.refreshStars(); this.toast('resetDone');
+          break;
         case 'lang':
-          s.settings.lang = el.dataset.lang; I18n.set(s.settings.lang); this.refreshSettings(); this.persist();
-          if (Game.def) $('#hud-level').textContent = `${I18n.t('level')} ${Game.levelIdx + 1} · ${I18n.t(Game.def.nameKey)}`;
+          s.settings.lang = el.dataset.lang; I18n.set(s.settings.lang); this.refreshSettings(); this.persist(); this.hudTitle();
           break;
         case 'pause':
           if (Game.state !== 'play') return;
-          Game.paused = true; Game.drag = null; P.gameplayStop(); this.refreshSettings(); this.modal('pause', true); break;
-        case 'resume': this.modal('pause', false); Game.paused = false; P.gameplayStart(); break;
+          Game.paused = true; Game.drag = null; P.gameplayStop(); this.refreshSettings();
+          $('#pause-tip').textContent = this.tip();
+          this.modal('pause', true); break;
+        case 'resume': this.modal('pause', false); Game.paused = false; P.gameplayStart(); Game.tryPendingNuke(); break;
         case 'restart': this.startLevel(Game.levelIdx); break;
         case 'retry': this.startLevel(Game.levelIdx); break;
         case 'menu': this.withInterstitial(() => this.toMenu()); break;
@@ -2789,8 +4433,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           this.busy = true;
           const ok = await P.showRewarded();
           this.busy = false;
-          if (ok && Game.canNuke()) Game.startNukeAim();
-          else if (!ok) this.toast('adFail');
+          // Награду выдаём всегда. Если игра на паузе — ядерка включится сразу после «Продолжить».
+          if (ok) Game.grantNuke();
+          else this.toast('adFail');
           break;
         }
         case 'watch-ad': {
@@ -2810,7 +4455,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       const has = Game.extPause.has(reason);
       if (on && !has) {
         Game.extPause.add(reason); Game.drag = null; A.pushPause();
-        if (reason !== 'ad' && Game.state === 'play' && !Game.paused) this.act('pause');
+        // Во время рекламы ВК может скрыть окно игры — это не повод открывать меню паузы
+        if (reason !== 'ad' && !P.adOpen && Game.state === 'play' && !Game.paused) this.act('pause');
       } else if (!on && has) {
         Game.extPause.delete(reason); A.popPause();
       }
@@ -2822,17 +4468,21 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       await P.init();
       bar.style.width = '65%';
       const loaded = await P.load();
-      this.save = Object.assign({ unlocked: 1, stars: [], best: [], settings: {} }, loaded || {});
-      this.save.settings = Object.assign({ music: true, sfx: true, lang: null }, this.save.settings);
+      this.save = Object.assign({ unlocked: 1, stars: [], best: [], settings: {}, ach: {}, seen: {}, stats: {}, skin: 'none' }, loaded || {});
+      this.save.settings = Object.assign({ music: true, sfx: true, vib: true, lang: null }, this.save.settings);
+      ['ach', 'seen', 'stats'].forEach((k) => { if (!this.save[k] || typeof this.save[k] !== 'object') this.save[k] = {}; });
       Game.save = this.save;
+      R.setSkin(this.save.skin);
 
       I18n.set(this.save.settings.lang || P.lang());
+      $('#load-tip').textContent = this.tip();
       A.musicOn = this.save.settings.music; A.sfxOn = this.save.settings.sfx;
+      if (P.isVK) $$('.vk-only').forEach((e) => e.classList.remove('hidden'));
 
       P.onPause = (r) => this.extPause(r || 'ad', true);
       P.onResume = (r) => this.extPause(r || 'ad', false);
       document.addEventListener('visibilitychange', () => this.extPause('hidden', document.hidden));
-      root.addEventListener('blur', () => { if (Game.state === 'play' && !Game.paused) this.act('pause'); });
+      root.addEventListener('blur', () => { if (!P.adOpen && !this.busy && Game.state === 'play' && !Game.paused) this.act('pause'); });
 
       document.addEventListener('click', (e) => {
         const b = e.target.closest('[data-action]');
@@ -2848,12 +4498,12 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       document.addEventListener('contextmenu', (e) => e.preventDefault());
       document.addEventListener('selectstart', (e) => e.preventDefault());
       document.addEventListener('dblclick', (e) => e.preventDefault());
-      document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+      document.addEventListener('touchmove', (e) => { if (!e.target.closest('.panel')) e.preventDefault(); }, { passive: false });
       document.addEventListener('wheel', (e) => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
 
       Game.init($('#game'), this);
       bar.style.width = '100%';
-      setTimeout(() => { this.show('menu'); P.loadingReady(); }, 250);
+      setTimeout(() => { this.show('menu'); P.loadingReady(); }, 450);
     },
   };
 
