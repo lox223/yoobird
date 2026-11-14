@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#FFC72C">
   <title>YooBird</title>
   <style>
-/* YooBird — стили. Палитру можно подогнать под YooSKINS, поменяв переменные ниже. */
+/* YooBird — стили. Палитра интерфейса задана переменными ниже. */
 :root {
   --yellow: #FFC72C;
   --yellow-hi: #FFE066;
@@ -562,6 +562,10 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           <button class="icon-btn big vk-only hidden" data-action="share" aria-label="Поделиться"><svg viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.5a3 3 0 0 0 0-1.4l6.7-3.5A3 3 0 1 0 15 7c0 .2 0 .5.1.7L8.4 11.2a3 3 0 1 0 0 3.6l6.7 3.5A3 3 0 1 0 18 16z"/></svg></button>
           <button class="btn btn-next" data-action="next" id="btn-next"><span data-i18n="next">Дальше</span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
         </div>
+        <button class="btn btn-ad btn-small" data-action="ad-boost" id="btn-boost-ad">
+          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9v6l5-3z" fill="#3D8BFD"/></svg>
+          <span data-i18n="adBoost">Реклама: бустеры ×2 на следующем уровне</span>
+        </button>
       </div>
     </section>
 
@@ -1552,6 +1556,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       hintSplit: 'Розовая Тройняшка: нажми в полёте — их станет трое!',
       intro_boulder: 'Валун', intro_boulder_d: 'Тяжёлый камень. Столкни его — покатится и раздавит всё на пути.',
       intro_boss: 'Король чувачков', intro_boss_d: 'Большой и очень крепкий. Одного птенца на него не хватит — бей бомбами и роняй на него камни.',
+      adBoost: 'Реклама: бустеры ×2 на следующем уровне', boostersReady: 'Готово! На следующем уровне бустеров вдвое больше', boostersX2: 'Бустеры ×2 — по два каждого!',
       vibration: 'Вибрация', reset: 'Сбросить прогресс', resetSure: 'Точно сбросить?', resetDone: 'Прогресс сброшен',
       statShots: 'Выстрелов', statLeft: 'Птенцов в запасе', statCombo: 'Лучшее комбо', needMore: 'До следующей звезды', enemiesLeft: 'Осталось чувачков',
       tips: 'Стекло ломается легче всего, камень — тяжелее всего.|Каждый птенец в запасе — это +10 000 очков.|Сломанный блок птенец пробивает насквозь и летит дальше.|Опрокинутый ящик TNT тоже взрывается.|Сбей несколько чувачков одним птенцом — получишь комбо-бонус.|Бустер «Прицел» показывает весь путь птенца до земли.|Бей по опорам: рухнувшая крыша сделает работу за тебя.|«Тряска» сильнее всего бьёт по стеклу.',
@@ -1614,6 +1619,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       hintSplit: 'Pink Triplet: tap in flight and there will be three!',
       intro_boulder: 'Boulder', intro_boulder_d: 'A heavy rock. Push it and it rolls over everything in its way.',
       intro_boss: 'The Dude King', intro_boss_d: 'Big and very tough. One chick is not enough: use bombs and drop rocks on him.',
+      adBoost: 'Watch ad: boosters ×2 on the next level', boostersReady: 'Done! Double boosters on the next level', boostersX2: 'Boosters ×2 — two of each!',
       vibration: 'Vibration', reset: 'Reset progress', resetSure: 'Really reset?', resetDone: 'Progress reset',
       statShots: 'Shots', statLeft: 'Chicks left', statCombo: 'Best combo', needMore: 'To the next star', enemiesLeft: 'Dudes left',
       tips: 'Glass breaks easiest, stone is the toughest.|Every spare chick is worth +10,000 points.|A chick smashes through a broken block and keeps flying.|A tipped-over TNT crate explodes too.|Knock out several dudes with one chick for a combo bonus.|The Aim booster shows the full flight path.|Hit the supports: a falling roof does the job for you.|Quake hits glass the hardest.',
@@ -2569,7 +2575,6 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     const P = PAINT[name] || PAINT.noon, set = [], r = rng(500 + name.length);
     for (let n = 0; n < 6; n++) {
       const W = 300 + r() * 220, H = 150 + r() * 50, cv = document.createElement('canvas');
-      cv.width = W; cv.height = H; const c = cv.getContext('2d');
       const puffs = [];
       const cnt = 9 + Math.floor(r() * 6);
       for (let i = 0; i < cnt; i++) {
@@ -2577,12 +2582,19 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
         const rad = (H * 0.3 + r() * H * 0.18) * (1 - Math.abs(t - 0.5) * 0.85);
         puffs.push([px, H * 0.72 - rad * (0.55 + r() * 0.5), rad]);
       }
+      // холст подгоняем под фактический размер облака (+ запас), чтобы края не срезались
+      let bx0 = W * 0.08, bx1 = W * 0.92, by0 = H * 0.6, by1 = H * 0.86;
+      for (const [x, y, rad] of puffs) { bx0 = Math.min(bx0, x - rad - 4); bx1 = Math.max(bx1, x + rad + 4); by0 = Math.min(by0, y - rad - 4); by1 = Math.max(by1, y + rad * 1.12 + 4); }
+      const pad = 6, ox = Math.floor(bx0) - pad, oy = Math.floor(by0) - pad;
+      cv.width = Math.ceil(bx1 - ox + pad); cv.height = Math.ceil(by1 - oy + pad);
+      const c = cv.getContext('2d'); c.translate(-ox, -oy);
       // плоское тёмное «дно»
       c.fillStyle = P.cloud[2]; c.beginPath(); c.ellipse(W / 2, H * 0.74, W * 0.42, H * 0.12, 0, 0, TAU); c.fill();
       for (const [x, y, rad] of puffs) { c.fillStyle = P.cloud[2]; c.beginPath(); c.arc(x, y + rad * 0.12, rad, 0, TAU); c.fill(); }
       for (const [x, y, rad] of puffs) { c.fillStyle = P.cloud[1]; c.beginPath(); c.arc(x - rad * 0.05, y - rad * 0.06, rad * 0.9, 0, TAU); c.fill(); }
       for (const [x, y, rad] of puffs) { c.fillStyle = P.cloud[0]; c.beginPath(); c.arc(x - rad * 0.12, y - rad * 0.2, rad * 0.62, 0, TAU); c.fill(); }
-      set.push({ cv, W, H });
+      // точка привязки (середина облака на 60% высоты) — в координатах нового холста
+      set.push({ cv, W: cv.width, H: cv.height, ax: W / 2 - ox, ay: H * 0.6 - oy });
     }
     cloudSprites.set(name, set);
     return set;
@@ -2626,7 +2638,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       clouds.forEach((cl, i) => {
         const sp = set[i % set.length], w = sp.W * cl.s, h = sp.H * cl.s;
         const cx = x0 - 450 + ((((cl.x + t * cl.v) - (x0 - 450)) % span) + span) % span;
-        ctx.drawImage(sp.cv, cx - w / 2, cl.y - h * 0.6, w, h);
+        ctx.drawImage(sp.cv, cx - sp.ax * cl.s, cl.y - sp.ay * cl.s, w, h);
       });
     }
     // стая птиц
@@ -2916,47 +2928,72 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     }
   }
 
+  // Холмы и скаты. Порядок: скаты (под холмами) → холмы от низких к высоким → трава у подножия поверх всего.
+  // Контур у стенки холма рисуется только там, где стенка открыта (не примыкает к соседнему холму или скату).
   function statics(ctx, list) {
-    const T = theme;
-    for (const s of list) {
-      if (s.poly) {
-        // Скат
-        const vs = s.vertices;
-        extrude(ctx, vs, T.ground[0], T.ground[1], null, (nx, ny, lit) => (ny < -0.3 ? T.grass[2] : mix(T.ground[1], T.ground[0], lit * 0.6)));
-        const top = Math.min(...vs.map((p) => p.y)), xs = vs.map((p) => p.x);
-        ctx.save(); ctx.beginPath(); vs.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); ctx.closePath(); ctx.clip();
-        fillSoil(ctx, Math.min(...xs), top, Math.max(...xs) - Math.min(...xs), C.GROUND_Y - top + 4, top);
-        ctx.restore();
-        ctx.beginPath(); vs.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); ctx.closePath();
-        ctx.lineWidth = 5; ctx.strokeStyle = OUT; ctx.stroke();
-        // трава по наклонной стороне (самая длинная грань, кроме основания)
-        let best = null;
-        for (let i = 0; i < vs.length; i++) {
-          const a = vs[i], b = vs[(i + 1) % vs.length];
-          if (Math.abs(a.y - b.y) < 1 && a.y > C.GROUND_Y - 5) continue;
-          if (Math.abs(a.x - b.x) < 1) continue;
-          const len = Math.hypot(a.x - b.x, a.y - b.y);
-          if (!best || len > best.len) best = { a, b, len };
-        }
-        if (best) {
-          ctx.lineCap = 'round';
-          ctx.strokeStyle = T.grass[1]; ctx.lineWidth = 16; line(ctx, best.a.x, best.a.y + 4, best.b.x, best.b.y + 4);
-          ctx.strokeStyle = T.grass[0]; ctx.lineWidth = 10; line(ctx, best.a.x, best.a.y, best.b.x, best.b.y);
-          ctx.lineCap = 'butt';
-        }
-        continue;
+    const T = theme, G = C.GROUND_Y;
+    const rects = list.filter((s) => !s.poly && s.size).map((s) => ({ x0: s.position.x - s.size.w / 2, x1: s.position.x + s.size.w / 2, y: s.position.y - s.size.h / 2 }));
+    const polys = list.filter((s) => s.poly);
+    rects.sort((a, b) => b.y - a.y);   // низкие — раньше, высокие перекрывают их
+
+    // 1) скаты
+    for (const s of polys) {
+      const vs = s.vertices, top = Math.min(...vs.map((p) => p.y)), xs = vs.map((p) => p.x);
+      ctx.save(); ctx.beginPath(); vs.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); ctx.closePath(); ctx.clip();
+      fillSoil(ctx, Math.min(...xs), top, Math.max(...xs) - Math.min(...xs), G - top + 4, top);
+      ctx.restore();
+      // трава по наклонной стороне
+      let best = null;
+      for (let i = 0; i < vs.length; i++) {
+        const a = vs[i], b = vs[(i + 1) % vs.length];
+        if (Math.abs(a.y - b.y) < 1 || Math.abs(a.x - b.x) < 1) continue;
+        const len = Math.hypot(a.x - b.x, a.y - b.y);
+        if (!best || len > best.len) best = { a, b, len };
       }
-      const w = s.size.w, h = s.size.h, x = s.position.x - w / 2, y = s.position.y - h / 2;
-      extrude(ctx, [{ x, y }, { x: x + w, y }, { x: x + w, y: y + h + 30 }, { x, y: y + h + 30 }], T.ground[0], T.ground[1], null,
+      if (best) {
+        // тёмная подложка — с плоскими концами, чтобы не торчала у вершины и у земли
+        ctx.lineCap = 'butt';
+        ctx.strokeStyle = OUT; ctx.lineWidth = 19; line(ctx, best.a.x, best.a.y + 3, best.b.x, best.b.y + 3);
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = T.grass[1]; ctx.lineWidth = 14; line(ctx, best.a.x, best.a.y + 3, best.b.x, best.b.y + 3);
+        ctx.strokeStyle = T.grass[0]; ctx.lineWidth = 9; line(ctx, best.a.x, best.a.y, best.b.x, best.b.y);
+        ctx.lineCap = 'butt';
+      }
+    }
+
+    // открытая часть стенки: от верха холма до верха соседа (если сосед ниже) или до земли
+    const exposed = (R, side) => {
+      const ex = side < 0 ? R.x0 : R.x1;
+      let bottom = G;
+      for (const o of rects) if (o !== R && Math.abs((side < 0 ? o.x1 : o.x0) - ex) < 6) bottom = Math.min(bottom, Math.max(R.y, o.y));
+      for (const s of polys) for (const p of s.vertices) if (Math.abs(p.x - ex) < 6 && p.y < G - 5) bottom = Math.min(bottom, Math.max(R.y, p.y));
+      return bottom;
+    };
+
+    // 2) холмы
+    for (const R of rects) {
+      const x = R.x0, y = R.y, w = R.x1 - R.x0;
+      extrude(ctx, [{ x, y }, { x: x + w, y }, { x: x + w, y: G }, { x, y: G }], T.ground[0], T.ground[1], null,
         (nx, ny, lit) => (ny < -0.5 ? T.grass[2] : mix(T.ground[1], T.ground[0], lit * 0.6)));
-      fillSoil(ctx, x, y, w, h + 30, y);
-      // тень у боковых стенок холма — объём
-      const sg = ctx.createLinearGradient(x, 0, x + 40, 0);
-      sg.addColorStop(0, 'rgba(0,0,0,0.28)'); sg.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = sg; ctx.fillRect(x, y, 40, h + 30);
-      ctx.beginPath(); ctx.rect(x, y, w, h + 30);
-      ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.strokeStyle = OUT; ctx.stroke();
-      ctx.save(); ctx.beginPath(); ctx.rect(x + 2, y + 2, w - 4, h); ctx.clip(); grassStrip(ctx, x, x + w, y + 2, true); ctx.restore();
+      fillSoil(ctx, x, y, w, G - y + 2, y);
+      ctx.strokeStyle = OUT; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      const lb = exposed(R, -1), rb = exposed(R, 1);
+      ctx.beginPath();
+      const rampAtTop = polys.some((s) => s.vertices.some((p) => Math.abs(p.x - x) < 6 && Math.abs(p.y - y) < 6));
+      if (lb > y + 1) { ctx.moveTo(x, lb); ctx.lineTo(x, y); } else ctx.moveTo(x + (rampAtTop ? 8 : 0), y);
+      ctx.lineTo(x + w, y);
+      if (rb > y + 1) ctx.lineTo(x + w, rb);
+      ctx.stroke(); ctx.lineCap = 'butt';
+      ctx.save(); ctx.beginPath(); ctx.rect(x + 2, y + 2, w - 4, G - y); ctx.clip(); grassStrip(ctx, x, x + w, y + 2, true); ctx.restore();
+    }
+
+    // 3) трава у подножия — поверх основания холмов и скатов, чтобы они «стояли» на земле
+    const spans = rects.map((R) => [R.x0 - 4, R.x1 + 4]);
+    for (const s of polys) { const xs = s.vertices.map((p) => p.x); spans.push([Math.min(...xs) - 16, Math.max(...xs) + 4]); }
+    for (const [a, b] of spans) {
+      ctx.save(); ctx.beginPath(); ctx.rect(a, G - 70, b - a, 100); ctx.clip();
+      grassStrip(ctx, a, b, G, true);
+      ctx.restore();
     }
   }
 
@@ -4439,6 +4476,31 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
   const LOCK_SVG = '<svg class="lock" viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 1 1 12 0v2h1v12H5V10zm2 0h8V8a4 4 0 1 0-8 0z"/></svg>';
   const fmt = (v) => v.toLocaleString('ru-RU');
 
+  // ---------- Правила межстраничной рекламы ----------
+  // Реклама не должна отпугивать: новичок сначала втягивается, а дальше реклама — только в естественных паузах и не часто.
+  const AD_RULES = {
+    freeLevels: 2,        // уровни 1–2 проходятся совсем без межстраничной рекламы
+    everyBreaks: 2,       // дальше — примерно на каждой 2-й паузе (переход на следующий уровень или в меню)
+    minGapSec: 75,        // и не чаще раза в 75 секунд
+    sessionGraceSec: 60,  // первая минута после запуска игры — без рекламы
+    afterRewardSec: 60,   // после добровольной рекламы — ещё минута без межстраничной
+  };
+  const AdPace = {
+    start: Date.now(), last: 0, breaks: 0, shown: 0,
+    // levelIdx — уровень, с которого уходит игрок (0 — первый)
+    shouldShow(levelIdx) {
+      const now = Date.now();
+      if (levelIdx < AD_RULES.freeLevels) return false;
+      this.breaks++;
+      if (now - this.start < AD_RULES.sessionGraceSec * 1000) return false;
+      if (this.last && now - this.last < AD_RULES.minGapSec * 1000) return false;
+      if (this.breaks < AD_RULES.everyBreaks) return false;
+      return true;
+    },
+    shownInterstitial() { this.last = Date.now(); this.breaks = 0; this.shown++; },
+    shownRewarded() { this.last = Math.max(this.last, Date.now() - (AD_RULES.minGapSec - AD_RULES.afterRewardSec) * 1000); },
+  };
+
   // Достижения: названия и описания — в i18n (ach_<id>, ach_<id>_d)
   const ACH = ['first', 'oneshot', 'combo3', 'combo5', 'clean', 'king', 'final', 'nuke', 'tnt10', 'kills100', 'stars15', 'stars30', 'stars45'];
   // Наряды птенцов: сколько звёзд нужно, чтобы открыть
@@ -4590,6 +4652,8 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     },
 
     showWin(r) {
+      // добровольная реклама на экране победы: бустеры ×2 на следующем уровне
+      $('#btn-boost-ad').classList.toggle('hidden', !r.hasNext || this.boostNext);
       // достижения за победу
       this.unlock('first');
       if (r.shots === 1 && r.level >= 1) this.unlock('oneshot');
@@ -4682,6 +4746,11 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
       this.show('game');
       this._tempted = false; $('#nuke-btn').classList.remove('tempt');
       Game.startLevel(i);
+      if (this.boostNext) {   // награда за рекламу с экрана победы
+        this.boostNext = false;
+        Game.boosters = { sight: 2, power: 2, quake: 2 }; Game.ui.refreshBoosters();
+        setTimeout(() => this.toast('boostersX2'), 2800);
+      }
       if (this.noIntro) { Game.nextT = 0.35; Game.introT = 0; Game.zoom.k = 0; Game.hintT = Game.hintT ? 0.05 : 0; }   // режим автотестов: без заставки
       this.hudTitle();
       this.checkIntro(i);
@@ -4698,8 +4767,9 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     // Межстраничная реклама в паузе между уровнями, затем действие.
     async withInterstitial(fn) {
       if (this.busy) return;
+      if (!AdPace.shouldShow(Game.levelIdx)) { fn(); return; }
       this.busy = true;
-      try { await P.showInterstitial(); } finally { this.busy = false; }
+      try { if (await P.showInterstitial()) AdPace.shownInterstitial(); else AdPace.breaks = AD_RULES.everyBreaks; } finally { this.busy = false; }
       fn();
     },
 
@@ -4761,8 +4831,18 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           this.busy = true;
           const ok = await P.showRewarded();
           this.busy = false;
+          if (ok) AdPace.shownRewarded();
           // Награду выдаём всегда. Если игра на паузе — ядерка включится сразу после «Продолжить».
           if (ok) Game.grantNuke();
+          else this.toast('adFail');
+          break;
+        }
+        case 'ad-boost': {
+          if (this.busy) return;
+          this.busy = true;
+          const ok = await P.showRewarded();
+          this.busy = false;
+          if (ok) { AdPace.shownRewarded(); this.boostNext = true; $('#btn-boost-ad').classList.add('hidden'); this.toast('boostersReady'); }
           else this.toast('adFail');
           break;
         }
@@ -4771,7 +4851,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
           this.busy = true;
           const ok = await P.showRewarded();
           this.busy = false;
-          if (ok) { this.modal('lose', false); Game.addExtraBird(); }
+          if (ok) { AdPace.shownRewarded(); this.modal('lose', false); Game.addExtraBird(); }
           else this.toast('adFail');
           break;
         }
@@ -4835,6 +4915,7 @@ canvas#game { position: absolute; inset: 0; display: block; touch-action: none; 
     },
   };
 
+  UI.AdPace = AdPace; UI.AD_RULES = AD_RULES;
   root.YB.UI = UI;
   root.addEventListener('load', () => UI.boot());
 })(window);
